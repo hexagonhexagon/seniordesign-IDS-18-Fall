@@ -1,0 +1,490 @@
+{
+    "041": {
+        "Occurrences": 30547,
+        "Probability": 0.020400776040257924
+    },
+    "042": {
+        "Occurrences": 30547,
+        "Probability": 0.020400776040257924
+    },
+    "047": {
+        "Occurrences": 30440,
+        "Probability": 0.02032931622304813
+    },
+    "04A": {
+        "Occurrences": 6071,
+        "Probability": 0.004054509815707135
+    },
+    "04B": {
+        "Occurrences": 6071,
+        "Probability": 0.004054509815707135
+    },
+    "04C": {
+        "Occurrences": 6071,
+        "Probability": 0.004054509815707135
+    },
+    "05A": {
+        "Occurrences": 6114,
+        "Probability": 0.004083227312342847
+    },
+    "05C": {
+        "Occurrences": 6100,
+        "Probability": 0.004073877429717266
+    },
+    "05D": {
+        "Occurrences": 6131,
+        "Probability": 0.004094580741245337
+    },
+    "076": {
+        "Occurrences": 30547,
+        "Probability": 0.020400776040257924
+    },
+    "077": {
+        "Occurrences": 30547,
+        "Probability": 0.020400776040257924
+    },
+    "07A": {
+        "Occurrences": 61095,
+        "Probability": 0.04080221992927482
+    },
+    "07D": {
+        "Occurrences": 30547,
+        "Probability": 0.020400776040257924
+    },
+    "082": {
+        "Occurrences": 30487,
+        "Probability": 0.02036070511471972
+    },
+    "083": {
+        "Occurrences": 6121,
+        "Probability": 0.004087902253655637
+    },
+    "084": {
+        "Occurrences": 611,
+        "Probability": 0.00040805559173069666
+    },
+    "085": {
+        "Occurrences": 60973,
+        "Probability": 0.04072074238068047
+    },
+    "091": {
+        "Occurrences": 24346,
+        "Probability": 0.016259445885884682
+    },
+    "092": {
+        "Occurrences": 5798,
+        "Probability": 0.003872187104508313
+    },
+    "14B": {
+        "Occurrences": 60880,
+        "Probability": 0.04065863244609626
+    },
+    "156": {
+        "Occurrences": 6086,
+        "Probability": 0.004064527547091685
+    },
+    "165": {
+        "Occurrences": 30428,
+        "Probability": 0.020321302037940487
+    },
+    "166": {
+        "Occurrences": 6086,
+        "Probability": 0.004064527547091685
+    },
+    "167": {
+        "Occurrences": 60880,
+        "Probability": 0.04065863244609626
+    },
+    "168": {
+        "Occurrences": 611,
+        "Probability": 0.00040805559173069666
+    },
+    "169": {
+        "Occurrences": 611,
+        "Probability": 0.00040805559173069666
+    },
+    "171": {
+        "Occurrences": 20285,
+        "Probability": 0.013547312075707335
+    },
+    "175": {
+        "Occurrences": 30428,
+        "Probability": 0.020321302037940487
+    },
+    "178": {
+        "Occurrences": 6086,
+        "Probability": 0.004064527547091685
+    },
+    "179": {
+        "Occurrences": 6086,
+        "Probability": 0.004064527547091685
+    },
+    "17C": {
+        "Occurrences": 6086,
+        "Probability": 0.004064527547091685
+    },
+    "185": {
+        "Occurrences": 30440,
+        "Probability": 0.02032931622304813
+    },
+    "200": {
+        "Occurrences": 30428,
+        "Probability": 0.020321302037940487
+    },
+    "202": {
+        "Occurrences": 60856,
+        "Probability": 0.040642604075880974
+    },
+    "204": {
+        "Occurrences": 60856,
+        "Probability": 0.040642604075880974
+    },
+    "20A": {
+        "Occurrences": 30428,
+        "Probability": 0.020321302037940487
+    },
+    "213": {
+        "Occurrences": 30547,
+        "Probability": 0.020400776040257924
+    },
+    "214": {
+        "Occurrences": 30547,
+        "Probability": 0.020400776040257924
+    },
+    "216": {
+        "Occurrences": 30547,
+        "Probability": 0.020400776040257924
+    },
+    "217": {
+        "Occurrences": 61094,
+        "Probability": 0.04080155208051585
+    },
+    "230": {
+        "Occurrences": 30428,
+        "Probability": 0.020321302037940487
+    },
+    "23A": {
+        "Occurrences": 30381,
+        "Probability": 0.020289913146268896
+    },
+    "242": {
+        "Occurrences": 15274,
+        "Probability": 0.010200721944508447
+    },
+    "24A": {
+        "Occurrences": 6110,
+        "Probability": 0.004080555917306967
+    },
+    "24B": {
+        "Occurrences": 6110,
+        "Probability": 0.004080555917306967
+    },
+    "24C": {
+        "Occurrences": 6110,
+        "Probability": 0.004080555917306967
+    },
+    "25A": {
+        "Occurrences": 6088,
+        "Probability": 0.004065863244609625
+    },
+    "25B": {
+        "Occurrences": 30440,
+        "Probability": 0.02032931622304813
+    },
+    "25C": {
+        "Occurrences": 60880,
+        "Probability": 0.04065863244609626
+    },
+    "2E4": {
+        "Occurrences": 6110,
+        "Probability": 0.004080555917306967
+    },
+    "2F1": {
+        "Occurrences": 611,
+        "Probability": 0.00040805559173069666
+    },
+    "312": {
+        "Occurrences": 6088,
+        "Probability": 0.004065863244609625
+    },
+    "326": {
+        "Occurrences": 6081,
+        "Probability": 0.004061188303296835
+    },
+    "331": {
+        "Occurrences": 1226,
+        "Probability": 0.0008187825784972735
+    },
+    "332": {
+        "Occurrences": 6659,
+        "Probability": 0.0044472048859815205
+    },
+    "333": {
+        "Occurrences": 6112,
+        "Probability": 0.004081891614824907
+    },
+    "334": {
+        "Occurrences": 609,
+        "Probability": 0.00040671989421275657
+    },
+    "336": {
+        "Occurrences": 611,
+        "Probability": 0.00040805559173069666
+    },
+    "352": {
+        "Occurrences": 4058,
+        "Probability": 0.002710130263900437
+    },
+    "35E": {
+        "Occurrences": 986,
+        "Probability": 0.000658498876344463
+    },
+    "365": {
+        "Occurrences": 6088,
+        "Probability": 0.004065863244609625
+    },
+    "366": {
+        "Occurrences": 6088,
+        "Probability": 0.004065863244609625
+    },
+    "367": {
+        "Occurrences": 6088,
+        "Probability": 0.004065863244609625
+    },
+    "368": {
+        "Occurrences": 6088,
+        "Probability": 0.004065863244609625
+    },
+    "369": {
+        "Occurrences": 6088,
+        "Probability": 0.004065863244609625
+    },
+    "37B": {
+        "Occurrences": 6110,
+        "Probability": 0.004080555917306967
+    },
+    "386": {
+        "Occurrences": 611,
+        "Probability": 0.00040805559173069666
+    },
+    "38D": {
+        "Occurrences": 613,
+        "Probability": 0.00040939128924863676
+    },
+    "3A8": {
+        "Occurrences": 30378,
+        "Probability": 0.020287909599991986
+    },
+    "3AA": {
+        "Occurrences": 3055,
+        "Probability": 0.0020402779586534835
+    },
+    "3AB": {
+        "Occurrences": 3089,
+        "Probability": 0.002062984816458465
+    },
+    "3B3": {
+        "Occurrences": 1303,
+        "Probability": 0.0008702069329379669
+    },
+    "3B4": {
+        "Occurrences": 611,
+        "Probability": 0.00040805559173069666
+    },
+    "3B5": {
+        "Occurrences": 1221,
+        "Probability": 0.0008154433347024233
+    },
+    "3B6": {
+        "Occurrences": 2446,
+        "Probability": 0.0016335580644407269
+    },
+    "3B7": {
+        "Occurrences": 2444,
+        "Probability": 0.0016322223669227867
+    },
+    "3B8": {
+        "Occurrences": 1222,
+        "Probability": 0.0008161111834613933
+    },
+    "3C3": {
+        "Occurrences": 697,
+        "Probability": 0.0004654905850021204
+    },
+    "3C7": {
+        "Occurrences": 610,
+        "Probability": 0.0004073877429717266
+    },
+    "3DA": {
+        "Occurrences": 610,
+        "Probability": 0.0004073877429717266
+    },
+    "3DD": {
+        "Occurrences": 609,
+        "Probability": 0.00040671989421275657
+    },
+    "3E0": {
+        "Occurrences": 611,
+        "Probability": 0.00040805559173069666
+    },
+    "3E1": {
+        "Occurrences": 614,
+        "Probability": 0.0004100591380076068
+    },
+    "3E2": {
+        "Occurrences": 611,
+        "Probability": 0.00040805559173069666
+    },
+    "3E3": {
+        "Occurrences": 611,
+        "Probability": 0.00040805559173069666
+    },
+    "3EA": {
+        "Occurrences": 611,
+        "Probability": 0.00040805559173069666
+    },
+    "3EB": {
+        "Occurrences": 799,
+        "Probability": 0.0005336111584170649
+    },
+    "40A": {
+        "Occurrences": 3055,
+        "Probability": 0.0020402779586534835
+    },
+    "410": {
+        "Occurrences": 6088,
+        "Probability": 0.004065863244609625
+    },
+    "411": {
+        "Occurrences": 6089,
+        "Probability": 0.004066531093368596
+    },
+    "415": {
+        "Occurrences": 30547,
+        "Probability": 0.020400776040257924
+    },
+    "416": {
+        "Occurrences": 6110,
+        "Probability": 0.004080555917306967
+    },
+    "421": {
+        "Occurrences": 6086,
+        "Probability": 0.004064527547091685
+    },
+    "42C": {
+        "Occurrences": 12219,
+        "Probability": 0.008160443985854964
+    },
+    "42D": {
+        "Occurrences": 6086,
+        "Probability": 0.004064527547091685
+    },
+    "430": {
+        "Occurrences": 6132,
+        "Probability": 0.004095248590004308
+    },
+    "434": {
+        "Occurrences": 6110,
+        "Probability": 0.004080555917306967
+    },
+    "435": {
+        "Occurrences": 6117,
+        "Probability": 0.004085230858619757
+    },
+    "439": {
+        "Occurrences": 611,
+        "Probability": 0.00040805559173069666
+    },
+    "43C": {
+        "Occurrences": 611,
+        "Probability": 0.00040805559173069666
+    },
+    "43D": {
+        "Occurrences": 12184,
+        "Probability": 0.008137069279291012
+    },
+    "43E": {
+        "Occurrences": 12171,
+        "Probability": 0.0081283872454244
+    },
+    "440": {
+        "Occurrences": 609,
+        "Probability": 0.00040671989421275657
+    },
+    "447": {
+        "Occurrences": 612,
+        "Probability": 0.0004087234404896667
+    },
+    "455": {
+        "Occurrences": 6110,
+        "Probability": 0.004080555917306967
+    },
+    "465": {
+        "Occurrences": 611,
+        "Probability": 0.00040805559173069666
+    },
+    "466": {
+        "Occurrences": 611,
+        "Probability": 0.00040805559173069666
+    },
+    "467": {
+        "Occurrences": 611,
+        "Probability": 0.00040805559173069666
+    },
+    "471": {
+        "Occurrences": 609,
+        "Probability": 0.00040671989421275657
+    },
+    "472": {
+        "Occurrences": 406,
+        "Probability": 0.0002711465961418377
+    },
+    "473": {
+        "Occurrences": 406,
+        "Probability": 0.0002711465961418377
+    },
+    "474": {
+        "Occurrences": 609,
+        "Probability": 0.00040671989421275657
+    },
+    "475": {
+        "Occurrences": 1218,
+        "Probability": 0.0008134397884255131
+    },
+    "476": {
+        "Occurrences": 1218,
+        "Probability": 0.0008134397884255131
+    },
+    "477": {
+        "Occurrences": 1218,
+        "Probability": 0.0008134397884255131
+    },
+    "4B0": {
+        "Occurrences": 30547,
+        "Probability": 0.020400776040257924
+    },
+    "581": {
+        "Occurrences": 611,
+        "Probability": 0.00040805559173069666
+    },
+    "595": {
+        "Occurrences": 1,
+        "Probability": 6.678487589700437e-07
+    },
+    "59E": {
+        "Occurrences": 682,
+        "Probability": 0.00045547285361756976
+    },
+    "5E2": {
+        "Occurrences": 62,
+        "Probability": 4.1406623056142706e-05
+    },
+    "720": {
+        "Occurrences": 10,
+        "Probability": 6.678487589700436e-06
+    },
+    "728": {
+        "Occurrences": 10,
+        "Probability": 6.678487589700436e-06
+    }
+}

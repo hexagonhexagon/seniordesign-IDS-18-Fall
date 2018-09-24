@@ -1,0 +1,16 @@
+C:\Users\xukey\Downloads\ml-ids\can-ml-ids-master\tests
+C:\Users\xukey\Downloads\ml-ids\can-ml-ids-master\tests
+------------------
+
+STATISTICS
+Percentage correct: 99.80380319951705
+Percentage caught: 99.99513823615209
+Percentage of false positives: 0.3520614977148302
+
+Replay message statistics: 50718 caught / 50936 total = 0.9957201193654782
+Random injection statistics: 2093 caught / 2096 total = 0.9985687022900763
+Spoofing statistics: 19810 caught / 19810 total = 1.0
+All zero: 39800 caught / 39800 total = 1.0
+
+Number of malicious messages: 61706
+Number of messages: 112642
