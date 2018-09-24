@@ -9,6 +9,7 @@ import json
 import math
 import os
 import sys
+import time
 import logging
 
 import numpy as np
@@ -467,8 +468,15 @@ def test_model(classifier, print_test):
 
 if __name__ == "__main__":
     msg_classifier = MessageClassifier(os.getcwd() + '/ml_ids_model')
+    t0 = time.clock()
     #train_model(msg_classifier)
+    end0 = time.clock() - t0
+   # print(time.clock() - t0, "Training: seconds process time")
+    t1 = time.clock()
     test_model(msg_classifier, False)
+   # print(time.clock() - t1, "Testing: seconds process time")
+  #  print(end0, "Training: seconds process time")
+
 
 
 

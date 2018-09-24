@@ -14,3 +14,38 @@ All zero: 39800 caught / 39800 total = 1.0
 
 Number of malicious messages: 61706
 Number of messages: 112642
+C:\Users\xukey\Downloads\ml-ids\can-ml-ids-master\tests
+C:\Users\xukey\Downloads\ml-ids\can-ml-ids-master\tests
+------------------
+
+STATISTICS
+Percentage correct: 99.82520400186215
+Percentage caught: 99.99523135858594
+Percentage of false positives: 0.3105983772819473
+
+Replay message statistics: 50740 caught / 50936 total = 0.9961520339249254
+Random injection statistics: 2038 caught / 2041 total = 0.9985301322880941
+Spoofing statistics: 20230 caught / 20230 total = 1.0
+All zero: 40640 caught / 40640 total = 1.0
+
+Number of malicious messages: 62911
+Number of messages: 113847
+74.00553035245566 Testing: seconds process time
+C:\Users\xukey\Downloads\ml-ids\can-ml-ids-master\tests
+C:\Users\xukey\Downloads\ml-ids\can-ml-ids-master\tests
+------------------
+
+STATISTICS
+Percentage correct: 99.77286878129631
+Percentage caught: 99.99524526507648
+Percentage of false positives: 0.4041169413399002
+
+Replay message statistics: 50680 caught / 50936 total = 0.9949740851264331
+Random injection statistics: 2042 caught / 2045 total = 0.9985330073349633
+Spoofing statistics: 21410 caught / 21410 total = 1.0
+All zero: 39640 caught / 39640 total = 1.0
+
+Number of malicious messages: 63095
+Number of messages: 114031
+96.81682051812972 Testing: seconds process time
+4.4624808001763574e-07 Training: seconds process time
