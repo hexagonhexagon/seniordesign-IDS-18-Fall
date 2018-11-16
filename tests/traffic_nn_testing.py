@@ -69,6 +69,7 @@ def main(classifier, traffic_file, train, verbose=True, print_test=False, live_c
 
     op_analyzer = OperationAnalyzer()
 
+    # parse traffic file wrong, traffic_file given as arg in main()
     can_msgs = traffic.traffic_parser(traffic_file)
 
     features = []
@@ -77,35 +78,42 @@ def main(classifier, traffic_file, train, verbose=True, print_test=False, live_c
     previous_entropy = 0
     current_entropy = 0
 
-    msgs_parsed = deque()
+    msgs_parsed = deque() # double-ended queue: can push/pop on either side of deque quickly
     msg_types = []
+    # num_to_read, factor_to_read are given as args in main()
+    # num_to_read: if not None, indicates the number of messages to read from rec_1
+    # factor_to_read: if not None, indicates the percentage of messages to read from rec_1
     if num_to_read is None:
         if factor_to_read is not None:
             num_to_read = int(len(can_msgs) * factor_to_read)
         else:
             num_to_read = len(can_msgs)
-    divisor = int(math.log10(num_to_read))
+    divisor = int(math.log10(num_to_read)) # used for printing 'Processed' messages to screen
     if divisor > 2:
         divisor -= 2
     else:
         divisor = 2
+    # divisor is 2 if num_to_read < 1000, num digits in num_to_read - 2 if num_to_read > 1000
 
     for i in range(0, num_to_read):
         if verbose is True:
             if (i - 1) % (10 ** divisor) == 0:
                 print('Processed ' + str(i) + ' of ' + str(num_to_read))
 
-        msgs_parsed.append(can_msgs[i])
+        msgs_parsed.append(can_msgs[i]) # keep track of messages parsed
 
-        seen_messages['Total'] = seen_messages['Total'] + 1
+        seen_messages['Total'] = seen_messages['Total'] + 1 # keep track of total number of seen messages in the last second
         if can_msgs[i].id_float not in seen_messages:
             seen_messages[can_msgs[i].id_float] = 0
-        seen_messages[can_msgs[i].id_float] = seen_messages[can_msgs[i].id_float] + 1
+        seen_messages[can_msgs[i].id_float] = seen_messages[can_msgs[i].id_float] + 1 # keep track of number of messages with the same id: key, value pair is id 66: 140 occurences
 
+        # get p = probability of message in known messages, q = probability of message in messages seen so far
         [p, q] = classifier.get_probability_distributions(can_msgs[i].id_float, seen_messages)
 
+        # calculate shannon entropy of messages seen so far
         current_entropy = classifier.calculate_entropy(seen_messages)
 
+        # append [id, num occurrences in last second of id, KL distance b/w probs of message ids??, difference in entropy from previous cycle, 1?]
         features.append([can_msgs[i].id_float,
                          classifier.find_num_occurrences_in_last_second(len(msgs_parsed) - 1,
                                                                         can_msgs[i].id_float,
@@ -114,14 +122,15 @@ def main(classifier, traffic_file, train, verbose=True, print_test=False, live_c
                          classifier.calculate_relative_entropy(q, p),
                          current_entropy - previous_entropy, 1])
 
-        labels.append(0)
+        labels.append(0) # append valid label to label list
         previous_entropy = current_entropy
-        msg_types.append('Valid')
-        if live_classification is True:
-            start = time.perf_counter()
+        msg_types.append('Valid') # append valid message type to message type list
+        if live_classification is True: # live_classification is false when called
+            start = time.perf_counter() # high precision current time
+            # prediction is true if malicious, false if not
             prediction = classifier.prediction_wrapper(msgs_parsed[len(msgs_parsed) - 1],
                                                        msgs_parsed, seen_messages)
-            end = time.perf_counter()
+            end = time.perf_counter() # high precision current time
             op_analyzer.add_runtime(start, end, 'Valid')
 
             if prediction is False:
@@ -129,7 +138,7 @@ def main(classifier, traffic_file, train, verbose=True, print_test=False, live_c
             else:
                 output_str = 'Valid message is CAUGHT'
 
-            if print_test is True:
+            if print_test is True: # print_test is false when called
                 print(output_str)
 
         if msgs_parsed[len(msgs_parsed) - 1].timestamp - msgs_parsed[0].timestamp \
