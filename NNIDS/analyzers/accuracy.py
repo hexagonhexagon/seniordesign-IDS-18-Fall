@@ -10,9 +10,9 @@ class AccuracyAnalyzer:
         :param classifier_predictions: list of predictions in order of receipt
         """
 
-        self.msg_types = message_types
-        self.labels = correct_labels
-        self.predictions = classifier_predictions
+        self.msg_types = message_types # list of either 'Valid', 'Random injection', 'Spoofing', or 'DOS'
+        self.labels = correct_labels # list of 0 (valid) and 1 (invalid)
+        self.predictions = classifier_predictions # ???
 
         self.num_correct = 0
         self.num_malicious = 0
@@ -32,28 +32,28 @@ class AccuracyAnalyzer:
 
         for i in range(0, len(self.predictions)):
             if int(self.predictions[i][0]) == self.labels[i]:
-                self.num_correct += 1
+                self.num_correct += 1 # measure number predicted correct
             if self.labels[i] == 1:
-                self.num_malicious += 1
+                self.num_malicious += 1 # measure number of malicious packets
                 if int(self.predictions[i][0]) == 1:
-                    self.num_caught += 1
+                    self.num_caught += 1 # measure number of malicious packets caught
             if int(self.predictions[i][0]) == 1:
-                self.num_classified_malicious += 1
+                self.num_classified_malicious += 1 # measure number predicted malicious
                 if self.labels[i] == 0:
-                    self.num_false_positives += 1
-            if self.msg_types[i] == 'Valid':
-                self.num_valid += 1
+                    self.num_false_positives += 1 # measure number of false positives
+            if self.msg_types[i] == 'Valid': # Measure valid packets
+                self.num_valid += 1 
                 if int(self.predictions[i][0]) == 0:
                     self.num_valid_caught += 1
-            elif self.msg_types[i] == 'Random injection':
+            elif self.msg_types[i] == 'Random injection': # Measure random injection packets
                 self.num_injected += 1
                 if int(self.predictions[i][0]) == 1:
                     self.num_injected_caught += 1
-            elif self.msg_types[i] == 'Spoofing':
+            elif self.msg_types[i] == 'Spoofing': # Measure spoofing packets
                 self.num_spoof += 1
                 if int(self.predictions[i][0]) == 1:
                     self.num_spoof_caught += 1
-            elif self.msg_types[i] == 'DOS':
+            elif self.msg_types[i] == 'DOS': # Measure Denial of Service packets
                 self.num_dos += 1
                 if int(self.predictions[i][0]) == 1:
                     self.num_dos_caught += 1
@@ -67,6 +67,7 @@ class AccuracyAnalyzer:
             if any of self.labels, self.predictions, and self.msg_types is empty
             if the length of self.labels, self.predictions, and self.msg_types differ
         """
+        # Error checking
         if len(self.labels) == 0:
             raise ValueError('AccuracyAnalyzer object has no label data')
         if len(self.predictions) == 0:
@@ -81,6 +82,7 @@ class AccuracyAnalyzer:
         if len(self.predictions) != len(self.msg_types):
             raise ValueError('The number of predictions and msg_types differ')
 
+        # Print actual precomputed statistics
         print('\nACCURACY STATISTICS')
         print('Percentage correct:\n\t' + str(self.num_correct)
               + ' correct / ' + str(len(self.labels)) + ' total = '
