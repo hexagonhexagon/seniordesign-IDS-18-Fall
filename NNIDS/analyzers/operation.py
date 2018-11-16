@@ -1,3 +1,9 @@
+# NOTE: this class can be reduced to a single function, with optional wrapper
+# class, for if we want to it to store info
+"""
+Simple function to display max, min, and average runtime for  NNIDS prediction
+"""
+
 import numpy as np
 import time
 
@@ -23,6 +29,8 @@ class OperationAnalyzer:
         if start_time - stop_time > 0.00001:
             raise ValueError('stop_time occurs before start_time')
 
+        # adds start and stop as an array to a dict item of name
+        # operation_type.
         if operation_type not in self.runtimes:
             self.runtimes[operation_type] = np.array([])
         self.runtimes[operation_type] = np.append(self.runtimes[operation_type],
