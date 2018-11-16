@@ -21,7 +21,8 @@ max_log_interval = 120000
 
 traffic_datasets = {
     'probability': os.getcwd() + '/data/traffic_analysis_dump/id_occurrences.json',
-    'train': os.getcwd() + '/data/traffic/local_Aug_31.traffic',
+    # 'train': os.getcwd() + '/data/traffic/local_Aug_31.traffic',
+    'train': os.getcwd() + '/data/traffic/local_Aug_31_trimmed.traffic',
     'test': os.getcwd() + '/data/traffic/office_local_Aug_31.traffic',
     'model_dir': os.getcwd() + '/traffic_ids'
 }
@@ -141,6 +142,7 @@ def main(classifier, traffic_file, train, verbose=True, print_test=False, live_c
             if print_test is True: # print_test is false when called
                 print(output_str)
 
+        # pop a single?! message if the oldest message is over a second old
         if msgs_parsed[len(msgs_parsed) - 1].timestamp - msgs_parsed[0].timestamp \
                 >= max_log_interval:
             seen_messages[msgs_parsed[0].id_float] -= 1
@@ -149,18 +151,23 @@ def main(classifier, traffic_file, train, verbose=True, print_test=False, live_c
             seen_messages['Total'] -= 1
             msgs_parsed.popleft()
 
-        if skip_attacks is True:
+        if skip_attacks is True: # skip_attacks is false when called
             continue
 
+        # start inserting attacks
         attack_previous_entropy = previous_entropy
         attack_seen_messages = dict(seen_messages)
         attack_msgs_parsed = deque(msgs_parsed)
 
         rand_num = np.random.randint(0, 25)
         if i < len(can_msgs) - 1 and rand_num == 0:  # 4% chance of inserting random message ID
+            # format string is zero-pad, 5 chars long, convert to hex uppercase letters
+            # end result looks like '4A5'; also should be 2048, not 4096 since ID is 11 bits!!
             rand_id = "{0:#0{1}X}".format(np.random.randint(0, 4096), 5)[2:]
             new_time_stamp = (can_msgs[i].timestamp + can_msgs[i + 1].timestamp) / 2
 
+            # insert constructed message into features, labels, etc.
+            # repeat code, should be a function
             new_msg = CANMessage(new_time_stamp, rand_id, 0)
             attack_msgs_parsed.append(new_msg)
 
@@ -184,7 +191,8 @@ def main(classifier, traffic_file, train, verbose=True, print_test=False, live_c
 
             msg_types.append('Random injection')
 
-            if live_classification is True:
+            # repeat code, should be a function
+            if live_classification is True: # live_classification is false when called
                 start = time.perf_counter()
                 prediction = classifier.prediction_wrapper(attack_msgs_parsed[len(attack_msgs_parsed) - 1],
                                                            attack_msgs_parsed,
@@ -211,6 +219,7 @@ def main(classifier, traffic_file, train, verbose=True, print_test=False, live_c
             # known id
             rand_idx = np.random.randint(0, 13)
             count = 0
+            # find known id: pick random id out of first 13 valid IDs
             for known_id in sorted(classifier.known_messages.keys()):
                 if count == rand_idx:
                     rand_id = known_id
@@ -218,7 +227,7 @@ def main(classifier, traffic_file, train, verbose=True, print_test=False, live_c
                 count += 1
             time_stamp_step = (can_msgs[i + 1].timestamp - can_msgs[i].timestamp) / 11
 
-            for j in range(1, 11):
+            for j in range(1, 11): # add 11 messages with same spoofed ID
                 new_time_stamp = can_msgs[i].timestamp + time_stamp_step * i
                 new_msg = CANMessage(new_time_stamp, rand_id, 0)
                 attack_msgs_parsed.append(new_msg)
@@ -272,10 +281,11 @@ def main(classifier, traffic_file, train, verbose=True, print_test=False, live_c
                     attack_msgs_parsed.popleft()
 
         elif i < len(can_msgs) - 1 and rand_num == 2:  # 4% chance ddos with 10 messages
+            # DOS with ID 0
             rand_id = '000'
             time_stamp_step = (can_msgs[i + 1].timestamp - can_msgs[i].timestamp) / 21
 
-            for j in range(1, 21):
+            for j in range(1, 21): # insert 21 messages with ID 0
                 new_time_stamp = can_msgs[i].timestamp + time_stamp_step * i
                 new_msg = CANMessage(new_time_stamp, rand_id, 0)
                 attack_msgs_parsed.append(new_msg)
@@ -335,18 +345,18 @@ def main(classifier, traffic_file, train, verbose=True, print_test=False, live_c
 
     print('Processed all data!')
 
-    if train is True:
+    if train is True: # true on first iteration, false on second iteration
         classifier.train_classifier(features, labels)
 
     else:
-        classifier.test_classifier(features, labels)
+        classifier.test_classifier(features, labels) # print overall classifier accuracy over valid and invalid messages
 
-        predictions = classifier.predict_class(features)
+        predictions = classifier.predict_class(features) # return classifier predictions
 
         acc_analyzer = AccuracyAnalyzer(msg_types, labels, predictions)
-        acc_analyzer.print_accuracy_statistics()
+        acc_analyzer.print_accuracy_statistics() # print detailed accuracy statistics
 
-        if live_classification is True:
+        if live_classification is True: # live_classification is false when called
             op_analyzer.print_runtime_statistics('s')
 
         print()
