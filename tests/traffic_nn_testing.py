@@ -219,7 +219,7 @@ def main(classifier, traffic_file, train, verbose=True, print_test=False, live_c
             # known id
             rand_idx = np.random.randint(0, 13)
             count = 0
-            # find known id: pick random id out of first 13 valid IDs
+            # find known id: each id has 1/13 chance of being picked until 13 ids have been iterated through, overwrite old id when succeed, possibility of not picking any id?
             for known_id in sorted(classifier.known_messages.keys()):
                 if count == rand_idx:
                     rand_id = known_id

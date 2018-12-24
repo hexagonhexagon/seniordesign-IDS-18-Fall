@@ -12,7 +12,7 @@ class AccuracyAnalyzer:
 
         self.msg_types = message_types # list of either 'Valid', 'Random injection', 'Spoofing', or 'DOS'
         self.labels = correct_labels # list of 0 (valid) and 1 (invalid)
-        self.predictions = classifier_predictions # ???
+        self.predictions = classifier_predictions # result from predictions, data type unclear
 
         self.num_correct = 0
         self.num_malicious = 0

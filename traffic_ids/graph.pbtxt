@@ -449,11 +449,11 @@ node {
       list {
         type: DT_INT64
         type: DT_DOUBLE
-        type: DT_INT32
-        type: DT_INT32
+        type: DT_INT64
+        type: DT_INT64
         type: DT_DOUBLE
-        type: DT_INT32
-        type: DT_INT32
+        type: DT_INT64
+        type: DT_INT64
       }
     }
   }
@@ -584,7 +584,7 @@ node {
   attr {
     key: "dtype"
     value {
-      type: DT_INT32
+      type: DT_INT64
     }
   }
   attr {
@@ -613,7 +613,7 @@ node {
   attr {
     key: "dtype"
     value {
-      type: DT_INT32
+      type: DT_INT64
     }
   }
   attr {
@@ -671,7 +671,7 @@ node {
   attr {
     key: "dtype"
     value {
-      type: DT_INT32
+      type: DT_INT64
     }
   }
   attr {
@@ -700,7 +700,7 @@ node {
   attr {
     key: "dtype"
     value {
-      type: DT_INT32
+      type: DT_INT64
     }
   }
   attr {
@@ -730,11 +730,11 @@ node {
       list {
         type: DT_INT64
         type: DT_DOUBLE
-        type: DT_INT32
-        type: DT_INT32
+        type: DT_INT64
+        type: DT_INT64
         type: DT_DOUBLE
-        type: DT_INT32
-        type: DT_INT32
+        type: DT_INT64
+        type: DT_INT64
       }
     }
   }
@@ -1108,11 +1108,11 @@ node {
       list {
         type: DT_INT64
         type: DT_DOUBLE
-        type: DT_INT32
-        type: DT_INT32
+        type: DT_INT64
+        type: DT_INT64
         type: DT_DOUBLE
-        type: DT_INT32
-        type: DT_INT32
+        type: DT_INT64
+        type: DT_INT64
       }
     }
   }
@@ -1557,7 +1557,7 @@ node {
   attr {
     key: "T"
     value {
-      type: DT_INT32
+      type: DT_INT64
     }
   }
   attr {
@@ -1595,7 +1595,7 @@ node {
   attr {
     key: "SrcT"
     value {
-      type: DT_INT32
+      type: DT_INT64
     }
   }
   attr {
@@ -1952,7 +1952,7 @@ node {
   attr {
     key: "T"
     value {
-      type: DT_INT32
+      type: DT_INT64
     }
   }
   attr {
@@ -1990,7 +1990,7 @@ node {
   attr {
     key: "SrcT"
     value {
-      type: DT_INT32
+      type: DT_INT64
     }
   }
   attr {
@@ -8497,7 +8497,7 @@ node {
   attr {
     key: "T"
     value {
-      type: DT_INT32
+      type: DT_INT64
     }
   }
   attr {
@@ -8529,7 +8529,7 @@ node {
   attr {
     key: "T"
     value {
-      type: DT_INT32
+      type: DT_INT64
     }
   }
   attr {
@@ -8589,7 +8589,7 @@ node {
   attr {
     key: "T"
     value {
-      type: DT_INT32
+      type: DT_INT64
     }
   }
   attr {
@@ -9204,7 +9204,7 @@ node {
   attr {
     key: "T"
     value {
-      type: DT_INT32
+      type: DT_INT64
     }
   }
   attr {
@@ -9236,7 +9236,7 @@ node {
   attr {
     key: "SrcT"
     value {
-      type: DT_INT32
+      type: DT_INT64
     }
   }
   attr {
@@ -10797,7 +10797,7 @@ node {
   attr {
     key: "T"
     value {
-      type: DT_INT32
+      type: DT_INT64
     }
   }
   attr {
@@ -10835,7 +10835,7 @@ node {
   attr {
     key: "SrcT"
     value {
-      type: DT_INT32
+      type: DT_INT64
     }
   }
   attr {
@@ -24514,7 +24514,7 @@ node {
         dtype: DT_STRING
         tensor_shape {
         }
-        string_val: "_temp_4f480c8aefbe477bb62c2761c957a0ec/part"
+        string_val: "_temp_c80b410164fa44ab8f73a8deb67a9c30/part"
       }
     }
   }
