@@ -5,6 +5,7 @@ This is an interface to a library of attack generator functions.
 These attacks will be used to train and test the IDS.
 """
 
+import malicious_generators
 
 class MaliciousGenerator:
     """
@@ -15,6 +16,8 @@ class MaliciousGenerator:
         This dictionary contains the attacks that can be used on the IDS. Each
         entry contains the probability of a certain attack, and the function
         pointer to get the packets.
+        The malicious generator module contains its own roster, which this
+        class will use as the default values.
         The sum of all probabilities should be == 1.
         - Attack: a function pointer to a malicious generator
             Usage: *func(scale)*
@@ -22,7 +25,7 @@ class MaliciousGenerator:
     """
 
     def __init__(self):
-        self.roster = None
+        self.roster = malicious_generators.ROSTER
 
     def adjust(self, attack_name, new_prob):
         """
