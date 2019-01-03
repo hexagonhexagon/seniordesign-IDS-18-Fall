@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """
 Malicious Packet Generator
 This is an interface to a library of attack generator functions.
@@ -51,6 +50,7 @@ class MaliciousGenerator:
             if x != attack_name
         ])
         scaling_target = 1 - new_prob
+
         for item in self.roster:
             if item != attack_name:
                 # normalize other probabilities to meet target
