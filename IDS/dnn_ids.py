@@ -1,11 +1,19 @@
 import tensorflow as tf
 import numpy as np
+import os.path
+import pickle
+
+feature_cols = [
+    tf.feature_column.numeric_column('id', dtype=tf.uint16), # Should this be a categorical column?
+    tf.feature_column.numeric_column('occurrences_in_last_sec', dtype=tf.uint16),
+    tf.feature_column.numeric_column('relative_entropy'),
+    tf.feature_column.numeric_column('system_entropy_change')
+]
 
 class DNNBasedIDS:
-    def __init__(self, model_dir):
-        self.params = {
+    def __init__(self):
+        self._params = {
             'hidden_units': [10, 20, 20, 20],
-            'model_dir': model_dir,
             'optimizer': tf.train.ProximalAdagradOptimizer(
                 learning_rate=0.1,
                 l1_regularization_strength=0.001,
@@ -14,29 +22,47 @@ class DNNBasedIDS:
             'activation_fn': tf.nn.relu,
             'loss_reduction': tf.losses.Reduction.SUM # Never used?
         }
-        self._dnn = None # We initialize this in another function.
+        self._dnn = None
 
     def change_param(self, key, value):
-        if key not in self.params:
-            raise ValueError('{} is not a valid parameter that can be changed.'.format(key))
-        self.params[key] = value
+        if self._dnn:
+            raise RuntimeError('Cannot change the parameters of an already initialized DNN!')
+        if key not in self._params:
+            raise ValueError('{} is not a valid parameter that can be changed. Valid keys: {}'.format(key, self._params.keys()))
+        self._params[key] = value
 
-    def initialize(self):
+    def new_model(self, model_dir):
+        if os.path.exists(model_dir):
+            raise FileExistsError('A model with that name already exists!')
+        with open(model_dir+'.params', 'w+b') as file:
+            pickle.dump(self._params, file)
         self._dnn = tf.estimator.DNNClassifier(
-            feature_columns=[
-                tf.feature_column.numeric_column('id', dtype=tf.uint16),
-                tf.feature_column.numeric_column('occurrences_in_last_sec', dtype=tf.uint16),
-                tf.feature_column.numeric_column('relative_entropy'),
-                tf.feature_column.numeric_column('system_entropy_change')
-            ],
-            hidden_units=self.params['hidden_units'],
-            model_dir=self.params['model_dir'],
+            feature_columns=feature_cols,
+            hidden_units=self._params['hidden_units'],
+            model_dir=model_dir,
             n_classes=2,
-            weight_column='weights', # Do we want weight column?
-            label_vocabulary=None, # Do we want label vocabulary?
-            optimizer=self.params['optimizer'],
-            activation_fn=self.params['activation_fn'],
+            weight_column=None, # Do we want weight column?
+            label_vocabulary=None,
+            optimizer=self._params['optimizer'],
+            activation_fn=self._params['activation_fn'],
         )
+
+    def load_model(self, model_dir):
+        if not os.path.exists(model_dir+'.params'):
+            raise FileNotFoundError('The model {} does not exist!'.format(model_dir))
+        with open(model_dir+'.params', 'rb') as file:
+            self._params = pickle.load(file)
+        self._dnn = tf.estimator.DNNClassifier(
+            feature_columns=feature_cols,
+            hidden_units=self._params['hidden_units'],
+            model_dir=model_dir,
+            n_classes=2,
+            weight_column=None, # Do we want weight column?
+            label_vocabulary=None,
+            optimizer=self._params['optimizer'],
+            activation_fn=self._params['activation_fn'],
+        )
+
 
     def train(self, input_function, num_steps):
         self._dnn.train(input_function, steps=num_steps)
