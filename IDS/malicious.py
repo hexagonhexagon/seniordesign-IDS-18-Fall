@@ -5,7 +5,10 @@ This is an interface to a library of attack generator functions.
 These attacks will be used to train and test the IDS.
 """
 
+import numpy
+
 import malicious_generators
+
 
 class MaliciousGenerator:
     """
@@ -26,6 +29,9 @@ class MaliciousGenerator:
 
     def __init__(self):
         self.roster = malicious_generators.ROSTER
+        # FUTURE: import multiple modules, and adjust the probability of each
+        # imported ROSTER, proportionally so that the total sum is 1
+        assert sum([self.roster[x]['Probability'] for x in self.roster]) == 1.0
 
     def adjust(self, attack_name, new_prob):
         """
@@ -39,8 +45,21 @@ class MaliciousGenerator:
           sum == 1. This is the preferred way to set the Probability of an
           entry in the roster.
         """
+        self.roster[attack_name]['Probability'] = new_prob
+        other_sum = sum([
+            self.roster[x]['Probability'] for x in self.roster
+            if x != attack_name
+        ])
+        scaling_target = 1 - new_prob
+        for item in self.roster:
+            if item != attack_name:
+                # normalize other probabilities to meet target
+                self.roster[item]['Probability'] *= (
+                    scaling_target / other_sum)
 
-    def get(self, scale):
+        assert sum([self.roster[x]['Probability'] for x in self.roster]) == 1.0
+
+    def get(self, scale=1):
         """
         A generator function that uses the probabilities to return a malicious
         CAN frame or list of CAN frames to be injected into whatever is calling
@@ -52,8 +71,14 @@ class MaliciousGenerator:
           Specifies how many batches the generator should make. Should be 1
           packet per batch, for most.
         """
+        choices = [self.roster[x]['Attack'] for x in self.roster]
+        chances = [self.roster[x]['Probability'] for x in self.roster]
+        chosen = numpy.random.choice(choices, p=chances)
+        for _ in range(scale):
+            for packet in chosen():
+                yield packet
 
-    def get_attack(self, attack_name, scale):
+    def get_attack(self, attack_name, scale=1):
         """
         Uses the specified malicious generator to create a list of malicious
         packets.
@@ -64,3 +89,6 @@ class MaliciousGenerator:
           Specifies how many batches the generator should make. Should be 1
           packet per batch, for most.
         """
+        for _ in range(scale):
+            for packet in self.roster[attack_name]['Attack']():
+                yield packet
