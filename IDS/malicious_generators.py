@@ -19,8 +19,8 @@ def random_packet(time_window):
     """
     new_id = random.getrandbits(11)
     # new packet timestamp halfway between previous and next
-    timestamp = int(time_window[0]['timestamp'] +
-                    time_window[1]['timestamp']) / 2
+    timestamp = int(
+        (time_window[0]['timestamp'] + time_window[1]['timestamp']) / 2)
     data = [random.getrandbits(8) for _ in range(8)]
     packet = {'timestamp': timestamp, 'id': new_id, 'data': data}
     yield packet
@@ -32,8 +32,8 @@ def flood(time_window):
         time_window: subscriptable object containing two CAN packets
     """
     new_id = 0
-    timestamp = int(time_window[0]['timestamp'] +
-                    time_window[1]['timestamp']) / 2
+    timestamp = int(
+        (time_window[0]['timestamp'] + time_window[1]['timestamp']) / 2)
     data = [0, 0, 0, 0, 0, 0, 0, 0]
     packet = {'timestamp': timestamp, 'id': new_id, 'data': data}
     for _ in range(21):

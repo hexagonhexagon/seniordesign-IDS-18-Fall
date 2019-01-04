@@ -88,35 +88,51 @@ class MaliciousGenerator:
 
         self.check_roster()
 
-    def get(self, scale=1):
+    def get(self, time_window, repeat=1):
         """A generator function that uses the probabilities to return a
         malicious CAN frame or list of CAN frames to be injected into whatever
         is calling the function. Can return None, which indicates that no
         packet should be injected.
 
         Arguments:
-        - scale: integer passed to the malicious generator.
+        - repeat: integer passed to the malicious generator.
           Specifies how many batches the generator should make. Should be 1
           packet per batch, for most.
+
+        Examples:
+            >>> mal = MaliciousGenerator()
+            >>> mal.get((pak1,pak2))
+            [{'timestamp': 5,
+                'id': 1433,
+                'data': [145, 49, 247, 135, 200, 57, 54, 214]}]
+            >>> mal.get([pak1, pak2], 2)
+            [{'timestamp': 5,
+                'id': 1433,
+                'data': [145, 49, 247, 135, 200, 57, 54, 214]},
+            {'timestamp': 5,
+                'id': 1433,
+                'data': [145, 49, 247, 135, 200, 57, 54, 214]}]
         """
         choices = [self.roster[x]['attack'] for x in self.roster]
         chances = [self.roster[x]['probability'] for x in self.roster]
         chosen = numpy.random.choice(choices, p=chances)
-        for _ in range(scale):
-            for packet in chosen():
+        if chosen is None:
+            return
+        for _ in range(repeat):
+            for packet in chosen(time_window):
                 yield packet
 
-    def get_attack(self, attack_name, scale=1):
+    def get_attack(self, time_window, attack_name, repeat=1):
         """
         Uses the specified malicious generator to create a list of malicious
         packets.
 
         Arguments:
         - attack_name: string specifying which malicious generator to use
-        - scale: integer passed to the malicious generator.
-          Specifies how many batches the generator should make. Should be 1
-          packet per batch, for most.
+        - repeat: integer passed to the malicious generator.
+            Specifies how many batches the generator should make. Should be 1
+            packet per batch, for most.
         """
-        for _ in range(scale):
-            for packet in self.roster[attack_name]['attack']():
+        for _ in range(repeat):
+            for packet in self.roster[attack_name]['attack'](time_window):
                 yield packet
