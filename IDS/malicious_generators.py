@@ -45,7 +45,7 @@ def replay(time_window):
     Args:
         time_window: subscriptable object containing two CAN packets
     """
-    # TODO: how to get last packet?
+    yield time_window[0]
 
 
 def spoof(time_window):
@@ -54,6 +54,14 @@ def spoof(time_window):
         time_window: subscriptable object containing two CAN packets
     """
     # TODO: which ID?
+    #       what data?
+
+    new_id = 0
+    timestamp = int(
+        (time_window[0]['timestamp'] + time_window[1]['timestamp']) / 2)
+    data = [0, 0, 0, 0, 0, 0, 0, 0]
+    packet = {'timestamp': timestamp, 'id': new_id, 'data': data}
+    yield packet
 
 
 ROSTER = {
