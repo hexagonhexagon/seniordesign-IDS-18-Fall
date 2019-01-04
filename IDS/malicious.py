@@ -42,30 +42,46 @@ class MaliciousGenerator:
         Raises:
             AssertationError: roster probabilities not set correctly; need == 1
         """
-        assert sum([self.roster[x]['probability'] for x in self.roster]) == 1.0
+        prob_sum = sum([self.roster[x]['probability'] for x in self.roster])
+        assert isclose(prob_sum, 1.0)
 
-    def adjust(self, attack_name, new_prob):
+    def adjust(self, adjustments):
         """Change the probability that a certain packet is returned from Get
         Malicious Packet.
 
         Arguments:
-        - attack_name: string specifying which malicious generator to use
-        - new_prob: the new probability the attack will have. All other attacks
-          will have their probabilities adjusted proportionally, so that their
-          sum == 1. This is the preferred way to set the probability of an
-          entry in the roster.
-        """
-        assert 0 <= new_prob <= 1
+        - adjustments: Dict specifying the attacks and their new probabilities.
+            All other attacks will have their probabilities adjusted
+            proportionally, so that the sum == 1. This is the preferred way
+            to set the probability of an entry in the roster.
 
-        self.roster[attack_name]['probability'] = new_prob
+        Raises:
+            AssertationError: if adjustments sum outside [0,1]
+
+        Examples:
+            >>> mal = MaliciousGenerator()
+            >>> mal.adjust({'random': 0.5})
+            >>> mal.adjust({'random': 0.3, 'spoof': 0.2})
+        """
+        scaling_target = 1 - sum(x for x in adjustments.values())
+        assert 0 <= scaling_target <= 1
+        print(scaling_target)
+
         other_sum = sum([
             self.roster[x]['probability'] for x in self.roster
-            if x != attack_name
+            if x not in adjustments
         ])
-        scaling_target = 1 - new_prob
+        print(other_sum)
 
         for item in self.roster:
-            if item != attack_name:
+            if item in adjustments:
+                self.roster[item]['probability'] = adjustments[item]
+            elif other_sum == 0:
+                self.roster[item]['probability'] += scaling_target / len([
+                    self.roster[x]['probability']
+                    for x in self.roster if x not in adjustments
+                ])
+            else:
                 # normalize other probabilities to meet target
                 self.roster[item]['probability'] *= (
                     scaling_target / other_sum)
