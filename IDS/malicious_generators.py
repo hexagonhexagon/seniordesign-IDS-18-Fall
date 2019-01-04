@@ -1,5 +1,4 @@
-"""
-Malicious Generators
+"""Malicious Generators
 A library of malicious generator functions to be used by the MaliciousGenerator
 class.
 
@@ -10,65 +9,68 @@ Module Constants:
 
 # TODO: need a way to communicate with IDS to get info about the CAN bus.
 
-import numpy as np
+import random
 
-def random_packet():
+
+def random_packet(time_window):
+    """Produces a CAN packet of random ID with random contents
+    Args:
+        time_window: subscriptable object containing two CAN packets
     """
-    Produces a CAN packet of random ID with random contents
-    """
-    # format string is zero-pad, 5 chars long, convert to hex uppercase letters
-    new_id = "{0:#0{1}X}".format(np.random.randint(0, 2048), 5)[2:]
-
-    # TODO: How to get next timestamp?
-    # new_time_stamp = (can_msgs[i].timestamp + can_msgs[i + 1].timestamp) / 2
-    timestamp = np.random.randint(0, 1e9)
-
-    data = [np.random.randint(0, 256) for _ in range(8)]
-    packet = {'Timestamp': timestamp, 'ID': new_id, 'Data': data}
+    new_id = random.getrandbits(11)
+    # new packet timestamp halfway between previous and next
+    timestamp = int(time_window[0]['timestamp'] +
+                    time_window[1]['timestamp']) / 2
+    data = [random.getrandbits(8) for _ in range(8)]
+    packet = {'timestamp': timestamp, 'id': new_id, 'data': data}
     yield packet
 
 
-def flood():
+def flood(time_window):
+    """Produces a long series of CAN packets
+    Args:
+        time_window: subscriptable object containing two CAN packets
     """
-    Produces a long series of CAN packets
-    """
-    new_id = '000'
-    timestamp = 0
+    new_id = 0
+    timestamp = int(time_window[0]['timestamp'] +
+                    time_window[1]['timestamp']) / 2
     data = [0, 0, 0, 0, 0, 0, 0, 0]
-    packet = {'Timestamp': timestamp, 'ID': new_id, 'Data': data}
+    packet = {'timestamp': timestamp, 'id': new_id, 'data': data}
     for _ in range(21):
         yield packet
 
 
-def replay():
-    """
-    Reproduces the previous packet on the CAN bus
+def replay(time_window):
+    """Reproduces the previous packet on the CAN bus
+    Args:
+        time_window: subscriptable object containing two CAN packets
     """
     # TODO: how to get last packet?
 
 
-def spoof():
-    """
-    Create plausible message data of a known ID
+def spoof(time_window):
+    """Create plausible message data of a known ID
+    Args:
+        time_window: subscriptable object containing two CAN packets
     """
     # TODO: which ID?
 
 
 ROSTER = {
     'random': {
-        'Attack': random_packet,
-        'Probability': 0.25
+        'attack': random_packet,
+        'probability': 0.25
     },
     'flood': {
-        'Attack': flood,
-        'Probability': 0.25
+        'attack': flood,
+        'probability': 0.25
     },
     'replay': {
-        'Attack': replay,
-        'Probability': 0.25
+        'attack': replay,
+        'probability': 0.25
     },
     'spoof': {
-        'Attack': spoof,
-        'Probability': 0.25
+        'attack': spoof,
+        'probability': 0.25
     }
 }
