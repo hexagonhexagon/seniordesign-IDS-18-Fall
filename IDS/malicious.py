@@ -2,11 +2,22 @@
 Malicious Packet Generator
 This is an interface to a library of attack generator functions.
 These attacks will be used to train and test the IDS.
+
+Attributes:
+    NONE_ROSTER: a partial roster kept in this module, to define the default
+    probability for returning nothing on get. This will be merged with the
+    roster imported from malicious_generators
 """
 
-import numpy
+from math import isclose  # used to compare floats
+
+import random
 
 import malicious_generators
+
+# CHECKME: having None for attack could cause problems, if it does, replace
+# with a lambda function to return None
+NONE_ROSTER = {'none': {'attack': None, 'probability': 0.5}}
 
 
 class MaliciousGenerator:
@@ -31,9 +42,11 @@ class MaliciousGenerator:
         Raises:
             AssertationError: roster probabilities not set correctly; need == 1
         """
+        # MAYBE: import multiple modules with malicious_generators
         self.roster = malicious_generators.ROSTER
-        # FUTURE: import multiple modules, and adjust the probability of each
-        # imported ROSTER, proportionally so that the total sum is 1
+        self.roster.update(NONE_ROSTER)  # add to roster
+        self._normalize_roster()
+
         self.check_roster()
 
     def check_roster(self):
@@ -44,6 +57,15 @@ class MaliciousGenerator:
         """
         prob_sum = sum([self.roster[x]['probability'] for x in self.roster])
         assert isclose(prob_sum, 1.0)
+
+    def _normalize_roster(self):
+        """Normalizes probability values in roster, by adjusting each value
+        proportionally so that the sum is 1
+        """
+        prob_sum = sum([self.roster[x]['probability'] for x in self.roster])
+        for item in self.roster:
+            self.roster[item]['probability'] *= (1 / prob_sum)
+        self.check_roster()
 
     def adjust(self, adjustments):
         """Change the probability that a certain packet is returned from Get
@@ -115,7 +137,7 @@ class MaliciousGenerator:
         """
         choices = [self.roster[x]['attack'] for x in self.roster]
         chances = [self.roster[x]['probability'] for x in self.roster]
-        chosen = numpy.random.choice(choices, p=chances)
+        chosen = random.choices(choices, weights=chances)[0]
         if chosen is None:
             return
         for _ in range(repeat):
