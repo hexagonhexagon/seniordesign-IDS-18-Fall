@@ -9,14 +9,11 @@ Attributes:
     roster imported from malicious_generators
 """
 
-from math import isclose  # used to compare floats
-
 import random
+from math import isclose  # used to compare floats
 
 import malicious_generators
 
-# CHECKME: having None for attack could cause problems, if it does, replace
-# with a lambda function to return None
 NONE_ROSTER = {'none': {'attack': None, 'probability': 0.5}}
 
 
@@ -97,10 +94,8 @@ class MaliciousGenerator:
             if item in adjustments:
                 self.roster[item]['probability'] = adjustments[item]
             elif other_sum == 0:
-                self.roster[item]['probability'] += scaling_target / len([
-                    self.roster[x]['probability']
-                    for x in self.roster if x not in adjustments
-                ])
+                self.roster[item]['probability'] += \
+                    scaling_target / (len(self.roster) - len(adjustments))
             else:
                 # normalize other probabilities to meet target
                 self.roster[item]['probability'] *= (
@@ -119,6 +114,10 @@ class MaliciousGenerator:
           - repeat: integer passed to the malicious generator.
             Specifies how many batches the generator should make. Should be 1
             packet per batch, for most.
+
+        Returns:
+            python generator object yielding 0 to N CAN packets.
+            A CAN packet is a dict with keys 'timestamp', 'id', and 'data'
 
         Usage: 
             mal.get() is as python generator, a kind of iterable object.
@@ -163,9 +162,17 @@ class MaliciousGenerator:
             Specifies how many batches the generator should make. Should be 1
             packet per batch, for most.
 
+        Returns:
+            python generator object yielding 1 to N CAN packets.
+            A CAN packet is a dict with keys 'timestamp', 'id', and 'data'
+
         Usage:
             Same as for MaliciousGenerator.get(), but with `attack_name`
             argument.
+
+        Raises:
+            TypeError: when attack_name == 'none'
+            KeyError:  when attack_name doesn't match any keys in the roster
         """
         for _ in range(repeat):
             for packet in self.roster[attack_name]['attack'](time_window):
