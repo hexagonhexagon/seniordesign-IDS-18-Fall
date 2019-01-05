@@ -40,7 +40,7 @@ class MaliciousGenerator:
         """Initializes class by importing roster from malicious_generators.
 
         Raises:
-            AssertationError: roster probabilities not set correctly; need == 1
+            AssertionError:: roster probabilities not set correctly; need == 1
         """
         # MAYBE: import multiple modules with malicious_generators
         self.roster = malicious_generators.ROSTER
@@ -53,7 +53,7 @@ class MaliciousGenerator:
         """Checks roster attribute for validity
 
         Raises:
-            AssertationError: roster probabilities not set correctly; need == 1
+            AssertionError:: roster probabilities not set correctly; need == 1
         """
         prob_sum = sum([self.roster[x]['probability'] for x in self.roster])
         assert isclose(prob_sum, 1.0)
@@ -78,7 +78,7 @@ class MaliciousGenerator:
             to set the probability of an entry in the roster.
 
         Raises:
-            AssertationError: if adjustments sum outside [0,1]
+            AssertionError:: if adjustments sum outside [0,1]
 
         Examples:
             >>> mal = MaliciousGenerator()
@@ -87,13 +87,11 @@ class MaliciousGenerator:
         """
         scaling_target = 1 - sum(x for x in adjustments.values())
         assert 0 <= scaling_target <= 1
-        print(scaling_target)
 
         other_sum = sum([
             self.roster[x]['probability'] for x in self.roster
             if x not in adjustments
         ])
-        print(other_sum)
 
         for item in self.roster:
             if item in adjustments:
@@ -117,17 +115,26 @@ class MaliciousGenerator:
         packet should be injected.
 
         Arguments:
-        - repeat: integer passed to the malicious generator.
-          Specifies how many batches the generator should make. Should be 1
-          packet per batch, for most.
+          - time_window: a subscriptable object containing two packets.
+          - repeat: integer passed to the malicious generator.
+            Specifies how many batches the generator should make. Should be 1
+            packet per batch, for most.
+
+        Usage: 
+            mal.get() is as python generator, a kind of iterable object.
+            A single value can be returned using the next() funciton.
+            next() will raise a StopIteration error when the generator exits,
+            unless the `default` argument is set.
+            Another use is `for x in mal.get()` as used in a loop or list
+            comprehension.
 
         Examples:
             >>> mal = MaliciousGenerator()
-            >>> mal.get((pak1,pak2))
-            [{'timestamp': 5,
+            >>> next(mal.get((pak1,pak2)))
+            {'timestamp': 5,
                 'id': 1433,
-                'data': [145, 49, 247, 135, 200, 57, 54, 214]}]
-            >>> mal.get([pak1, pak2], 2)
+                'data': [145, 49, 247, 135, 200, 57, 54, 214]}
+            >>> [x for x in mal.get([pak1, pak2], 2)]
             [{'timestamp': 5,
                 'id': 1433,
                 'data': [145, 49, 247, 135, 200, 57, 54, 214]},
@@ -150,10 +157,15 @@ class MaliciousGenerator:
         packets.
 
         Arguments:
-        - attack_name: string specifying which malicious generator to use
-        - repeat: integer passed to the malicious generator.
+          - time_window: a subscriptable object containing two packets.
+          - attack_name: string specifying which malicious generator to use
+          - repeat: integer passed to the malicious generator.
             Specifies how many batches the generator should make. Should be 1
             packet per batch, for most.
+
+        Usage:
+            Same as for MaliciousGenerator.get(), but with `attack_name`
+            argument.
         """
         for _ in range(repeat):
             for packet in self.roster[attack_name]['attack'](time_window):

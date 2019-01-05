@@ -5,6 +5,12 @@ class.
 Module Constants:
 - ROSTER: a dictionary containing references to each malicious generator
   contained in this module, and the default probabilities associated with each.
+
+Notes:
+    CAN Packet: a dict with 3 keys: timestamp, id, data
+        timestamp is an int representing 0.1 milisecond intervals since start
+        id is an 11-bit integer
+        data is an 8-byte bytes object
 """
 
 # TODO: need a way to communicate with IDS to get info about the CAN bus.
@@ -21,7 +27,7 @@ def random_packet(time_window):
     # new packet timestamp halfway between previous and next
     timestamp = int(
         (time_window[0]['timestamp'] + time_window[1]['timestamp']) / 2)
-    data = [random.getrandbits(8) for _ in range(8)]
+    data = bytes([random.getrandbits(8) for _ in range(8)])
     packet = {'timestamp': timestamp, 'id': new_id, 'data': data}
     yield packet
 
@@ -32,11 +38,13 @@ def flood(time_window):
         time_window: subscriptable object containing two CAN packets
     """
     new_id = 0
-    timestamp = int(
-        (time_window[0]['timestamp'] + time_window[1]['timestamp']) / 2)
-    data = [0, 0, 0, 0, 0, 0, 0, 0]
-    packet = {'timestamp': timestamp, 'id': new_id, 'data': data}
-    for _ in range(21):
+    n_to_make = 21
+    timestamp_step = (time_window[0]['timestamp']
+                    - time_window[1]['timestamp']) / n_to_make
+    data = bytes([0, 0, 0, 0, 0, 0, 0, 0])
+    for ii in range(n_to_make):
+        timestamp = int(time_window[0]['timestamp'] + timestamp_step * ii)
+        packet = {'timestamp': timestamp, 'id': new_id, 'data': data}
         yield packet
 
 
@@ -59,7 +67,7 @@ def spoof(time_window):
     new_id = 0
     timestamp = int(
         (time_window[0]['timestamp'] + time_window[1]['timestamp']) / 2)
-    data = [0, 0, 0, 0, 0, 0, 0, 0]
+    data = bytes([0, 0, 0, 0, 0, 0, 0, 0])
     packet = {'timestamp': timestamp, 'id': new_id, 'data': data}
     yield packet
 
