@@ -157,14 +157,15 @@ class DNNBasedIDS:
         stating if the frame is malicious, and prob_malicious is a float
         describing the probability the frame is malicious.
         """
-        features = {k: np.array(v) for k, v in processed_frame.items()}
+        features = {k: np.array([v]) for k, v in processed_frame.items()}
         input_function = tf.estimator.inputs.numpy_input_fn(
-            features, y=None, batch_size=1)
+            features, y=None, shuffle=False)
         predictions = self._dnn.predict(input_function)
         prediction = list(predictions)[0]
-        is_malicious = bool(prediction['class_ids'][0])
-        prob_malicious = prediction['probabilities'][1]
-        return is_malicious, prob_malicious
+        pred_class = prediction['class_ids'][0]
+        is_malicious = bool(pred_class)
+        confidence = prediction['probabilities'][pred_class]
+        return is_malicious, confidence
 
     def predict(self, input_function):
         """Take an input function for a data set and return whether the frames are malicious or not.
@@ -179,5 +180,5 @@ class DNNBasedIDS:
         describing the probability the frame is malicious.
         """
         predictions = self._dnn.predict(input_function)
-        return map(lambda x: (bool(x['class_ids'][0]), x['probabilities'][1]),
+        return map(lambda x: (bool(x['class_ids'][0]), x['probabilities'][x['class_ids'][0]]),
                    predictions)
