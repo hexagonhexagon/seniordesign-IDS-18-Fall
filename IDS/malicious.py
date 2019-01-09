@@ -7,6 +7,9 @@ Attributes:
     NONE_ROSTER: a partial roster kept in this module, to define the default
     probability for returning nothing on get. This will be merged with the
     roster imported from malicious_generators
+    The malicious generator implementations are being imported from a separate
+    module to allow for easy plug-in ability. Note that this allows for
+    execution of arbitrary code.
 """
 
 import random
