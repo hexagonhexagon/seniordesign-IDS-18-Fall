@@ -290,6 +290,31 @@ def inject_malicious_packets(canlist, malgen):
     labels.append(0)
     return newcanlist, labels
 
+
+
+def id_past(canlist, time_frame=1000):
+    """Calculates the frequency of each unique ID
+    
+    Args:
+        canlist: a list of CAN packets
+        time_frame: distance in milliseconds to check back in time.
+    Returns:
+        A list, for each packet in canlist, containing the number of
+        occurrences of the corresponding ID in the past second.
+    """
+    id_counts = []
+    frames_last_sec = []
+    for frame in canlist:
+        # Get rid of frames older than the time interval
+        frames_last_sec = list(
+            filter(lambda x: frame['timestamp'] - x['timestamp'] < time_frame * 10,
+                   frames_last_sec))
+        # Count occurrences of current frame
+        id_last_sec = sum(1 for x in frames_last_sec if x['id'] == frame['id'])
+        id_counts.append(id_last_sec)
+    return id_counts
+
+
 def generate_feature_lists(canlist, idprobs):
     """Take in a list of CAN messages along with an ID probabilities dictionary and generate the feature lists required for the DNN based IDS.
 
@@ -309,7 +334,9 @@ def generate_feature_lists(canlist, idprobs):
         'relative_entropy': [],
         'system_entropy_change': []
     }
-    frames_last_sec = []
+
+    featurelist['occurrences_in_last_sec'] = id_past(canlist)
+
     observed_idcounts = {}
     observed_numframes = 0
     total_numframes = len(canlist)
@@ -324,18 +351,6 @@ def generate_feature_lists(canlist, idprobs):
                 end='\r')
         id = frame['id']
         featurelist['id'].append(id)
-
-        # Calculate the number of occurrences of the message in the last
-        # second
-        ts = frame['timestamp']
-        # Get rid of frames older than 10000 0.1ms intervals (1 second)
-        frames_last_sec = list(
-            filter(lambda x: ts - x['timestamp'] < 10000, frames_last_sec))
-        num_occurrences_id = 0
-        for old_frame in frames_last_sec:
-            if old_frame['id'] == id:
-                num_occurrences_id += 1
-        featurelist['occurrences_in_last_sec'].append(num_occurrences_id)
 
         observed_numframes += 1
         observed_idcounts.setdefault(id, 0)
@@ -357,7 +372,6 @@ def generate_feature_lists(canlist, idprobs):
                 observed_system_entropy -= p * np.log(p)
         featurelist['system_entropy_change'].append(
             observed_system_entropy - old_system_entropy)
-        frames_last_sec.append(frame)
 
     return featurelist
 
