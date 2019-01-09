@@ -162,8 +162,7 @@ def validate_can_data(canlist):
     if len(canlist) == 0:
         print('The list provided is empty!')
         valid = False
-    for i in range(len(canlist)):
-        frame = canlist[i]
+    for i, frame in enumerate(canlist):
         # Does the frame have all the right keys?
         haskeys = True
         for key in ['id', 'timestamp', 'data']:
@@ -310,13 +309,48 @@ def id_past(canlist, time_frame=1000):
     for frame in canlist:
         frame_time = frame['timestamp']
         # Get rid of frames older than the time interval
-        frames_last_sec = list(filter(
-            lambda x: frame_time - x['timestamp'] < time_frame * 10,
-            frames_last_sec))
+        frames_last_sec = list(
+            filter(lambda x: frame_time - x['timestamp'] < time_frame * 10,
+                   frames_last_sec))
         # Count occurrences of current frame
         id_last_sec = sum(1 for x in frames_last_sec if x['id'] == frame['id'])
         id_counts.append(id_last_sec)
     return id_counts
+
+
+def id_entropy(canlist, idprobs):
+    """Calculate relative and system change entropy.
+
+    Returns:
+        Two lists, containing the calculated relative and system change
+        entropy, for each item in canlist
+    """
+
+    observed_idcounts = {}
+    observed_system_entropy = 0
+    e_relative = []
+    e_system = []
+
+    for count, frame in enumerate(canlist):
+        observed_idcounts.setdefault(frame['id'], 0)
+        observed_idcounts[frame['id']] += 1
+        # Calculate relative entropy of message ID
+        p = observed_idcounts[frame['id']] / count
+        q = idprobs.get(frame['id'], 0)
+        if q == 0:
+            e_relative.append(np.Infinity)
+        else:
+            e_relative.append(p * np.log(p / q))
+
+        # Calculate change in system entropy
+        old_system_entropy = observed_system_entropy
+        observed_system_entropy = 0
+        for _, v in observed_idcounts.items():
+            p = v / count
+            with np.errstate(divide='ignore'):
+                observed_system_entropy -= p * np.log(p)
+        e_system.append(observed_system_entropy - old_system_entropy)
+    return e_relative, e_system
 
 
 def generate_feature_lists(canlist, idprobs):
@@ -340,42 +374,9 @@ def generate_feature_lists(canlist, idprobs):
     }
 
     featurelist['occurrences_in_last_sec'] = id_past(canlist)
-
-    observed_idcounts = {}
-    observed_numframes = 0
-    total_numframes = len(canlist)
-    observed_system_entropy = 0
-
-    for frame in canlist:
-        if observed_numframes % 100 == 0:
-            print(
-                '{}/{} frames processed ({}%)'.format(
-                    observed_numframes, total_numframes,
-                    round(100 * observed_numframes / total_numframes)),
-                end='\r')
-        id = frame['id']
-        featurelist['id'].append(id)
-
-        observed_numframes += 1
-        observed_idcounts.setdefault(id, 0)
-        observed_idcounts[id] += 1
-        # Calculate relative entropy of message ID
-        p = observed_idcounts[id] / observed_numframes
-        q = idprobs.get(id, 0)
-        if q == 0:
-            featurelist['relative_entropy'].append(np.Infinity)
-        else:
-            featurelist['relative_entropy'].append(p * np.log(p / q))
-
-        # Calculate change in system entropy
-        old_system_entropy = observed_system_entropy
-        observed_system_entropy = 0
-        for _, v in observed_idcounts.items():
-            p = v / observed_numframes
-            with np.errstate(divide='ignore'):
-                observed_system_entropy -= p * np.log(p)
-        featurelist['system_entropy_change'].append(observed_system_entropy -
-                                                    old_system_entropy)
+    e_relative, e_system = id_entropy(canlist, idprobs)
+    featurelist['relative_entropy'] = e_relative
+    featurelist['system_entropy_change'] = e_system
 
     return featurelist
 
