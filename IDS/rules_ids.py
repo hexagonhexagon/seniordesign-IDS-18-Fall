@@ -11,6 +11,7 @@ Notes:
     arbitrary code.
 """
 
+import preprocessor
 import rules
 
 def prepare():
@@ -26,7 +27,7 @@ def test(can_frame):
         can_frame: a single or list of CAN packets
 
     Returns:
-        Boolean value
+        Tuple (bool, str)
     """
     results = []
     for rule in rules.ROSTER.values():
@@ -41,7 +42,7 @@ def test_series(canlist):
         canlist: a single or list of CAN packets
 
     Returns:
-        List of boolean values, corresponding to packets in input list
+        List of tuples (bool, str), corresponding to packets in input list
     """
 
     results = []

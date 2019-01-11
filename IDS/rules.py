@@ -9,8 +9,7 @@ Notes:
 """
 
 from preprocessor import id_past
-
-# TODO: How to get infor for whitelists?
+from rule_abc import Rule
 
 
 def id_whitelist(canlist):
@@ -56,6 +55,11 @@ def message_sequence(canlist):
     This rule compares the input list against a list of known valid sequences.
     """
     pass
+
+
+PREP = {
+
+}
 
 
 ROSTER = {
