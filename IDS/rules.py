@@ -31,8 +31,6 @@ class MessageFrequency(Rule):
         CAN Bus runs at 1e6 baud. So, bandwidth is about 10000 packets per
         second.
     """
-    def __init__(self, profile_id):
-        super().__init__(profile_id)
 
     def test(self, canlist):
         # rule thresholds

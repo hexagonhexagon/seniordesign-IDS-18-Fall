@@ -26,8 +26,6 @@ class RulesIDS:
         """
         self.profile_id = profile_id
         self.roster = rules.ROSTER
-        if self.profile_id:
-            self.prepare()
 
     def prepare(self, canlist=None, set_profile_id=None):
         """Prepare rule heuristics with working data
