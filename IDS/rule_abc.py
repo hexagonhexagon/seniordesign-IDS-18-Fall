@@ -1,6 +1,8 @@
 """Rule Abstract Base Class"""
 
 from abc import ABC, abstractmethod
+import pathlib
+
 
 class Rule(ABC):
     """Rule Abstract Base Class
@@ -20,12 +22,18 @@ class Rule(ABC):
         provide declarations for these items.
     """
 
+    # use this file as path reference
+    # MAYBE: make a file in project root to define global constants, such as
+    # this.
+    SAVE_PATH = pathlib.Path(__file__).parent.parent / 'savedata/rule-data'
+
     def __init__(self, profile_id):
         # Define attributes all rules should have
+        if not profile_id:
+            raise ValueError("profile_id can not be empty")
         self.profile_id = profile_id
         # Initialize super-class
         super().__init__()
-        self.prepare()
 
     @abstractmethod
     def test(self, canlist):
@@ -50,7 +58,7 @@ class Rule(ABC):
         This method should be implemented as needed.
         Accepts a list of CAN frames and a string identifier for the vehicle
         profile. Analyze a list of CAN packets to provide working data for a
-        corresponding Rule Function. 
+        corresponding Rule Function.
         Working data should be saved to a JSON file named after the class
         writing it (e.g. Whitelist.json), in a subfolder of the “savedata”
         directory, corresponding to the vehicle profile (e.g. Ford_Fusion_2018)
@@ -69,4 +77,3 @@ class Rule(ABC):
 
         """
         pass
-
