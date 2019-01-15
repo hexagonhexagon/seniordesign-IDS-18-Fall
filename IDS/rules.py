@@ -1,6 +1,8 @@
 """Rules Library
 provides rule inplementations for the rules based IDS
 
+See rule_abc.Rule for definitions of how Rules should behave
+
 Notes:
     CAN Packet: a dict with 3 keys: timestamp, id, data
         timestamp is an int representing 0.1 milisecond intervals since start
@@ -8,13 +10,31 @@ Notes:
         data is an 8-byte bytes object
 """
 
+import json
 from preprocessor import id_past
 from rule_abc import Rule
 
 
 class ID_Whitelist(Rule):
     """Compares frame ID to whitelist"""
-    pass
+
+    def test(self, canlist):
+        """Check against whitelist"""
+        return [x['id'] in self.whitelist for x in canlist]
+
+    def prepare(self, canlist=None):
+        """Compile whitelist from CAN data, or import existing profile.
+        See Rule.prepare
+        """
+        if canlist:
+            # make new set of valid ID's
+            self.whitelist = set(x['id'] for x in canlist)
+            # self.save_file defined by Rule (parent)
+            with self.save_file.open('w') as prof:
+                json.dump({'whitelist': self.whitelist}, prof)
+        else:
+            # load existing profile data
+            super()._load()
 
 
 class TimeInterval(Rule):
@@ -57,11 +77,6 @@ class MessageSequence(Rule):
     This rule compares the input list against a list of known valid sequences.
     """
     pass
-
-
-PREP = {
-
-}
 
 
 ROSTER = {

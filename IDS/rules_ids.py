@@ -11,7 +11,6 @@ Notes:
     arbitrary code.
 """
 
-import preprocessor
 import rules
 import rule_abc
 
@@ -71,7 +70,7 @@ class RulesIDS:
     def test(self, can_frame):
         """Examine single CAN packet according to rules in the roster
         Args:
-            can_frame: a single or list of CAN packets
+            can_frame: a single CAN packet
 
         Returns:
             Tuple (bool, str)
@@ -88,7 +87,7 @@ class RulesIDS:
     def test_series(self, canlist):
         """Examine list of CAN packets according to rules in the roster
         Args:
-            canlist: a single or list of CAN packets
+            canlist: a list of CAN packets
 
         Returns:
             List of tuples (bool, str), corresponding to packets in input list
