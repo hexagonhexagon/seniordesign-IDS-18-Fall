@@ -103,8 +103,12 @@ class MessageFrequency(Rule):
                 c_max = max(c_list)
                 self.frequencies[can_id] = (c_min - c_std, c_max + c_std)
 
+            savedata = {
+                'frequencies': self.frequencies,
+                'time_frame': self.time_frame
+            }
             with self.save_file.open('w') as prof:
-                json.dump({'frequencies': self.frequencies}, prof)
+                json.dump(savedata, prof)
         else:
             super()._load()
 
@@ -114,12 +118,55 @@ class MessageSequence(Rule):
     CAN packets of valid ID's are typically sent in a predicable sequence.
     This rule compares the input list against a list of known valid sequences.
     """
-    pass
+
+    def __init__(self, profile_id, length=5):
+        """Init Message Sequence
+        Length in number of packets
+        """
+        super().__init__(self, profile_id)
+        self.length = length
+
+    def test(self, canlist):
+        """Check packet sequences
+        Marks true for first packets within sequence length.
+        """
+        for ii, _ in enumerate(canlist):
+            if ii < self.length:
+                yield True
+                continue
+            seq = tuple(
+                canlist[ii - x]['id'] for x in reversed(range(0, self.length)))
+            yield seq in self.sequences
+
+    def prepare(self, canlist=None):
+        """Create set of allowed sequences
+        The set will be represented as a python set containing tuples.
+        """
+        if canlist:
+            self.sequences = set()
+            for ii, _ in enumerate(canlist):
+                if ii < self.length:
+                    continue
+                seq = tuple(canlist[ii - x]['id']
+                            for x in reversed(range(0, self.length)))
+                self.sequences.add(seq)
+
+            savedata = {
+                # can't save a set with JSON
+                'sequences': list(self.sequences),
+                'length': self.length
+            }
+            with self.save_file.open('w') as prof:
+                json.dump(savedata, prof)
+        else:
+            super()._load()
+            # set lookups are much faster than lists: O(1) vs O(n)
+            self.sequences = set(tuple(x) for x in self.sequences)
 
 
 ROSTER = {
     'ID_Whitelist': ID_Whitelist,
-    'TimeInterval': TimeInterval,
+    # 'TimeInterval': TimeInterval,
     'MessageFrequency': MessageFrequency,
     'MessageSequence': MessageSequence
 }
