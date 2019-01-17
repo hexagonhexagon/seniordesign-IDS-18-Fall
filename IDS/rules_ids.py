@@ -78,9 +78,9 @@ class RulesIDS:
             that failed the packet. Else, str is None
         """
         for name, rule in self.roster.items():
-            # Each rule returns a boolean list for the packets sent in
-            result = rule.test([can_frame])
-            if not result[0]:
+            # Each rule is a generator yielding booleans for a list sent in.
+            result = next(rule.test([can_frame]))
+            if not result:
                 return False, name
         return True, None
 
@@ -90,23 +90,24 @@ class RulesIDS:
             canlist: a list of CAN packets
 
         Returns:
-            List of tuples (bool, str), corresponding to packets in input list
+            A python generator yieldinga tuples (bool, name).
+            Each tuple corresponds to a packet in the input list.
             str is the name of the rule to first fail a given packet, or None
             if passed.
         """
+        # Each rule is a generator yielding bools for the packets sent in
+        results = {
+            name: rule.test(canlist)
+            for name, rule in self.roster.items()
+        }
 
-        results = []
-        for name, rule in self.roster.items():
-            # Each rule returns a boolean list for the packets sent in
-            for ii, val in enumerate(rule.test(canlist)):
-                if ii >= len(results):
-                    if val:
-                        results.append((val, None))
-                    else:
-                        results.append((val, name))
-                else:
-                    # if first fail
-                    if not val and results[ii][0]:
-                        results[ii] = (val, name)
-
-        return results
+        for _ in canlist:
+            yielded = False
+            for name, rule in results:
+                # next() returns next generator item
+                if not next(rule):
+                    yielded = True
+                    yield False, name
+                    break
+            if not yielded:
+                yield True, None

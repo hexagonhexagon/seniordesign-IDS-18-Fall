@@ -20,8 +20,11 @@ class ID_Whitelist(Rule):
     """Compares frame ID to whitelist"""
 
     def test(self, canlist):
-        """Check against whitelist"""
-        return [x['id'] in self.whitelist for x in canlist]
+        """Check against whitelist
+        see Rule.test
+        """
+        for can_id in (x['id'] for x in canlist):
+            yield can_id in self.whitelist
 
     def prepare(self, canlist=None):
         """Compile whitelist from CAN data, or import existing profile.
@@ -60,24 +63,25 @@ class MessageFrequency(Rule):
         self.time_frame = time_frame
 
     def test(self, canlist):
-        """Check that packet occurrence is within acceptable frequencies."""
+        """Check that packet occurrence is within acceptable frequencies.
+        see Rule.test
+        """
         # return True if sample is too small
         if len(canlist) < self.time_frame * 10:
-            return [True for x in canlist]
+            yield from (True for x in canlist)
+            return
 
         # check ID appearance frequency
         id_counts = preprocessor.id_past(canlist, self.time_frame)
-        results = []
-        for ii, can_id in enumerate(x['id'] for x in canlist):
+        for count, can_id in zip(id_counts, (x['id'] for x in canlist)):
             if can_id not in self.frequencies:
-                results.append(False)
+                yield False
                 continue
             low, high = self.frequencies[can_id]
-            if low <= id_counts[ii] <= high:
-                results.append(True)
+            if low <= count <= high:
+                yield True
             else:
-                results.append(False)
-        return results
+                yield False
 
     def prepare(self, canlist=None):
         """Create frequency range dictionary
@@ -91,8 +95,8 @@ class MessageFrequency(Rule):
         if canlist:
             id_counts = preprocessor.id_past(canlist, self.time_frame)
             self.frequencies = {x['id']: list() for x in canlist}
-            for ii, can_id in enumerate(x['id'] for x in canlist):
-                self.frequencies[can_id].append(id_counts[ii])
+            for count, can_id in zip(id_counts, (x['id'] for x in canlist)):
+                self.frequencies[can_id].append(count)
             for can_id, c_list in self.frequencies.items():
                 c_std = stdev(c_list)
                 c_min = min(c_list)

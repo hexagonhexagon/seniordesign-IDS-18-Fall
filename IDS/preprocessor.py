@@ -304,15 +304,14 @@ def inject_malicious_packets(canlist, malgen):
 
 def id_past(canlist, time_frame=1000):
     """Calculates the frequency of each unique ID
-    
+
     Args:
         canlist: a list of CAN packets
         time_frame: distance in milliseconds to check back in time.
     Returns:
-        A list, for each packet in canlist, containing the number of
+        A python generator, for each packet in canlist, yielding the number of
         occurrences of the corresponding ID in the past second.
     """
-    id_counts = []
     frames_last_sec = []
     for frame in canlist:
         frame_time = frame['timestamp']
@@ -322,8 +321,7 @@ def id_past(canlist, time_frame=1000):
                    frames_last_sec))
         # Count occurrences of current frame
         id_last_sec = sum(1 for x in frames_last_sec if x['id'] == frame['id'])
-        id_counts.append(id_last_sec)
-    return id_counts
+        yield id_last_sec
 
 
 def id_entropy(canlist, idprobs):
@@ -382,7 +380,7 @@ def generate_feature_lists(canlist, idprobs):
         'system_entropy_change': []
     }
 
-    featurelist['occurrences_in_last_sec'] = id_past(canlist)
+    featurelist['occurrences_in_last_sec'] = [x for x in id_past(canlist)]
     e_relative, e_system = id_entropy(canlist, idprobs)
     featurelist['relative_entropy'] = e_relative
     featurelist['system_entropy_change'] = e_system

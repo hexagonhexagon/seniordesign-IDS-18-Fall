@@ -54,9 +54,10 @@ class Rule(ABC):
         If any working data is needed, it should be defined by implementing the
         "prepare" method.
 
-        Returns: [ bool, ... ]
+        Returns: python generator: bool, ...
             The classification is a list of boolean values. The function should
             return one classification for each CAN frame received in the list.
+            This list should be returned as a python generator object.
 
         Examples:
             >>> MyRule.test([pak1, pak2, pak3])
