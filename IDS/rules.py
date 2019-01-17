@@ -11,8 +11,9 @@ Notes:
 """
 
 import json
-from preprocessor import id_past
+import preprocessor
 from rule_abc import Rule
+from statistics import stdev
 
 
 class ID_Whitelist(Rule):
@@ -48,27 +49,60 @@ class MessageFrequency(Rule):
     """Rule to detect DOS attacks
     This rule works by checking ID frequency and CAN bus bandwidth saturation.
     Notes:
-        CAN Bus runs at 1e6 baud. So, bandwidth is about 10000 packets per
-        second.
+        CAN packet timestamp is in 0.1 milisecond intervals
     """
 
+    def __init__(self, profile_id, time_frame=1000):
+        """Init MessageFrequency Rule
+        Set Time Window in miliseconds
+        """
+        super().__init__(self, profile_id)
+        self.time_frame = time_frame
+
     def test(self, canlist):
-        # rule thresholds
-        size_req = 10
-        max_id_per_sec = 300
-
-        # TODO: check if there is better representation of results than list of
-        # booleans
-
+        """Check that packet occurrence is within acceptable frequencies."""
         # return True if sample is too small
-        if len(canlist) < size_req:
+        if len(canlist) < self.time_frame * 10:
             return [True for x in canlist]
 
         # check ID appearance frequency
-        # TODO: check according to known frequency distrobutions
-        id_counts = id_past(canlist)
-        results = [x <= max_id_per_sec for x in id_counts]
+        id_counts = preprocessor.id_past(canlist, self.time_frame)
+        results = []
+        for ii, can_id in enumerate(x['id'] for x in canlist):
+            if can_id not in self.frequencies:
+                results.append(False)
+                continue
+            low, high = self.frequencies[can_id]
+            if low <= id_counts[ii] <= high:
+                results.append(True)
+            else:
+                results.append(False)
         return results
+
+    def prepare(self, canlist=None):
+        """Create frequency range dictionary
+        Frequency dict keys are CAN packet ID's.
+        Frequemcy range is Observed range +- Std.Dev. This is stored as a
+        tuple.
+
+        if no CAN data provided, load existing profile data.
+        see Rule.prepare
+        """
+        if canlist:
+            id_counts = preprocessor.id_past(canlist, self.time_frame)
+            self.frequencies = {x['id']: list() for x in canlist}
+            for ii, can_id in enumerate(x['id'] for x in canlist):
+                self.frequencies[can_id].append(id_counts[ii])
+            for can_id, c_list in self.frequencies.items():
+                c_std = stdev(c_list)
+                c_min = min(c_list)
+                c_max = max(c_list)
+                self.frequencies[can_id] = (c_min - c_std, c_max + c_std)
+
+            with self.save_file.open('w') as prof:
+                json.dump({'frequencies': self.frequencies}, prof)
+        else:
+            super()._load()
 
 
 class MessageSequence(Rule):
