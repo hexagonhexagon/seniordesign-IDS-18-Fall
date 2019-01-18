@@ -13,7 +13,7 @@ Notes:
 import json
 import preprocessor
 from rule_abc import Rule
-from statistics import stdev
+from statistics import stdev, mean
 
 
 class ID_Whitelist(Rule):
@@ -99,9 +99,9 @@ class MessageFrequency(Rule):
                 self.frequencies[can_id].append(count)
             for can_id, c_list in self.frequencies.items():
                 c_std = stdev(c_list)
-                c_min = min(c_list)
-                c_max = max(c_list)
-                self.frequencies[can_id] = (c_min - c_std, c_max + c_std)
+                c_mean = mean(c_list)
+                self.frequencies[can_id] = (c_mean - 2 * c_std,
+                                            c_mean + 2 * c_std)
 
             savedata = {
                 'frequencies': self.frequencies,
