@@ -4,11 +4,8 @@ from ast import literal_eval
 import io
 import json
 
-# Make the imports work by adding the IDS folder to where it searches for
-# imports.
-sys.path.append(os.path.abspath('../IDS'))
-import preprocessor as dp
-from malicious import MaliciousGenerator
+import IDS.preprocessor as dp
+from IDS.malicious import MaliciousGenerator
 
 def test_parse_traffic():
     # Check parse_traffic
