@@ -11,8 +11,8 @@ Notes:
     arbitrary code.
 """
 
-import rules
-import rule_abc
+import IDS.rules
+import IDS.rule_abc
 
 
 class RulesIDS:
@@ -24,7 +24,7 @@ class RulesIDS:
         be called separately
         """
         self.profile_id = profile_id
-        self.roster = rules.ROSTER
+        self.roster = IDS.rules.ROSTER
 
     def prepare(self, canlist=None, set_profile_id=None):
         """Prepare rule heuristics with working data
@@ -59,7 +59,7 @@ class RulesIDS:
         # rule_abc.Rule
         new_roster = {}
         for name, item in self.roster.items():
-            if not issubclass(item, rule_abc.Rule):  # Necessary?
+            if not issubclass(item, IDS.rule_abc.Rule):  # Necessary?
                 raise ValueError("{}: {} is not a Rule.".format(
                     name, type(item)))
             rule_instance = item(self.profile_id)

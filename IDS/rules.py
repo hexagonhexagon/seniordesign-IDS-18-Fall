@@ -13,8 +13,8 @@ Notes:
 import collections
 import json
 import numpy as np
-import preprocessor
-from rule_abc import Rule
+import IDS.preprocessor
+from IDS.rule_abc import Rule
 from statistics import stdev, mean
 
 
@@ -178,7 +178,7 @@ class MessageFrequency(Rule):
             return
 
         # check ID appearance frequency
-        id_counts = preprocessor.id_past(canlist, self.time_frame)
+        id_counts = IDS.preprocessor.id_past(canlist, self.time_frame)
         for count, can_id in zip(id_counts, (x['id'] for x in canlist)):
             if can_id not in self.frequencies:
                 yield False
@@ -199,7 +199,7 @@ class MessageFrequency(Rule):
         see Rule.prepare
         """
         if canlist:
-            id_counts = preprocessor.id_past(canlist, self.time_frame)
+            id_counts = IDS.preprocessor.id_past(canlist, self.time_frame)
             self.frequencies = collections.defaultdict(list())
             for count, can_id in zip(id_counts, (x['id'] for x in canlist)):
                 self.frequencies[can_id].append(count)
