@@ -322,7 +322,7 @@ def id_past(canlist, time_frame=1):
 
         # Get rid of frames older than the time interval
         tdiff = frame_q[-1]['timestamp'] - frame_q[0]['timestamp']
-        while tdiff > time_frame * 1e4:
+        while tdiff >= time_frame * 1e4:
             frame_q.popleft()
             tdiff = frame_q[-1]['timestamp'] - frame_q[0]['timestamp']
 
