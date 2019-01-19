@@ -26,6 +26,7 @@ load_feature_lists -- Take the path to a feature list file and return the
 feature lists from the file.
 """
 
+import collections
 import csv
 import json
 import os.path
@@ -302,26 +303,32 @@ def inject_malicious_packets(canlist, malgen):
     return newcanlist, labels
 
 
-def id_past(canlist, time_frame=1000):
+def id_past(canlist, time_frame=1):
     """Calculates the frequency of each unique ID
 
     Args:
         canlist: a list of CAN packets
-        time_frame: distance in milliseconds to check back in time.
+        time_frame: float distance in seconds to check back in time.
     Returns:
-        A python generator, for each packet in canlist, yielding the number of
-        occurrences of the corresponding ID in the past second.
+        A python generator, for each packet in canlist, yielding the frequency
+        of the corresponding ID.
+
+    Notes:
+        CAN timestamps are in units of 0.1 miliseconds
     """
-    frames_last_sec = []
+    frame_q = collections.deque()
     for frame in canlist:
-        frame_time = frame['timestamp']
+        frame_q.append(frame)
+
         # Get rid of frames older than the time interval
-        frames_last_sec = list(
-            filter(lambda x: frame_time - x['timestamp'] < time_frame * 10,
-                   frames_last_sec))
+        tdiff = frame_q[-1]['timestamp'] - frame_q[0]['timestamp']
+        while tdiff > time_frame * 1e4:
+            frame_q.popleft()
+            tdiff = frame_q[-1]['timestamp'] - frame_q[0]['timestamp']
+
         # Count occurrences of current frame
-        id_last_sec = sum(1 for x in frames_last_sec if x['id'] == frame['id'])
-        yield id_last_sec
+        id_last_sec = sum(1 for x in frame_q if x['id'] == frame['id'])
+        yield id_last_sec / time_frame
 
 
 def id_entropy(canlist, idprobs):
