@@ -1,8 +1,8 @@
 """Rule Abstract Base Class"""
 
-from abc import ABC, abstractmethod
 import json
 import pathlib
+from abc import ABC, abstractmethod
 
 
 class Rule(ABC):
@@ -32,7 +32,7 @@ class Rule(ABC):
         Raises:
             ValueError: if profile_id is not a valid python identifier.
         """
-        if not profile_id.is_identifier():
+        if not profile_id.isidentifier():
             raise ValueError("profile_id needs to be valid python identifier")
         self.profile_id = profile_id
         super().__init__()
@@ -113,3 +113,18 @@ class Rule(ABC):
         # unpack loaded JSON into class instance
         for name, val in attr_dict.items():
             setattr(self, name, val)
+
+    def _save(self, savedata):
+        """Helper function to save class data, and automatically create parent
+        directories if not existant.
+        Args:
+            savedata: dictionary representing class attributes to save.
+                Should be of the form {attr_name: data}
+        Note:
+            JSON can only save certain base file types, such as dicts or lists.
+            Other types would need a custom encoder function.
+        """
+
+        self.save_file.parent.mkdir(parents=True, exist_ok=True)
+        with self.save_file.open('w') as prof:
+            json.dump(savedata, prof)
