@@ -35,12 +35,13 @@ class ID_Whitelist(Rule):
         if canlist:
             # make new set of valid ID's
             self.whitelist = set(x['id'] for x in canlist)
-            # self.save_file defined by Rule (parent)
-            with self.save_file.open('w') as prof:
-                json.dump({'whitelist': self.whitelist}, prof)
+            savedata = {'whitelist': self.whitelist}
+            super()._save(savedata)
         else:
             # load existing profile data
             super()._load()
+            # JSON doesn't support sets
+            self.whitelist = set(self.whitelist)
 
 
 class TimeInterval(Rule):
@@ -142,8 +143,7 @@ class TimeInterval(Rule):
                 'bins': self.bins,
                 'valid_bins': self.valid_bins,
             }
-            with self.save_file.open('w') as prof:
-                json.dump(savedata, prof)
+            super()._save(savedata)
         else:
             super()._load()
             # JSON doesn't support python sets
@@ -214,8 +214,7 @@ class MessageFrequency(Rule):
                 'frequencies': self.frequencies,
                 'time_frame': self.time_frame
             }
-            with self.save_file.open('w') as prof:
-                json.dump(savedata, prof)
+            super()._save(savedata)
         else:
             super()._load()
 
@@ -267,8 +266,7 @@ class MessageSequence(Rule):
                 'sequences': list(self.sequences),
                 'length': self.length
             }
-            with self.save_file.open('w') as prof:
-                json.dump(savedata, prof)
+            super()._save(savedata)
         else:
             super()._load()
             # set lookups are much faster than lists: O(1) vs O(n)
