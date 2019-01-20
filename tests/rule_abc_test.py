@@ -4,10 +4,12 @@ Note:
     pytest searches for test_* functions at the module level, or within Test*
     classes.
     So, in this file, classes inheriting from Rule, can't have a name of Test*
+
+    At least when running pytest, relative paths start in pytest's working
+    directory. using pathlib helps avoid this confusion
 """
 
-import json
-import os
+import pathlib
 
 from IDS.rule_abc import Rule
 
@@ -21,10 +23,10 @@ SAMPLE = [{
     'data': b'\x1c/\x1e/p\x17p\x17'
 }]
 
-
 #--------------------#
 #  Test Basic Usage  #
 #--------------------#
+
 
 class DummyCl(Rule):
     """Dummy rule for testing minimal usage of the class"""
@@ -44,6 +46,7 @@ def test_dummy():
 #  Test Data Loading  #
 #---------------------#
 
+
 class LoadCl(Rule):
     """Test Rule._load()
     Can't define as a Test* class, since Rule requires a test() method.
@@ -55,9 +58,8 @@ class LoadCl(Rule):
 
     def prepare(self, canlist=None):
         if canlist:
-            with self.save_file.open('w') as prof:
-                savedata = {'asdf': [x['id'] for x in canlist]}
-                json.dump(savedata, prof)
+            savedata = {'asdf': [x['id'] for x in canlist]}
+            super()._save(savedata)
         else:
             super()._load()
 
@@ -67,9 +69,10 @@ def test_load():
     asdf = LoadCl('test_load')
     asdf.prepare(SAMPLE)
     # check that save file was created correctly
-    assert os.path.isfile('../savedata/test_load/LoadCl.json')
+    sample_path = pathlib.Path(__file__).parent.parent / \
+        'savedata/rule-profiles/test_load/LoadCl.json'
+    assert sample_path.is_file()
 
     # load savedata
     asdf.prepare()
     assert all(asdf.test(SAMPLE))
-
