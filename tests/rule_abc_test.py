@@ -32,12 +32,22 @@ class DummyCl(Rule):
     """Dummy rule for testing minimal usage of the class"""
 
     def test(self, canlist):
-        for _ in canlist:
-            yield False
+        for pak in canlist:
+            yield pak['id'] != pak['id']
 
 
 def test_dummy():
+    # profile_id must be a valid python identifier
+    try:
+        dum = DummyCl('FSD&)*( ')
+    except ValueError:
+        pass
+    else:
+        assert False
+
     dum = DummyCl('test_dummy')
+    # check that prepare() can be called despite not being implemented by the
+    # child
     dum.prepare()
     assert not any(dum.test(SAMPLE))
 
@@ -58,7 +68,8 @@ class LoadCl(Rule):
 
     def prepare(self, canlist=None):
         if canlist:
-            savedata = {'asdf': [x['id'] for x in canlist]}
+            self.asdf = [x['id'] for x in canlist]
+            savedata = {'asdf': self.asdf}
             super()._save(savedata)
         else:
             super()._load()
@@ -66,13 +77,30 @@ class LoadCl(Rule):
 
 def test_load():
     """Test Rule._load()"""
-    asdf = LoadCl('test_load')
-    asdf.prepare(SAMPLE)
-    # check that save file was created correctly
     sample_path = pathlib.Path(__file__).parent.parent / \
         'savedata/rule-profiles/test_load/LoadCl.json'
+    # delete any existing file
+    try:
+        sample_path.unlink()
+    except FileNotFoundError:
+        pass
+
+    asdf = LoadCl('test_load')
+    try:
+        asdf.prepare()
+    except FileNotFoundError:
+        pass
+    else:
+        assert False
+
+    asdf.prepare(SAMPLE)
+    # check that save file was created correctly
     assert sample_path.is_file()
 
     # load savedata
+    asdf = LoadCl('test_load')
     asdf.prepare()
     assert all(asdf.test(SAMPLE))
+    # remove sample file (check out pytest fixtures for this)
+    sample_path.unlink()
+    sample_path.parent.rmdir()
