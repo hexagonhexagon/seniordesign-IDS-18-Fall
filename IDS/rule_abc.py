@@ -107,6 +107,9 @@ class Rule(ABC):
             This allows for execution of arbitrary code
             This method is marked as private, because it is intented to only be
             used by child classes.
+        
+        Raises:
+            FileNotFoundError
         """
         with self.save_file.open() as prof:
             attr_dict = json.load(prof)

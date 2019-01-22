@@ -13,6 +13,7 @@ Notes:
 
 import IDS.rules
 import IDS.rule_abc
+import collections.abc
 
 
 class RulesIDS:
@@ -76,7 +77,13 @@ class RulesIDS:
             Tuple (bool, str)
             Returns on the first rule to fail, with str as the name of the rule
             that failed the packet. Else, str is None
+
+        Raises:
+            TypeError: if can_frame isn't like a dict
         """
+        if not isinstance(can_frame, collections.abc.Mapping):
+            raise TypeError('can_frame must be like a dictionary')
+
         for name, rule in self.roster.items():
             # Each rule is a generator yielding booleans for a list sent in.
             result = next(rule.test([can_frame]))
@@ -94,7 +101,13 @@ class RulesIDS:
             Each tuple corresponds to a packet in the input list.
             str is the name of the rule to first fail a given packet, or None
             if passed.
+
+        Raises:
+            TypeError: if canlist isn't like a list
         """
+        if not isinstance(canlist, collections.abc.Sequence):
+            raise TypeError('canlist must be like a list')
+
         # Each rule is a generator yielding bools for the packets sent in
         results = {
             name: rule.test(canlist)
@@ -103,7 +116,7 @@ class RulesIDS:
 
         for _ in canlist:
             yielded = False
-            for name, rule in results:
+            for name, rule in results.items():
                 # next() returns next generator item
                 if not next(rule):
                     yielded = True
