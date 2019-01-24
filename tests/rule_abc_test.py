@@ -8,8 +8,10 @@ Note:
     At least when running pytest, relative paths start in pytest's working
     directory. using pathlib helps avoid this confusion
 """
+# pylint: disable=redefined-outer-name
 
 import pathlib
+import pytest
 
 from IDS.rule_abc import Rule
 
@@ -38,12 +40,8 @@ class DummyCl(Rule):
 
 def test_dummy():
     # profile_id must be a valid python identifier
-    try:
+    with pytest.raises(ValueError):
         dum = DummyCl('FSD&)*( ')
-    except ValueError:
-        pass
-    else:
-        assert False
 
     dum = DummyCl('test_dummy')
     # check that prepare() can be called despite not being implemented by the
@@ -86,12 +84,8 @@ def test_load():
         pass
 
     asdf = LoadCl('test_load')
-    try:
+    with pytest.raises(FileNotFoundError):
         asdf.prepare()
-    except FileNotFoundError:
-        pass
-    else:
-        assert False
 
     asdf.prepare(SAMPLE)
     # check that save file was created correctly

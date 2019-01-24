@@ -3,11 +3,11 @@ Note:
     pytest searches for test_* functions at the module level, or within Test*
     classes.
 """
+# pylint: disable=redefined-outer-name
 
 import pytest
 
 import tests.rule_abc_test
-from IDS.rule_abc import Rule
 from IDS.rules_ids import RulesIDS
 
 TEST_ROSTER = {
@@ -16,26 +16,17 @@ TEST_ROSTER = {
 }
 
 
-@pytest.fixture(scope='module')
-def sample_canlist():
-    """Get Sample CAN Data for testing
-    As it is, there's no point making this a fixture.
-    """
-    # for now just use the 2 packets in rule_abc_test
-    return tests.rule_abc_test.SAMPLE
-
-
 @pytest.fixture  # default scope is 'function'
-def prepared_rules_ids(sample_canlist):
+def prepared_rules_ids(canlist_good):
     """Create a RulesIDS with prepared rules."""
     rul = RulesIDS('test_preload')
     rul.roster = TEST_ROSTER
-    rul.prepare(sample_canlist)
+    rul.prepare(canlist_good)
     return rul
 
 
 # look into pytest incremental testing
-def test_prepare_save(sample_canlist):
+def test_prepare_save(canlist_good):
     """Test RuleIDS.prepare for accepting data
     Tests:
         - profile ID must be set before prepare() can run.
@@ -45,22 +36,15 @@ def test_prepare_save(sample_canlist):
 
     # test no name
     rul.roster = TEST_ROSTER
-    try:
-        rul.prepare(sample_canlist)
-    except ValueError:
-        pass
-    else:
-        assert False
+    with pytest.raises(ValueError):
+        rul.prepare(canlist_good)
+
     rul.profile_id = 'test'
 
     # test bad roster
     rul.roster = {'asdf': object}
-    try:
-        rul.prepare(sample_canlist)
-    except ValueError:
-        pass
-    else:
-        assert False
+    with pytest.raises(ValueError):
+        rul.prepare(canlist_good)
 
 
 # NOTE: vague test; maybe useless?
@@ -75,33 +59,26 @@ def test_prepare_load(prepared_rules_ids):
     # Can't know if any rules have working data or not.
 
 
-def test_test(prepared_rules_ids, sample_canlist):
-    single_frame = sample_canlist[0]
+def test_test(prepared_rules_ids, canlist_good):
+    single_frame = canlist_good[0]
     # test bad return
     # 'dummy' rule always returns False
     assert prepared_rules_ids.test(single_frame) == (False, 'dummy')
-    try:
-        prepared_rules_ids.test(sample_canlist)
-    except TypeError:  # TODO: which one?
-        pass
-    else:
-        assert False
+    with pytest.raises(TypeError):
+        prepared_rules_ids.test(canlist_good)
 
-    for res in prepared_rules_ids.test_series(sample_canlist):
+    for res in prepared_rules_ids.test_series(canlist_good):
         assert res == (False, 'dummy')
 
-    try:
+    with pytest.raises(TypeError):
         # test_series is a generator
         next(prepared_rules_ids.test_series(single_frame))
-    except TypeError:  # TODO: which one?
-        pass
-    else:
-        assert False
 
     # test good return
     # remove bad rule
     del prepared_rules_ids.roster['dummy']
-    print(prepared_rules_ids.roster['load'])
+
     assert prepared_rules_ids.test(single_frame) == (True, None)
-    for res in prepared_rules_ids.test_series(sample_canlist):
+
+    for res in prepared_rules_ids.test_series(canlist_good):
         assert res == (True, None)
