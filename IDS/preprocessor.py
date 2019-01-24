@@ -317,18 +317,19 @@ def id_past(canlist, time_frame=1):
         CAN timestamps are in units of 0.1 miliseconds
     """
     frame_q = collections.deque()
+    id_counts = collections.Counter()
     for frame in canlist:
         frame_q.append(frame)
 
         # Get rid of frames older than the time interval
+        id_counts[frame['id']] += 1
         tdiff = frame_q[-1]['timestamp'] - frame_q[0]['timestamp']
         while tdiff >= time_frame * 1e4:
-            frame_q.popleft()
+            pop_frame = frame_q.popleft()
             tdiff = frame_q[-1]['timestamp'] - frame_q[0]['timestamp']
+            id_counts[pop_frame['id']] -= 1
 
-        # Count occurrences of current frame
-        id_last_sec = sum(1 for x in frame_q if x['id'] == frame['id'])
-        yield id_last_sec / time_frame
+        yield id_counts[frame['id']] / time_frame
 
 
 def id_entropy(canlist, idprobs):
