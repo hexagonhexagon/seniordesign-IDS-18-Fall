@@ -5,7 +5,6 @@ folder/package that this is in.
 # pylint: disable = redefined-outer-name
 
 import pathlib
-import random
 
 import pytest
 
