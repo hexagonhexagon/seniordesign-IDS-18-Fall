@@ -11,11 +11,12 @@ Notes:
 """
 
 import collections
-import json
+from statistics import mean, stdev
+
 import numpy as np
+
 import IDS.preprocessor
 from IDS.rule_abc import Rule
-from statistics import stdev, mean
 
 
 class ID_Whitelist(Rule):
@@ -34,14 +35,14 @@ class ID_Whitelist(Rule):
         """
         if canlist:
             # make new set of valid ID's
-            self.whitelist = set(x['id'] for x in canlist)
-            savedata = {'whitelist': self.whitelist}
+            self.whitelist = set(x['id'] for x in canlist)  # pylint: disable=attribute-defined-outside-init
+            savedata = {'whitelist': list(self.whitelist)}
             super()._save(savedata)
         else:
             # load existing profile data
             super()._load()
             # JSON doesn't support sets
-            self.whitelist = set(self.whitelist)
+            self.whitelist = set(self.whitelist)  # pylint: disable=attribute-defined-outside-init
 
 
 class TimeInterval(Rule):
@@ -59,30 +60,35 @@ class TimeInterval(Rule):
         num_selections: an integer representing the number of most common
         clusters to be choosen as valid. must be 0 < x < num_bins
 
-        
+
     Notes:
         num_bins and num_selections are only valid before prepare() is run.
     """
 
     def __init__(self, profile_id):
-        super().__init__(self, profile_id)
+        super().__init__(profile_id)
         self.num_bins = 'auto'
-        self.num_selections = 10
+        self.__num_selections = 4
+        # init empty working data
+        self.bins = {}
+        self.valid_bins = {}
 
     @property
     def num_selections(self):
+        """num_selections can't be more than num_bins"""
         return self.__num_selections
 
     @num_selections.setter
-    def num_selections(self, x):
-        if x < 1:
+    def num_selections(self, val):
+        if val < 1:
             self.__num_selections = 1
-        elif isinstance(self.num_bins, int) and x >= self.num_bins:
+        elif isinstance(self.num_bins, int) and val >= self.num_bins:
             self.__num_selections = self.num_bins - 1
         else:
-            self.__num_selections = x
+            self.__num_selections = val
 
-    def _delays(self, canlist):
+    @staticmethod
+    def _delays(canlist):
         """Calculate delay from last occurrence for each CAN packet
         Delay for first encounter of each ID is -1.
         Returns:
@@ -102,7 +108,7 @@ class TimeInterval(Rule):
         """
         delays = self._delays(canlist)
         for delay, can_id in zip(delays, (x['id'] for x in canlist)):
-            if can_id not in self.known_delays:
+            if can_id not in self.valid_bins:
                 yield False
             elif delay == -1:
                 yield True
@@ -124,24 +130,29 @@ class TimeInterval(Rule):
         """
         if canlist:
             # Sort time intervals by packet ID
-            id_delays = collections.defaultdict(list())
+            id_delays = collections.defaultdict(list)
             delays = self._delays(canlist)
             for delay, can_id in zip(delays, (x['id'] for x in canlist)):
                 id_delays[can_id].append(delay)
 
             # Make histograms for each ID's delay list
             for can_id, delays in id_delays.items():
-                hist, self.bins[can_id] = np.histogram(delays, self.num_bins)
+                hist, hist_bins = np.histogram(delays, self.num_bins)
+                # JSON can't handle numpy datatypes
+                self.bins[can_id] = [float(x) for x in hist_bins]
+
                 if self.num_bins == 'auto':
                     num_sel = int(len(hist) / 10) + 1
                 else:
                     num_sel = self.num_selections
                 # Get the indicies of K largest values
-                self.valid_bins[can_id] = set(hist.argsort()[-num_sel:])
+                hist_inds = hist.argsort()[-num_sel:]
+                # JSON can't handle numpy datatypes
+                self.valid_bins[can_id] = set(int(x) for x in hist_inds)
 
             savedata = {
                 'bins': self.bins,
-                'valid_bins': self.valid_bins,
+                'valid_bins': {x: list(y) for x, y in self.valid_bins.items()},
             }
             super()._save(savedata)
         else:
@@ -165,7 +176,7 @@ class MessageFrequency(Rule):
         """Init MessageFrequency Rule
         Set Time Window in miliseconds
         """
-        super().__init__(self, profile_id)
+        super().__init__(profile_id)
         self.time_frame = time_frame
 
     def test(self, canlist):
@@ -200,7 +211,7 @@ class MessageFrequency(Rule):
         """
         if canlist:
             id_counts = IDS.preprocessor.id_past(canlist, self.time_frame)
-            self.frequencies = collections.defaultdict(list())
+            self.frequencies = collections.defaultdict(list)
             for count, can_id in zip(id_counts, (x['id'] for x in canlist)):
                 self.frequencies[can_id].append(count)
 
@@ -233,7 +244,7 @@ class MessageSequence(Rule):
         """Init Message Sequence
         Length in number of packets
         """
-        super().__init__(self, profile_id)
+        super().__init__(profile_id)
         self.length = length
 
     def test(self, canlist):
