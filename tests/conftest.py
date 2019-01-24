@@ -18,7 +18,7 @@ TEST_DIR = pathlib.Path(__file__).parent
 def canlist_good():
     """Get Sample CAN Data for testing"""
     small_sample = IDS.preprocessor.parse_traffic(
-        TEST_DIR / 'sample_data/rules_test/sample_100.traffic')
+        TEST_DIR / 'sample_data/traffic/asia_train.traffic')
     return small_sample
 
 

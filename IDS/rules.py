@@ -9,7 +9,6 @@ Notes:
         id is an 11-bit integer
         data is an 8-byte bytes object
 """
-
 import collections
 from statistics import mean, stdev
 
@@ -26,8 +25,8 @@ class ID_Whitelist(Rule):
         """Check against whitelist
         see Rule.test
         """
-        for can_id in (x['id'] for x in canlist):
-            yield can_id in self.whitelist
+        for pak in canlist:
+            yield pak['id'] in self.whitelist
 
     def prepare(self, canlist=None):
         """Compile whitelist from CAN data, or import existing profile.
@@ -107,7 +106,8 @@ class TimeInterval(Rule):
         see Rule.test
         """
         delays = self._delays(canlist)
-        for delay, can_id in zip(delays, (x['id'] for x in canlist)):
+        for delay, pak in zip(delays, canlist):
+            can_id = pak['id']
             if can_id not in self.valid_bins:
                 yield False
             elif delay == -1:
@@ -132,8 +132,8 @@ class TimeInterval(Rule):
             # Sort time intervals by packet ID
             id_delays = collections.defaultdict(list)
             delays = self._delays(canlist)
-            for delay, can_id in zip(delays, (x['id'] for x in canlist)):
-                id_delays[can_id].append(delay)
+            for delay, pak in zip(delays, canlist):
+                id_delays[pak['id']].append(delay)
 
             # Make histograms for each ID's delay list
             for can_id, delays in id_delays.items():
@@ -152,7 +152,8 @@ class TimeInterval(Rule):
 
             savedata = {
                 'bins': self.bins,
-                'valid_bins': {x: list(y) for x, y in self.valid_bins.items()},
+                'valid_bins': {x: list(y)
+                               for x, y in self.valid_bins.items()},
             }
             super()._save(savedata)
         else:
@@ -168,29 +169,31 @@ class MessageFrequency(Rule):
         CAN packet timestamp is in 0.1 milisecond intervals
 
     Attributes:
-        time_frame: a float value in miliseconds, representing the calculation
+        time_frame: a float value in seconds, representing the calculation
         window for message frequencies.
     """
 
-    def __init__(self, profile_id, time_frame=1000):
+    def __init__(self, profile_id):
         """Init MessageFrequency Rule
-        Set Time Window in miliseconds
+        Set Time Window in seconds
         """
         super().__init__(profile_id)
-        self.time_frame = time_frame
+        self.time_frame = 1
+        self.frequencies = collections.defaultdict(list)
 
     def test(self, canlist):
         """Check that packet occurrence is within acceptable frequencies.
         see Rule.test
         """
         # return True if sample is too small
-        if len(canlist) < self.time_frame * 10:
+        if len(canlist) < self.time_frame * 1e4:
             yield from (True for x in canlist)
             return
 
         # check ID appearance frequency
         id_counts = IDS.preprocessor.id_past(canlist, self.time_frame)
-        for count, can_id in zip(id_counts, (x['id'] for x in canlist)):
+        for count, pak in zip(id_counts, canlist):
+            can_id = pak['id']
             if can_id not in self.frequencies:
                 yield False
                 continue
@@ -211,15 +214,17 @@ class MessageFrequency(Rule):
         """
         if canlist:
             id_counts = IDS.preprocessor.id_past(canlist, self.time_frame)
-            self.frequencies = collections.defaultdict(list)
-            for count, can_id in zip(id_counts, (x['id'] for x in canlist)):
+            for count, pak in zip(id_counts, canlist):
+                can_id = pak['id']
                 self.frequencies[can_id].append(count)
 
+            new_freq = collections.defaultdict(list)
             for can_id, c_list in self.frequencies.items():
-                c_std = stdev(c_list)
-                c_mean = mean(c_list)
-                self.frequencies[can_id] = (c_mean - 2 * c_std,
-                                            c_mean + 2 * c_std)
+                if len(c_list) > 1:
+                    c_std = stdev(c_list)
+                    c_mean = mean(c_list)
+                    new_freq[can_id] = (c_mean - 2 * c_std, c_mean + 2 * c_std)
+            self.frequencies = new_freq
 
             savedata = {
                 'frequencies': self.frequencies,
