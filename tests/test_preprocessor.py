@@ -15,11 +15,11 @@ SAMPLE_PATH = pathlib.Path(__file__).parent / 'sample_data'
 def test_parse_traffic():
     # Check parse_traffic
     frames = dp.parse_traffic(SAMPLE_PATH / 'traffic/asia_train.traffic')
-    with open(str(SAMPLE_PATH.parent / 'test_preprocessor/traffic_validate.txt')) as verification_file:
+    with open(str(SAMPLE_PATH / 'test_preprocessor/traffic_validate.txt')) as verification_file:
         frames_check = literal_eval(verification_file.read())
     assert frames == frames_check
     frames = dp.parse_traffic(str(SAMPLE_PATH / 'traffic/local_Aug_31_trimmed.traffic'))
-    with open(SAMPLE_PATH.parent / 'test_preprocessor/traffic_validate_2.txt') as verification_file:
+    with open(SAMPLE_PATH / 'test_preprocessor/traffic_validate_2.txt') as verification_file:
         frames_check = literal_eval(verification_file.read())
     assert frames == frames_check
     raised_exception = False
@@ -44,7 +44,7 @@ def test_parse_traffic():
 def test_parse_csv():
     # Check parse_csv
     frames = dp.parse_csv(str(SAMPLE_PATH / 'csv/2006 Ford Fusion/Test Data/2006 Ford Fusion Test.csv'))
-    with open(SAMPLE_PATH.parent / 'test_preprocessor/csv_validate.txt') as verification_file:
+    with open(SAMPLE_PATH / 'test_preprocessor/csv_validate.txt') as verification_file:
         frames_check = literal_eval(verification_file.read())
     assert frames == frames_check
     raised_exception = False
@@ -127,7 +127,7 @@ def test_feature_lists(tmp_path):
     feat_file = tmp_path / 'feature_lists'
     dp.write_feature_lists(feature_lists, [], feat_file)
     feature_lists, _ = dp.load_feature_lists(feat_file)
-    with open(SAMPLE_PATH.parent / 'test_preprocessor/feature_lists_validate.txt') as validation_file:
+    with open(SAMPLE_PATH / 'test_preprocessor/feature_lists_validate.txt') as validation_file:
         feature_lists_check = literal_eval(validation_file.read())
     assert feature_lists == feature_lists_check
 
