@@ -224,7 +224,7 @@ def validate_can_data(canlist):
     return valid
 
 
-def write_id_probs(canlist, outfilepath):
+def write_id_probs(canlist, outfilepath=None):
     """Take a list of CAN frames along with a path to write a file to, and
     generate a dictionary of the probabilities of each ID occurring, and write
     it to a file. Return the dictionary of ID probabilities.
@@ -239,15 +239,15 @@ def write_id_probs(canlist, outfilepath):
     in outfilepath in a JSON format, as well as return a dictionary where
     the key value pairs are id: probability of that id occurring.
     """
-    idcounts = {}
+    idcounts = collections.Counter()
     numframes = len(canlist)
     for frame in canlist:
-        idcounts.setdefault(frame['id'], 0)
         idcounts[frame['id']] += 1
 
     probs = {k: v / numframes for k, v in idcounts.items()}
-    with open(outfilepath, 'w+') as file:
-        json.dump(probs, file, indent=2)
+    if outfilepath:
+        with open(outfilepath, 'w+') as file:
+            json.dump(probs, file, indent=2)
     return probs
 
 
@@ -305,6 +305,9 @@ def inject_malicious_packets(canlist, malgen):
 
 def id_past(canlist, time_frame=1):
     """Calculates the frequency of each unique ID
+    Frequency is calculated by counting the number of packets within the
+    time_frame, including the current packet, and dividing by the length of the
+    time_frame.
 
     Args:
         canlist: a list of CAN packets
@@ -340,13 +343,12 @@ def id_entropy(canlist, idprobs):
         entropy, for each item in canlist
     """
 
-    observed_idcounts = {}
+    observed_idcounts = collections.Counter()
     observed_system_entropy = 0
     e_relative = []
     e_system = []
 
-    for count, frame in enumerate(canlist):
-        observed_idcounts.setdefault(frame['id'], 0)
+    for count, frame in enumerate(canlist, 1):
         observed_idcounts[frame['id']] += 1
         # Calculate relative entropy of message ID
         p = observed_idcounts[frame['id']] / count
@@ -359,7 +361,7 @@ def id_entropy(canlist, idprobs):
         # Calculate change in system entropy
         old_system_entropy = observed_system_entropy
         observed_system_entropy = 0
-        for _, v in observed_idcounts.items():
+        for v in observed_idcounts.values():
             p = v / count
             with np.errstate(divide='ignore'):
                 observed_system_entropy -= p * np.log(p)
@@ -382,13 +384,13 @@ def generate_feature_lists(canlist, idprobs):
     'system_entropy_change': [...]}.
     """
     featurelist = {
-        'id': [],
+        'id': [x['id'] for x in canlist],
         'occurrences_in_last_sec': [],
         'relative_entropy': [],
         'system_entropy_change': []
     }
 
-    featurelist['occurrences_in_last_sec'] = [x for x in id_past(canlist)]
+    featurelist['occurrences_in_last_sec'] = list(id_past(canlist))
     e_relative, e_system = id_entropy(canlist, idprobs)
     featurelist['relative_entropy'] = e_relative
     featurelist['system_entropy_change'] = e_system
