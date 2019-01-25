@@ -5,6 +5,8 @@ import pathlib
 import sys
 from ast import literal_eval
 
+import pytest
+
 import IDS.preprocessor as dp
 from IDS.malicious import MaliciousGenerator
 
@@ -26,26 +28,14 @@ def test_parse_traffic():
         frames_check = literal_eval(verification_file.read())
     assert frames == frames_check
 
-    raised_exception = False
-    try:
+    with pytest.raises(FileNotFoundError):
         dp.parse_traffic('asdf')
-    except FileNotFoundError:
-        raised_exception = True
-    assert raised_exception
 
-    raised_exception = False
-    try:
+    with pytest.raises(FileNotFoundError):
         dp.parse_traffic('.')
-    except FileNotFoundError:
-        raised_exception = True
-    assert raised_exception
 
-    raised_exception = False
-    try:
+    with pytest.raises(ValueError):
         dp.parse_traffic(str(SAMPLE_PATH.parent / 'test_preprocessor.py'))
-    except ValueError:
-        raised_exception = True
-    assert raised_exception
 
 
 def test_parse_csv():
@@ -58,26 +48,14 @@ def test_parse_csv():
         frames_check = literal_eval(verification_file.read())
     assert frames == frames_check
 
-    raised_exception = False
-    try:
+    with pytest.raises(FileNotFoundError):
         dp.parse_csv('asdf')
-    except FileNotFoundError:
-        raised_exception = True
-    assert raised_exception
 
-    raised_exception = False
-    try:
+    with pytest.raises(FileNotFoundError):
         dp.parse_csv('.')
-    except FileNotFoundError:
-        raised_exception = True
-    assert raised_exception
 
-    raised_exception = False
-    try:
+    with pytest.raises(ValueError):
         dp.parse_csv(str(SAMPLE_PATH.parent / 'test_preprocessor.py'))
-    except ValueError:
-        raised_exception = True
-    assert raised_exception
 
 
 def test_validate_can_data():
