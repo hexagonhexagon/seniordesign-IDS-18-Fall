@@ -1,20 +1,25 @@
+"""Testing for IDS Data Preprocessor"""
+
 import sys
-import os
 from ast import literal_eval
 import io
-import json
+import pathlib
 
 import IDS.preprocessor as dp
 from IDS.malicious import MaliciousGenerator
 
+
+SAMPLE_PATH = pathlib.Path(__file__).parent / 'sample_data'
+
+
 def test_parse_traffic():
     # Check parse_traffic
-    frames = dp.parse_traffic('sample_data/traffic/asia_train.traffic')
-    with open('test_preprocessor/traffic_validate.txt') as verification_file:
+    frames = dp.parse_traffic(SAMPLE_PATH / 'traffic/asia_train.traffic')
+    with open(str(SAMPLE_PATH.parent / 'test_preprocessor/traffic_validate.txt')) as verification_file:
         frames_check = literal_eval(verification_file.read())
     assert frames == frames_check
-    frames = dp.parse_traffic('sample_data/traffic/local_Aug_31_trimmed.traffic')
-    with open('test_preprocessor/traffic_validate_2.txt') as verification_file:
+    frames = dp.parse_traffic(str(SAMPLE_PATH / 'traffic/local_Aug_31_trimmed.traffic'))
+    with open(SAMPLE_PATH.parent / 'test_preprocessor/traffic_validate_2.txt') as verification_file:
         frames_check = literal_eval(verification_file.read())
     assert frames == frames_check
     raised_exception = False
@@ -31,15 +36,15 @@ def test_parse_traffic():
     assert raised_exception
     raised_exception = False
     try:
-        dp.parse_traffic('test_preprocessor.py')
+        dp.parse_traffic(str(SAMPLE_PATH.parent / 'test_preprocessor.py'))
     except ValueError:
         raised_exception = True
     assert raised_exception
 
 def test_parse_csv():
     # Check parse_csv
-    frames = dp.parse_csv('sample_data/csv/2006 Ford Fusion/Test Data/2006 Ford Fusion Test.csv')
-    with open('test_preprocessor/csv_validate.txt') as verification_file:
+    frames = dp.parse_csv(str(SAMPLE_PATH / 'csv/2006 Ford Fusion/Test Data/2006 Ford Fusion Test.csv'))
+    with open(SAMPLE_PATH.parent / 'test_preprocessor/csv_validate.txt') as verification_file:
         frames_check = literal_eval(verification_file.read())
     assert frames == frames_check
     raised_exception = False
@@ -56,7 +61,7 @@ def test_parse_csv():
     assert raised_exception
     raised_exception = False
     try:
-        dp.parse_csv('test_preprocessor.py')
+        dp.parse_csv(str(SAMPLE_PATH.parent / 'test_preprocessor.py'))
     except ValueError:
         raised_exception = True
     assert raised_exception
@@ -65,7 +70,7 @@ def test_validate_can_data():
     old_stdout = sys.stdout
     sys.stdout = buffer = io.StringIO() # Write anything being printed to stdout to buffer instead
 
-    frames = dp.parse_csv('sample_data/csv/2006 Ford Fusion/Test Data/2006 Ford Fusion Test.csv')
+    frames = dp.parse_csv(str(SAMPLE_PATH / 'csv/2006 Ford Fusion/Test Data/2006 Ford Fusion Test.csv'))
     assert dp.validate_can_data(frames)
     frames[163].pop('id')
     frames[124]['id'] = 3999
@@ -86,10 +91,11 @@ Frame index 777's timestamp is not an integer: actually a <class 'str'>, value '
 Frame index 777's data is not a bytes object: actually a <class 'str'>, value 'asdf'!
 This dataset is invalid!\n"""
 
-def test_id_probs():
-    frames = dp.parse_csv('sample_data/csv/2006 Ford Fusion/Test Data/2006 Ford Fusion Test.csv')
-    dp.write_id_probs(frames, 'idprobs.json')
-    idprobs = dp.load_id_probs('idprobs.json')
+def test_id_probs(tmp_path):
+    frames = dp.parse_csv(SAMPLE_PATH / 'csv/2006 Ford Fusion/Test Data/2006 Ford Fusion Test.csv')
+    probs_file = str(tmp_path / 'idprobs.json')
+    dp.write_id_probs(frames, probs_file)
+    idprobs = dp.load_id_probs(probs_file)
     idprobs_check = {
         1072: 0.07521674607513865,
         336: 0.15019917206904632,
@@ -112,22 +118,22 @@ def test_id_probs():
         1107: 0.0014840271811294228
     }
     assert idprobs == idprobs_check
-    os.remove('idprobs.json')
 
-def test_feature_lists():
-    frames = dp.parse_csv('sample_data/csv/2006 Ford Fusion/Test Data/2006 Ford Fusion Test.csv')
-    idprobs = dp.write_id_probs(frames, 'test')
-    os.remove('test')
+def test_feature_lists(tmp_path):
+    frames = dp.parse_csv(SAMPLE_PATH / 'csv/2006 Ford Fusion/Test Data/2006 Ford Fusion Test.csv')
+    idprobs = dp.write_id_probs(frames, tmp_path / 'idprobs')
+
     feature_lists = dp.generate_feature_lists(frames, idprobs)
-    dp.write_feature_lists(feature_lists, [], 'test')
-    feature_lists, _ = dp.load_feature_lists('test')
-    with open('test_preprocessor/feature_lists_validate.txt') as validation_file:
+    feat_file = tmp_path / 'feature_lists'
+    dp.write_feature_lists(feature_lists, [], feat_file)
+    feature_lists, _ = dp.load_feature_lists(feat_file)
+    with open(SAMPLE_PATH.parent / 'test_preprocessor/feature_lists_validate.txt') as validation_file:
         feature_lists_check = literal_eval(validation_file.read())
     assert feature_lists == feature_lists_check
-    os.remove('test')
+
 
 def test_inject_malicious_packets():
-    frames = dp.parse_csv('../tests/sample_data/csv/2006 Ford Fusion/Test Data/2006 Ford Fusion Test.csv')
+    frames = dp.parse_csv(SAMPLE_PATH / 'csv/2006 Ford Fusion/Test Data/2006 Ford Fusion Test.csv')
     prev_len = len(frames)
     mg = MaliciousGenerator()
     frames, labels = dp.inject_malicious_packets(frames, mg)
