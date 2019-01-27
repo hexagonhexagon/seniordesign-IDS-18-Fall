@@ -45,10 +45,10 @@ def check_rule(rul, can_ans):
     results = rul.test(badlist)
     for result, answer in zip(results, answers):
         if result != answer:
-            if answer:  # passed rule; bad packet
-                false_counts['negative'] += 1
-            else:  # failed rule
+            if answer:  # good packet; failed rule
                 false_counts['positive'] += 1
+            else:  # bad packet; passed rule
+                false_counts['negative'] += 1
 
     print('false-positives: {} / {}'.format(false_counts['positive'],
                                             len(badlist)))
