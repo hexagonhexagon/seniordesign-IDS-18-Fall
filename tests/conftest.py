@@ -22,7 +22,7 @@ def canlist_good():
     return small_sample
 
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def malgen():
     """Provides an initialized MaliciousGenerator object"""
     new_malgen = IDS.malicious.MaliciousGenerator()
@@ -31,7 +31,7 @@ def malgen():
     return new_malgen
 
 
-@pytest.fixture
+@pytest.fixture(scope='module')
 def canlist_bad(canlist_good, malgen):
     """Insert malicious packets randomly into canlist_good"""
     badlist, labels = IDS.preprocessor.inject_malicious_packets(

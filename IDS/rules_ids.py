@@ -21,8 +21,6 @@ class RulesIDS:
 
     def __init__(self, profile_id=None):
         """Init IDS
-        If profile is specified now, prepare will be run, else it will have to
-        be called separately
         """
         self.profile_id = profile_id
         self.roster = IDS.rules.ROSTER
@@ -60,9 +58,6 @@ class RulesIDS:
         # rule_abc.Rule
         new_roster = {}
         for name, item in self.roster.items():
-            if not issubclass(item, IDS.rule_abc.Rule):  # Necessary?
-                raise ValueError("{}: {} is not a Rule.".format(
-                    name, type(item)))
             rule_instance = item(self.profile_id)
             rule_instance.prepare(canlist)
             new_roster[name] = rule_instance

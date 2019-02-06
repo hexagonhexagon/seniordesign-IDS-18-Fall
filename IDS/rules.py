@@ -5,7 +5,7 @@ See rule_abc.Rule for definitions of how Rules should behave
 
 Notes:
     CAN Packet: a dict with 3 keys: timestamp, id, data
-        timestamp is an int representing 0.1 milisecond intervals since start
+        timestamp is an int representing 0.1 millisecond intervals since start
         id is an 11-bit integer
         data is an 8-byte bytes object
 """
@@ -56,9 +56,13 @@ class TimeInterval(Rule):
         numpy.histogram_bin_edges. if num_bins is 'auto' a bin count will be
         calculated and be assigned to num_bins by prepare().
 
-        num_selections: an integer representing the number of most common
-        clusters to be choosen as valid. must be 0 < x < num_bins
+        coverage: ratio of data held by the indices of valid_bins to data
+        observed in histogram.
 
+        Working Data:
+        bins: array where each value represents the edge of a bin for the
+        histogram.
+        valid_bins: a list of integers corresponding to indices of `bins`.
 
     Notes:
         num_bins and num_selections are only valid before prepare() is run.
@@ -67,24 +71,24 @@ class TimeInterval(Rule):
     def __init__(self, profile_id):
         super().__init__(profile_id)
         self.num_bins = 'auto'
-        self.__num_selections = 4
+        self.__coverage = 1.0
         # init empty working data
         self.bins = {}
         self.valid_bins = {}
 
     @property
-    def num_selections(self):
-        """num_selections can't be more than num_bins"""
-        return self.__num_selections
+    def coverage(self):
+        """coverage must be 0 < x < 1"""
+        return self.__coverage
 
-    @num_selections.setter
-    def num_selections(self, val):
-        if val < 1:
-            self.__num_selections = 1
-        elif isinstance(self.num_bins, int) and val >= self.num_bins:
-            self.__num_selections = self.num_bins - 1
+    @coverage.setter
+    def coverage(self, val):
+        if val > 1.0:
+            self.__coverage = 1.0
+        elif val < 0.0:
+            self.__coverage = 0.0
         else:
-            self.__num_selections = val
+            self.__coverage = val
 
     @staticmethod
     def _delays(canlist):
@@ -123,7 +127,7 @@ class TimeInterval(Rule):
         Working Data:
             bins: list representing ranges to sort time intervals into.
 
-            valid_bins: a list of indicies, corresponding to `bins` that are
+            valid_bins: a list of indices, corresponding to `bins` that are
             considered valid time intervals.
 
         see Rule.prepare
@@ -141,12 +145,15 @@ class TimeInterval(Rule):
                 # JSON can't handle numpy datatypes
                 self.bins[can_id] = [float(x) for x in hist_bins]
 
-                if self.num_bins == 'auto':
-                    num_sel = int(len(hist) / 10) + 1
-                else:
-                    num_sel = self.num_selections
-                # Get the indicies of K largest values
-                hist_inds = hist.argsort()[-num_sel:]
+                # Add indicies of the histogram, from largest to smallest,
+                # until a suitable level of data coverage is reached.
+                hist_inds = hist.argsort()
+                valid_bins_coverage = 0.0
+                for ind in hist_inds:
+                    if valid_bins_coverage >= self.coverage:
+                        break
+                    self.valid_bins.append(ind)
+                    valid_bins_coverage += hist[ind]
                 # JSON can't handle numpy datatypes
                 self.valid_bins[can_id] = set(int(x) for x in hist_inds)
 
@@ -166,7 +173,7 @@ class MessageFrequency(Rule):
     """Rule to detect DOS attacks
     This rule works by checking ID frequency and CAN bus bandwidth saturation.
     Notes:
-        CAN packet timestamp is in 0.1 milisecond intervals
+        CAN packet timestamp is in 0.1 millisecond intervals
 
     Attributes:
         time_frame: a float value in seconds, representing the calculation
@@ -251,6 +258,7 @@ class MessageSequence(Rule):
         """
         super().__init__(profile_id)
         self.length = length
+        self.sequences = set()
 
     def test(self, canlist):
         """Check packet sequences
@@ -269,7 +277,6 @@ class MessageSequence(Rule):
         The set will be represented as a python set containing tuples.
         """
         if canlist:
-            self.sequences = set()
             for ii, _ in enumerate(canlist):
                 if ii < self.length:
                     continue
@@ -291,7 +298,7 @@ class MessageSequence(Rule):
 
 ROSTER = {
     'ID_Whitelist': ID_Whitelist,
-    # 'TimeInterval': TimeInterval,
+    'TimeInterval': TimeInterval,
     'MessageFrequency': MessageFrequency,
     'MessageSequence': MessageSequence
 }
