@@ -43,7 +43,7 @@ def test_prepare_save(canlist_good):
 
     # test bad roster
     rul.roster = {'asdf': object}
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         rul.prepare(canlist_good)
 
 

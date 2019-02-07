@@ -74,7 +74,7 @@ class TimeInterval(Rule):
         self.__coverage = 1.0
         # init empty working data
         self.bins = {}
-        self.valid_bins = {}
+        self.valid_bins = collections.defaultdict(list)
 
     @property
     def coverage(self):
@@ -152,7 +152,7 @@ class TimeInterval(Rule):
                 for ind in hist_inds:
                     if valid_bins_coverage >= self.coverage:
                         break
-                    self.valid_bins.append(ind)
+                    self.valid_bins[can_id].append(ind)
                     valid_bins_coverage += hist[ind]
                 # JSON can't handle numpy datatypes
                 self.valid_bins[can_id] = set(int(x) for x in hist_inds)
@@ -166,7 +166,12 @@ class TimeInterval(Rule):
         else:
             super()._load()
             # JSON doesn't support python sets
-            self.valid_bins = {x: set(y) for x, y in self.valid_bins.items()}
+            # JSON saves all keys as strings
+            self.bins = {int(x): y for x, y in self.bins.items()}
+            self.valid_bins = {
+                int(x): set(y)
+                for x, y in self.valid_bins.items()
+            }
 
 
 class MessageFrequency(Rule):
@@ -240,6 +245,11 @@ class MessageFrequency(Rule):
             super()._save(savedata)
         else:
             super()._load()
+            # JSON saves all keys as strings
+            self.frequencies = {
+                int(x): tuple(y)
+                for x, y in self.frequencies.items()
+            }
 
 
 class MessageSequence(Rule):

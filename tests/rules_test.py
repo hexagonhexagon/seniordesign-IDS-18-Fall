@@ -86,12 +86,17 @@ def test_timeinterval(canlist_good, canlist_bad, tmp_path):
 
     rul = empty_rule()
     rul.prepare(canlist_good)
+    presave = [rul.bins, rul.valid_bins]
     check_rule(rul, canlist_bad)
 
     # check data loading
     rul = empty_rule()
     rul.prepare()
+    postsave = [rul.bins, rul.valid_bins]
     check_rule(rul, canlist_bad)
+
+    # check save & load is correct
+    assert presave == postsave
 
 
 def test_frequency(canlist_good, canlist_bad, tmp_path):
@@ -104,12 +109,17 @@ def test_frequency(canlist_good, canlist_bad, tmp_path):
 
     rul = empty_rule()
     rul.prepare(canlist_good)
+    presave = rul.frequencies
     check_rule(rul, canlist_bad)
 
     # check data loading
     rul = empty_rule()
     rul.prepare()
+    postsave = rul.frequencies
     check_rule(rul, canlist_bad)
+
+    # check save & load is correct
+    assert presave == postsave
 
 
 def test_sequence(canlist_good, canlist_bad, tmp_path):
@@ -122,9 +132,14 @@ def test_sequence(canlist_good, canlist_bad, tmp_path):
 
     rul = empty_rule()
     rul.prepare(canlist_good)
+    presave = rul.sequences
     check_rule(rul, canlist_bad)
 
     # check data loading
     rul = empty_rule()
     rul.prepare()
+    postsave = rul.sequences
     check_rule(rul, canlist_bad)
+
+    # check save & load is correct
+    assert presave == postsave

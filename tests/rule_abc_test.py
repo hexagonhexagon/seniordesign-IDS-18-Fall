@@ -73,17 +73,22 @@ class LoadCl(Rule):
             super()._load()
 
 
-def test_load():
+def test_load(tmp_path):
     """Test Rule._load()"""
-    sample_path = pathlib.Path(__file__).parent.parent / \
-        'savedata/rule-profiles/test_load/LoadCl.json'
+    def empty_rule():
+        rul = LoadCl('test_load')
+        rul.SAVE_PATH = tmp_path
+        return rul
+
+    sample_path = tmp_path / 'test_load/LoadCl.json'
+
     # delete any existing file
     try:
         sample_path.unlink()
     except FileNotFoundError:
         pass
 
-    asdf = LoadCl('test_load')
+    asdf = empty_rule()
     with pytest.raises(FileNotFoundError):
         asdf.prepare()
 
@@ -92,7 +97,7 @@ def test_load():
     assert sample_path.is_file()
 
     # load savedata
-    asdf = LoadCl('test_load')
+    asdf = empty_rule()
     asdf.prepare()
     assert all(asdf.test(SAMPLE))
     # remove sample file (check out pytest fixtures for this)
