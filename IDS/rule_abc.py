@@ -38,7 +38,7 @@ class Rule(ABC):
         super().__init__()
 
     @property
-    def save_file(self):
+    def save_path(self):
         """Define profile save path"""
         # self.__class__.__name__ provides the name of the current instance.
         # This will be the name of the child class.
@@ -78,7 +78,7 @@ class Rule(ABC):
         writing it (e.g. 'Whitelist.json' for class 'Whitelist'). The file
         should be placed in a subfolder of the “savedata” directory,
         corresponding to the vehicle profile (e.g. Ford_Fusion_2018).
-        The Rule abstract class "save_file" property is provided to establish
+        The Rule abstract class "save_path" property is provided to establish
         this.
         The JSON should be a dictionary, with each key corresponding to the
         class attribute name of the data being saved. For example:
@@ -111,7 +111,7 @@ class Rule(ABC):
         Raises:
             FileNotFoundError
         """
-        with self.save_file.open() as prof:
+        with self.save_path.open() as prof:
             attr_dict = json.load(prof)
         # unpack loaded JSON into class instance
         for name, val in attr_dict.items():
@@ -128,6 +128,6 @@ class Rule(ABC):
             Other types would need a custom encoder function.
         """
 
-        self.save_file.parent.mkdir(parents=True, exist_ok=True)
-        with self.save_file.open('w') as prof:
+        self.save_path.parent.mkdir(parents=True, exist_ok=True)
+        with self.save_path.open('w') as prof:
             json.dump(savedata, prof)
