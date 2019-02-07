@@ -2,6 +2,7 @@ from IDS.dnn_ids import DNNBasedIDS
 from IDS.rules_ids import RulesIDS
 import IDS.preprocessor as dp
 from numpy import log
+import os.path
 
 class TwoStageIDS:
     def __init__(self):
@@ -15,7 +16,7 @@ class TwoStageIDS:
 
         self.params = {
             'dnn_dir_path': None,
-            'rules_dir_path': None,
+            'rules_profile': None,
             'idprobs_path': None
         }
         # Simulation variables start here.
@@ -24,13 +25,28 @@ class TwoStageIDS:
         self.total_frames = 0
         self.system_entropy = 0
 
-    def load_ids(self):
+    def init_ids(self):
         if self.params['dnn_dir_path']:
-            self.dnn.load_model(self.params['dnn_dir_path'])
-            self.dnn_trained = True
-        if self.params['rules_dir_path']:
-            self.rules.prepare(set_profile_id=self.params['rules_dir_path'])
-            self.rules_trained = True
+            # If the DNN model trying to be loaded has
+            # been trained, then a .params file will exist.
+            if os.path.exists(self.params['dnn_dir_path'] + '.params'):
+                print('Loading existing DNN model')
+                self.dnn.load_model(self.params['dnn_dir_path'])
+                self.dnn_trained = True
+            else:
+                print('Creating new DNN model')
+                self.dnn.new_model(self.params['dnn_dir_path'])
+                self.dnn_trained = False
+        if self.params['rules_profile']:
+            self.rules.profile_id = self.params['rules_profile']
+            try:
+                self.rules.prepare() # If the profile ID provided hasn't been
+                                     # prepared, an error will be thrown
+                print('Loading existing Rules IDS profile')
+                self.rules_trained = True
+            except FileNotFoundError:
+                print('Creating new Rules IDS profile')
+                self.rules_trained = False
         if self.params['idprobs_path']:
             self.idprobs = dp.load_id_probs(self.params['idprobs_path'])
 
@@ -39,6 +55,9 @@ class TwoStageIDS:
             raise ValueError(f'{key} is not a valid parameter that can be changed. Valid parameters: {list(self.params.keys())}')
         else:
             self.params[key] = value
+
+    def change_dnn_parameters(self, key, value):
+        self.dnn.change_param(key, value)
 
     def retrain_rules(self, canlist):
         self.rules.prepare(canlist)
