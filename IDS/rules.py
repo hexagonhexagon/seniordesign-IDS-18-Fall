@@ -273,14 +273,30 @@ class MessageSequence(Rule):
     def test(self, canlist):
         """Check packet sequences
         Marks true for first packets within sequence length.
+        Uses a queue to sample sequences; the queue is 'rolled back' one, if a
+        bad packet is appended to the queue.
+
+        Note: if sequence sampling gets corrupted -- bad packets present in
+        initial filling sequence -- rule will reject all packets.
         """
-        for ii, _ in enumerate(canlist):
-            if ii < self.length:
+        seq = collections.deque()  # left is old
+        prev = None
+        for pak in canlist:
+            seq.append(pak['id'])
+            if len(seq) <= self.length:
+                print(seq)
                 yield True
                 continue
-            seq = tuple(
-                canlist[ii - x]['id'] for x in reversed(range(0, self.length)))
-            yield seq in self.sequences
+            else:
+                prev = seq.popleft()
+
+            if tuple(seq) in self.sequences:
+                yield True
+            else:
+                # get rid of bad value from sequence
+                seq.appendleft(prev)
+                seq.pop()
+                yield False
 
     def prepare(self, canlist=None):
         """Create set of allowed sequences
