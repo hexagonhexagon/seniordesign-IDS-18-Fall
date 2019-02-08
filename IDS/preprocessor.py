@@ -1,4 +1,5 @@
-"""A module that handles preprocessing raw CAN message data and converting it to feature sets.
+"""A module that handles preprocessing raw CAN message data and converting it
+to feature sets.
 
 Functions:
 parse_traffic -- Take in the path to a .traffic file, parse the file, and
@@ -25,15 +26,19 @@ load_feature_lists -- Take the path to a feature list file and return the
 feature lists from the file.
 """
 
+import collections
 import csv
 import json
+import os.path
 import re
 import struct
-import os.path
+
 import numpy as np
 
+
 def parse_traffic(filepath):
-    """Take in the path to a .traffic file, parse the file, and return a list of CAN messages.
+    """Take in the path to a .traffic file, parse the file, and return a list
+    of CAN messages.
 
     Arguments:
     filepath -- The path to the .traffic file. A
@@ -59,8 +64,7 @@ def parse_traffic(filepath):
                 message = json.loads(escapedline)
             except json.JSONDecodeError:
                 raise ValueError(
-                    filepath +
-                    ' does not appear to be a valid traffic file.')
+                    filepath + ' does not appear to be a valid traffic file.')
             # Timestamp may be given as integer or string, convert to
             # integer. The timestamp is the UNIX timestamp in milliseconds.
             ts = int(message['timestamp'])
@@ -82,8 +86,7 @@ def parse_traffic(filepath):
                 # representation as the unsigned integer. Ex. -1 -> 0xff ->
                 # 255.
                 data = list(
-                    map(
-                        lambda x: struct.unpack('B', struct.pack('b', x))[0],
+                    map(lambda x: struct.unpack('B', struct.pack('b', x))[0],
                         data))
             else:
                 # Data has been given as a list of hex values. We convert
@@ -98,8 +101,10 @@ def parse_traffic(filepath):
 
     return messages
 
+
 def parse_csv(filepath):
-    """Take in the path to a CAN frame .csv file, parse the file, and return a list of CAN messages.
+    """Take in the path to a CAN frame .csv file, parse the file, and return a
+    list of CAN messages.
 
     Arguments:
     filepath -- The path to the .traffic file. A
@@ -140,8 +145,10 @@ def parse_csv(filepath):
 
     return messages
 
+
 def validate_can_data(canlist):
-    """Take in a list of CAN messages, determine if the list of messages is valid or not, and print all errors that are found to the screen.
+    """Take in a list of CAN messages, determine if the list of messages is
+    valid or not, and print all errors that are found to the screen.
 
     This function checks, in order:
         - If the list is empty
@@ -160,8 +167,7 @@ def validate_can_data(canlist):
     if len(canlist) == 0:
         print('The list provided is empty!')
         valid = False
-    for i in range(len(canlist)):
-        frame = canlist[i]
+    for i, frame in enumerate(canlist):
         # Does the frame have all the right keys?
         haskeys = True
         for key in ['id', 'timestamp', 'data']:
@@ -188,13 +194,13 @@ def validate_can_data(canlist):
         if not isinstance(frame['timestamp'], int):
             print(
                 'Frame index {}\'s timestamp is not an integer: actually a {}, value {}!'
-                .format(i, type(frame['timestamp']),
-                        repr(frame['timestamp'])))
+                .format(i, type(frame['timestamp']), repr(frame['timestamp'])))
             valid = False
         # Is the frame timestamp positive?
         elif frame['timestamp'] < 0:
-            print('Frame index {}\'s timestamp is negative: actually {}!'.
-                    format(i, frame['timestamp']))
+            print(
+                'Frame index {}\'s timestamp is negative: actually {}!'.format(
+                    i, frame['timestamp']))
             valid = False
         # Is the data field a bytes object? Note that data being a bytes
         # object guarantees that the entries of the bytes are in the range
@@ -202,8 +208,7 @@ def validate_can_data(canlist):
         if not isinstance(frame['data'], bytes):
             print(
                 'Frame index {}\'s data is not a bytes object: actually a {}, value {}!'
-                .format(i, type(frame['timestamp']),
-                        repr(frame['timestamp'])))
+                .format(i, type(frame['timestamp']), repr(frame['timestamp'])))
             valid = False
         # Is the data list 0-8 bytes long?
         elif len(frame['data']) > 8:
@@ -218,8 +223,11 @@ def validate_can_data(canlist):
         print('This dataset is invalid!')
     return valid
 
-def write_id_probs(canlist, outfilepath):
-    """Take a list of CAN frames along with a path to write a file to, and generate a dictionary of the probabilities of each ID occurring, and write it to a file. Return the dictionary of ID probabilities.
+
+def write_id_probs(canlist, outfilepath=None):
+    """Take a list of CAN frames along with a path to write a file to, and
+    generate a dictionary of the probabilities of each ID occurring, and write
+    it to a file. Return the dictionary of ID probabilities.
 
     Arguments:
     canlist -- A list of CAN messages produced from parse_can or
@@ -231,19 +239,21 @@ def write_id_probs(canlist, outfilepath):
     in outfilepath in a JSON format, as well as return a dictionary where
     the key value pairs are id: probability of that id occurring.
     """
-    idcounts = {}
+    idcounts = collections.Counter()
     numframes = len(canlist)
     for frame in canlist:
-        idcounts.setdefault(frame['id'], 0)
         idcounts[frame['id']] += 1
 
     probs = {k: v / numframes for k, v in idcounts.items()}
-    with open(outfilepath, 'w+') as file:
-        json.dump(probs, file, indent=2)
+    if outfilepath:
+        with open(outfilepath, 'w+') as file:
+            json.dump(probs, file, indent=2)
     return probs
 
+
 def load_id_probs(filepath):
-    """Take the path to an ID probabilities file and return the ID probability dictionary from the file.
+    """Take the path to an ID probabilities file and return the ID probability
+    dictionary from the file.
 
     Arguments:
     filepath -- The path to the ID probability file. A
@@ -262,8 +272,10 @@ def load_id_probs(filepath):
     # must convert the keys to integers before we return the result.
     return {int(k): v for k, v in id_probs.items()}
 
+
 def inject_malicious_packets(canlist, malgen):
-    """Take in a list of CAN messages and a malicious generator and inject malicious packets into the list.
+    """Take in a list of CAN messages and a malicious generator and inject
+    malicious packets into the list.
 
     Arguments:
     canlist -- The list of CAN messages to use. Generated by parse_traffic
@@ -282,7 +294,7 @@ def inject_malicious_packets(canlist, malgen):
     for i in range(len(canlist) - 1):
         newcanlist.append(canlist[i])
         labels.append(0)
-        malicious_frames = malgen.get((canlist[i], canlist[i+1]))
+        malicious_frames = malgen.get((canlist[i], canlist[i + 1]))
         for frame in malicious_frames:
             newcanlist.append(frame)
             labels.append(1)
@@ -290,8 +302,76 @@ def inject_malicious_packets(canlist, malgen):
     labels.append(0)
     return newcanlist, labels
 
+
+def id_past(canlist, time_frame=1):
+    """Calculates the frequency of each unique ID
+    Frequency is calculated by counting the number of packets within the
+    time_frame, including the current packet, and dividing by the length of the
+    time_frame.
+
+    Args:
+        canlist: a list of CAN packets
+        time_frame: float distance in seconds to check back in time.
+    Returns:
+        A python generator, for each packet in canlist, yielding the frequency
+        of the corresponding ID.
+
+    Notes:
+        CAN timestamps are in units of 0.1 miliseconds
+    """
+    frame_q = collections.deque()
+    id_counts = collections.Counter()
+    for frame in canlist:
+        frame_q.append(frame)
+
+        # Get rid of frames older than the time interval
+        id_counts[frame['id']] += 1
+        tdiff = frame_q[-1]['timestamp'] - frame_q[0]['timestamp']
+        while tdiff >= time_frame * 1e4:
+            pop_frame = frame_q.popleft()
+            tdiff = frame_q[-1]['timestamp'] - frame_q[0]['timestamp']
+            id_counts[pop_frame['id']] -= 1
+
+        yield id_counts[frame['id']] / time_frame
+
+
+def id_entropy(canlist, idprobs):
+    """Calculate relative and system change entropy.
+
+    Returns:
+        Two lists, containing the calculated relative and system change
+        entropy, for each item in canlist
+    """
+
+    observed_idcounts = collections.Counter()
+    observed_system_entropy = 0
+    e_relative = []
+    e_system = []
+
+    for count, frame in enumerate(canlist, 1):
+        observed_idcounts[frame['id']] += 1
+        # Calculate relative entropy of message ID
+        p = observed_idcounts[frame['id']] / count
+        q = idprobs.get(frame['id'], 0)
+        if q == 0:
+            e_relative.append(np.Infinity)
+        else:
+            e_relative.append(p * np.log(p / q))
+
+        # Calculate change in system entropy
+        old_system_entropy = observed_system_entropy
+        observed_system_entropy = 0
+        for v in observed_idcounts.values():
+            p = v / count
+            with np.errstate(divide='ignore'):
+                observed_system_entropy -= p * np.log(p)
+        e_system.append(observed_system_entropy - old_system_entropy)
+    return e_relative, e_system
+
+
 def generate_feature_lists(canlist, idprobs):
-    """Take in a list of CAN messages along with an ID probabilities dictionary and generate the feature lists required for the DNN based IDS.
+    """Take in a list of CAN messages along with an ID probabilities dictionary
+    and generate the feature lists required for the DNN based IDS.
 
     Arguments:
     canlist -- The list of CAN messages to use. Generated by parse_traffic
@@ -304,70 +384,29 @@ def generate_feature_lists(canlist, idprobs):
     'system_entropy_change': [...]}.
     """
     featurelist = {
-        'id': [],
+        'id': [x['id'] for x in canlist],
         'occurrences_in_last_sec': [],
         'relative_entropy': [],
         'system_entropy_change': []
     }
-    frames_last_sec = []
-    observed_idcounts = {}
-    observed_numframes = 0
-    total_numframes = len(canlist)
-    observed_system_entropy = 0
 
-    for frame in canlist:
-        if observed_numframes % 100 == 0:
-            print(
-                '{}/{} frames processed ({}%)'.format(
-                    observed_numframes, total_numframes,
-                    round(100 * observed_numframes / total_numframes)),
-                end='\r')
-        id = frame['id']
-        featurelist['id'].append(id)
-
-        # Calculate the number of occurrences of the message in the last
-        # second
-        ts = frame['timestamp']
-        # Get rid of frames older than 10000 0.1ms intervals (1 second)
-        frames_last_sec = list(
-            filter(lambda x: ts - x['timestamp'] < 10000, frames_last_sec))
-        num_occurrences_id = 0
-        for old_frame in frames_last_sec:
-            if old_frame['id'] == id:
-                num_occurrences_id += 1
-        featurelist['occurrences_in_last_sec'].append(num_occurrences_id)
-
-        observed_numframes += 1
-        observed_idcounts.setdefault(id, 0)
-        observed_idcounts[id] += 1
-        # Calculate relative entropy of message ID
-        p = observed_idcounts[id] / observed_numframes
-        q = idprobs.get(id, 0)
-        if q == 0:
-            featurelist['relative_entropy'].append(np.Infinity)
-        else:
-            featurelist['relative_entropy'].append(p * np.log(p / q))
-
-        # Calculate change in system entropy
-        old_system_entropy = observed_system_entropy
-        observed_system_entropy = 0
-        for _, v in observed_idcounts.items():
-            p = v / observed_numframes
-            with np.errstate(divide='ignore'):
-                observed_system_entropy -= p * np.log(p)
-        featurelist['system_entropy_change'].append(
-            observed_system_entropy - old_system_entropy)
-        frames_last_sec.append(frame)
+    featurelist['occurrences_in_last_sec'] = list(id_past(canlist))
+    e_relative, e_system = id_entropy(canlist, idprobs)
+    featurelist['relative_entropy'] = e_relative
+    featurelist['system_entropy_change'] = e_system
 
     return featurelist
 
+
 def write_feature_lists(featurelist, labels, outfilepath):
-    """Take in a list of features with their labels and the path to a file to write, and write a file containing the feature list to disk.
+    """Take in a list of features with their labels and the path to a file to
+    write, and write a file containing the feature list to disk.
 
     Arguments:
     featurelist -- The list of features to write. Generated by
     generate_feature_lists.
-    labels -- The list of labels for the feature list. Generated by inject_malicious_packets.
+    labels -- The list of labels for the feature list. Generated by
+    inject_malicious_packets.
     outfilepath -- A string containing the path to the file you want to
     write. The file will be created by this function.
     """
@@ -375,8 +414,10 @@ def write_feature_lists(featurelist, labels, outfilepath):
     with open(outfilepath, 'w+') as file:
         json.dump(featureslabels, file, indent=2)
 
+
 def load_feature_lists(filepath):
-    """Take the path to a feature list file and return the feature lists from the file.
+    """Take the path to a feature list file and return the feature lists from
+    the file.
 
     Arguments:
     filepath -- The path to the feature list file. A FileNotFoundError will
