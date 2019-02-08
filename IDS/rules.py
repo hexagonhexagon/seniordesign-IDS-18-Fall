@@ -287,7 +287,6 @@ class MessageSequence(Rule):
             seq.append(pak['id'])
             if len(seq) <= self.length:
                 # Fill initial sequence
-                print(seq)
                 if pak['id'] in self.whitelist:
                     yield True
                 else:
