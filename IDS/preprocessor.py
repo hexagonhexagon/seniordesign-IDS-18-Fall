@@ -317,6 +317,7 @@ class ID_Past:  # pylint: disable=too-few-public-methods,invalid-name
     Notes:
         CAN timestamps are in units of 0.1 miliseconds
     """
+
     def __init__(self, time_frame=1):
         self.time_frame = time_frame
         self.frame_q = collections.deque()
@@ -328,8 +329,8 @@ class ID_Past:  # pylint: disable=too-few-public-methods,invalid-name
             canlist: a list of CAN packets; any length > 0
             time_frame: float distance in seconds to check back in time.
         Returns:
-            A python generator, for each packet in canlist, yielding the frequency
-            of the corresponding ID.
+            A python generator, for each packet in canlist, yielding the
+            frequency of the corresponding ID.
         """
         for frame in canlist:
             self.frame_q.append(frame)
@@ -339,44 +340,53 @@ class ID_Past:  # pylint: disable=too-few-public-methods,invalid-name
             tdiff = self.frame_q[-1]['timestamp'] - self.frame_q[0]['timestamp']
             while tdiff >= self.time_frame * 1e4:
                 pop_frame = self.frame_q.popleft()
-                tdiff = self.frame_q[-1]['timestamp'] - self.frame_q[0]['timestamp']
+                tdiff = self.frame_q[-1]['timestamp'] \
+                        - self.frame_q[0]['timestamp']
                 self.id_counts[pop_frame['id']] -= 1
 
             yield self.id_counts[frame['id']] / self.time_frame
 
 
-def id_entropy(canlist, idprobs):
+class ID_Entropy:  # pylint: disable=too-few-public-methods,invalid-name
     """Calculate relative and system change entropy.
+    This is a class, so that the memory queue can persist, which allows for
+    feeding CAN frames in one-by-one.
 
     Returns:
         Two lists, containing the calculated relative and system change
         entropy, for each item in canlist
     """
 
-    observed_idcounts = collections.Counter()
-    observed_system_entropy = 0
-    e_relative = []
-    e_system = []
+    def __init__(self):
+        self.observed_idcounts = collections.Counter()
+        self.observed_system_entropy = 0
 
-    for count, frame in enumerate(canlist, 1):
-        observed_idcounts[frame['id']] += 1
-        # Calculate relative entropy of message ID
-        p = observed_idcounts[frame['id']] / count
-        q = idprobs.get(frame['id'], 0)
-        if q == 0:
-            e_relative.append(np.Infinity)
-        else:
-            e_relative.append(p * np.log(p / q))
+    def feed(self, canlist, idprobs):
+        """feed CAN packets into entropy calculator
+        Args:
+            canlist: list of CAN packets; any length > 0
+        Returns:
+            python generator yielding tuples (e_relative, e_system)
+        """
+        for count, frame in enumerate(canlist, 1):
+            self.observed_idcounts[frame['id']] += 1
+            # Calculate relative entropy of message ID
+            p = self.observed_idcounts[frame['id']] / count
+            q = idprobs.get(frame['id'], 0)
+            if q == 0:
+                e_relative = np.Infinity
+            else:
+                e_relative = p * np.log(p / q)
 
-        # Calculate change in system entropy
-        old_system_entropy = observed_system_entropy
-        observed_system_entropy = 0
-        for v in observed_idcounts.values():
-            p = v / count
-            with np.errstate(divide='ignore'):
-                observed_system_entropy -= p * np.log(p)
-        e_system.append(observed_system_entropy - old_system_entropy)
-    return e_relative, e_system
+            # Calculate change in system entropy
+            old_system_entropy = self.observed_system_entropy
+            self.observed_system_entropy = 0
+            for v in self.observed_idcounts.values():
+                p = v / count
+                with np.errstate(divide='ignore'):
+                    self.observed_system_entropy -= p * np.log(p)
+            e_system = self.observed_system_entropy - old_system_entropy
+        yield e_relative, e_system
 
 
 def generate_feature_lists(canlist, idprobs):
@@ -401,9 +411,10 @@ def generate_feature_lists(canlist, idprobs):
     }
 
     featurelist['occurrences_in_last_sec'] = list(ID_Past().feed(canlist))
-    e_relative, e_system = id_entropy(canlist, idprobs)
-    featurelist['relative_entropy'] = e_relative
-    featurelist['system_entropy_change'] = e_system
+    # zip(*iterable) separates an iterable of length-N tuples into N tuples
+    e_relative, e_system = zip(*ID_Entropy().feed(canlist, idprobs))
+    featurelist['relative_entropy'] = list(e_relative)
+    featurelist['system_entropy_change'] = list(e_system)
 
     return featurelist
 
