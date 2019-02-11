@@ -23,10 +23,8 @@ class TwoStageIDS:  # pylint: disable=too-many-instance-attributes
             'idprobs_path': None
         }
         # Simulation variables start here.
-        self.frames_last_sec = []
-        self.idcounts = {}
-        self.total_frames = 0
-        self.system_entropy = 0
+        self.id_freq = dp.ID_Past()
+        self.id_entr = dp.ID_Entropy()
 
     def init_ids(self):
         if self.params['dnn_dir_path']:
@@ -90,11 +88,9 @@ class TwoStageIDS:  # pylint: disable=too-many-instance-attributes
             raise RuntimeError('The DNN must be trained before a simulation can be started!')
         if not self.rules_trained:
             raise RuntimeError('The Rules Based IDS must be prepared before a simulation can be started!')
-        self.frames_last_sec = []
-        self.idcounts = {}
-        self.total_frames = 0
-        self.system_entropy = 0
         self.in_simulation = True
+        self.id_freq = dp.ID_Past()
+        self.id_entr = dp.ID_Entropy()
 
     def stop_simulation(self):
         if not self.in_simulation:
@@ -105,40 +101,14 @@ class TwoStageIDS:  # pylint: disable=too-many-instance-attributes
         passed = self.rules.test(frame)
         if not passed[0]: # passed is a pair (passed rule, rule_name)
             return passed
-        else: # Passed RuleBasedIDS, test against DNNBasedIDS.
-            self.frames_last_sec.append(frame)
-            # Remove frames from frames_last_sec older than 10000 0.1ms
-            # increments from this frame.
-            self.frames_last_sec = list(filter(
-                lambda x: frame['timestamp'] - x['timestamp'] < 10000,
-                self.frames_last_sec
-            ))
-            id = frame['id']
-            self.idcounts.setdefault(id, 0)
-            self.idcounts[id] += 1
-            self.total_frames += 1
-
+        else:  # Passed RuleBasedIDS, test against DNNBasedIDS.
             processed_frame = {'id': id}
+            processed_frame['occurrences_in_last_sec'] = next(
+                self.id_freq.feed([frame]))
 
-            occurrences_in_last_sec = 0
-            for old_frame in self.frames_last_sec:
-                if old_frame['id'] == frame['id']:
-                    occurrences_in_last_sec += 1
-            processed_frame['occurrences_in_last_sec'] = occurrences_in_last_sec
-
-            p = self.idcounts[frame['id']] / self.total_frames
-            q = self.idprobs.get(frame['id'], 0)
-            if q == 0:
-                processed_frame['relative_entropy'] = 100
-            else:
-                processed_frame['relative_entropy'] = p * log(p / q)
-
-            old_system_entropy = self.system_entropy
-            self.system_entropy = 0
-            for idcount in self.idcounts.values():
-                p = idcount / self.total_frames
-                self.system_entropy -= p * log(p)
-            processed_frame['system_entropy_change'] = (self.system_entropy
-                - old_system_entropy)
+            e_relative, e_system = next(
+                self.id_entr.feed([frame], self.idprobs))
+            processed_frame['relative_entropy'] = e_relative
+            processed_frame['system_entropy_change'] = e_system
 
             return self.dnn.predict_frame(processed_frame)
