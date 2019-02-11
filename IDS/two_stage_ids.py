@@ -4,7 +4,10 @@ import IDS.preprocessor as dp
 from numpy import log
 import os.path
 
-class TwoStageIDS:
+class TwoStageIDS:  # pylint: disable=too-many-instance-attributes
+    """Intrusion Detection System using two stages for classification.
+
+    """
     def __init__(self):
         self.dnn_trained = False
         self.rules_trained = False
@@ -99,9 +102,9 @@ class TwoStageIDS:
         self.in_simulation = False
 
     def judge_single_frame(self, frame):
-        is_malicious = self.rules.test(frame)
-        if is_malicious[0]: # is_malicious is a pair (is_malicious, rule_name)
-            return is_malicious
+        passed = self.rules.test(frame)
+        if not passed[0]: # passed is a pair (passed rule, rule_name)
+            return passed
         else: # Passed RuleBasedIDS, test against DNNBasedIDS.
             self.frames_last_sec.append(frame)
             # Remove frames from frames_last_sec older than 10000 0.1ms

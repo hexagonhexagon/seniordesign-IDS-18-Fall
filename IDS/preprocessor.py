@@ -303,36 +303,46 @@ def inject_malicious_packets(canlist, malgen):
     return newcanlist, labels
 
 
-def id_past(canlist, time_frame=1):
+class ID_Past:  # pylint: disable=too-few-public-methods,invalid-name
     """Calculates the frequency of each unique ID
     Frequency is calculated by counting the number of packets within the
     time_frame, including the current packet, and dividing by the length of the
     time_frame.
+    This is a class, so that the memory queue can persist, which allows for
+    feeding CAN frames in one-by-one.
 
-    Args:
-        canlist: a list of CAN packets
+    Attributes:
         time_frame: float distance in seconds to check back in time.
-    Returns:
-        A python generator, for each packet in canlist, yielding the frequency
-        of the corresponding ID.
 
     Notes:
         CAN timestamps are in units of 0.1 miliseconds
     """
-    frame_q = collections.deque()
-    id_counts = collections.Counter()
-    for frame in canlist:
-        frame_q.append(frame)
+    def __init__(self, time_frame=1):
+        self.time_frame = time_frame
+        self.frame_q = collections.deque()
+        self.id_counts = collections.Counter()
 
-        # Get rid of frames older than the time interval
-        id_counts[frame['id']] += 1
-        tdiff = frame_q[-1]['timestamp'] - frame_q[0]['timestamp']
-        while tdiff >= time_frame * 1e4:
-            pop_frame = frame_q.popleft()
-            tdiff = frame_q[-1]['timestamp'] - frame_q[0]['timestamp']
-            id_counts[pop_frame['id']] -= 1
+    def feed(self, canlist):
+        """feed CAN frames into the counting queue.
+        Args:
+            canlist: a list of CAN packets; any length > 0
+            time_frame: float distance in seconds to check back in time.
+        Returns:
+            A python generator, for each packet in canlist, yielding the frequency
+            of the corresponding ID.
+        """
+        for frame in canlist:
+            self.frame_q.append(frame)
 
-        yield id_counts[frame['id']] / time_frame
+            # Get rid of frames older than the time interval
+            self.id_counts[frame['id']] += 1
+            tdiff = self.frame_q[-1]['timestamp'] - self.frame_q[0]['timestamp']
+            while tdiff >= self.time_frame * 1e4:
+                pop_frame = self.frame_q.popleft()
+                tdiff = self.frame_q[-1]['timestamp'] - self.frame_q[0]['timestamp']
+                self.id_counts[pop_frame['id']] -= 1
+
+            yield self.id_counts[frame['id']] / self.time_frame
 
 
 def id_entropy(canlist, idprobs):
@@ -390,7 +400,7 @@ def generate_feature_lists(canlist, idprobs):
         'system_entropy_change': []
     }
 
-    featurelist['occurrences_in_last_sec'] = list(id_past(canlist))
+    featurelist['occurrences_in_last_sec'] = list(ID_Past().feed(canlist))
     e_relative, e_system = id_entropy(canlist, idprobs)
     featurelist['relative_entropy'] = e_relative
     featurelist['system_entropy_change'] = e_system

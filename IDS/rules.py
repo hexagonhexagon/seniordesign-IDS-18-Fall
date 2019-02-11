@@ -203,7 +203,7 @@ class MessageFrequency(Rule):
             return
 
         # check ID appearance frequency
-        id_counts = IDS.preprocessor.id_past(canlist, self.time_frame)
+        id_counts = IDS.preprocessor.ID_Past(self.time_frame).feed(canlist)
         for count, pak in zip(id_counts, canlist):
             can_id = pak['id']
             if can_id not in self.frequencies:
@@ -225,7 +225,7 @@ class MessageFrequency(Rule):
         see Rule.prepare
         """
         if canlist:
-            id_counts = IDS.preprocessor.id_past(canlist, self.time_frame)
+            id_counts = IDS.preprocessor.ID_Past(self.time_frame).feed(canlist)
             for count, pak in zip(id_counts, canlist):
                 can_id = pak['id']
                 self.frequencies[can_id].append(count)
