@@ -63,12 +63,12 @@ def test_test(prepared_rules_ids, canlist_good):
     single_frame = canlist_good[0]
     # test bad return
     # 'dummy' rule always returns False
-    assert prepared_rules_ids.test(single_frame) == (False, 'dummy')
+    assert prepared_rules_ids.test(single_frame) == (True, 'dummy')
     with pytest.raises(TypeError):
         prepared_rules_ids.test(canlist_good)
 
     for res in prepared_rules_ids.test_series(canlist_good):
-        assert res == (False, 'dummy')
+        assert res == (True, 'dummy')
 
     with pytest.raises(TypeError):
         # test_series is a generator
@@ -78,7 +78,7 @@ def test_test(prepared_rules_ids, canlist_good):
     # remove bad rule
     del prepared_rules_ids.roster['dummy']
 
-    assert prepared_rules_ids.test(single_frame) == (True, None)
+    assert prepared_rules_ids.test(single_frame) == (False, None)
 
     for res in prepared_rules_ids.test_series(canlist_good):
-        assert res == (True, None)
+        assert res == (False, None)

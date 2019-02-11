@@ -57,7 +57,8 @@ class Rule(ABC):
         Returns: python generator: bool, ...
             The classification is a list of boolean values. The function should
             return one classification for each CAN frame received in the list.
-            This list should be returned as a python generator object.
+            This list should be returned as a python generator object. bool
+            should represent "is_malicious" for a given CAN frame.
 
         Examples:
             >>> MyRule.test([pak1, pak2, pak3])

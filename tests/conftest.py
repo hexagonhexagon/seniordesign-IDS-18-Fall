@@ -37,6 +37,6 @@ def canlist_bad(canlist_good, malgen):
     badlist, labels = IDS.preprocessor.inject_malicious_packets(
         canlist_good, malgen)
     # labels returned by inject_malicious_packets are ints (0,1) for
-    # "is malicious", but rules return bools for "passed rule"
-    answers = [not bool(x) for x in labels]
+    # "is malicious"; rules also return bools for "is_malicious"
+    answers = [bool(x) for x in labels]
     return badlist, answers

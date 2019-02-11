@@ -35,7 +35,7 @@ class DummyCl(Rule):
 
     def test(self, canlist):
         for pak in canlist:
-            yield pak['id'] != pak['id']
+            yield pak['id'] == pak['id']
 
 
 def test_dummy():
@@ -47,7 +47,7 @@ def test_dummy():
     # check that prepare() can be called despite not being implemented by the
     # child
     dum.prepare()
-    assert not any(dum.test(SAMPLE))
+    assert all(dum.test(SAMPLE))
 
 
 #---------------------#
@@ -62,7 +62,7 @@ class LoadCl(Rule):
 
     def test(self, canlist):
         for asdf_id, can_id in zip(self.asdf, (x['id'] for x in canlist)):
-            yield asdf_id == can_id
+            yield asdf_id != can_id
 
     def prepare(self, canlist=None):
         if canlist:
@@ -99,7 +99,7 @@ def test_load(tmp_path):
     # load savedata
     asdf = empty_rule()
     asdf.prepare()
-    assert all(asdf.test(SAMPLE))
+    assert not any(asdf.test(SAMPLE))
     # remove sample file (check out pytest fixtures for this)
     sample_path.unlink()
     sample_path.parent.rmdir()

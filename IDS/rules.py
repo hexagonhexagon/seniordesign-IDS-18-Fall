@@ -8,6 +8,8 @@ Notes:
         timestamp is an int representing 0.1 millisecond intervals since start
         id is an 11-bit integer
         data is an 8-byte bytes object
+
+    Test Results are bools representing "is_malicious" for each CAN frame
 """
 import collections
 from statistics import mean, stdev
@@ -26,7 +28,7 @@ class ID_Whitelist(Rule):
         see Rule.test
         """
         for pak in canlist:
-            yield pak['id'] in self.whitelist
+            yield pak['id'] not in self.whitelist
 
     def prepare(self, canlist=None):
         """Compile whitelist from CAN data, or import existing profile.
@@ -113,14 +115,14 @@ class TimeInterval(Rule):
         for delay, pak in zip(delays, canlist):
             can_id = pak['id']
             if can_id not in self.valid_bins:
-                yield False
-            elif delay == -1:
                 yield True
+            elif delay == -1:
+                yield False
             elif np.digitize(delay, self.bins[can_id]) \
                     in self.valid_bins[can_id]:
-                yield True
-            else:
                 yield False
+            else:
+                yield True
 
     def prepare(self, canlist=None):
         """Calculate acceptable delay values
@@ -199,7 +201,7 @@ class MessageFrequency(Rule):
         """
         # return True if sample is too small
         if len(canlist) < self.time_frame * 1e4:
-            yield from (True for x in canlist)
+            yield from (False for x in canlist)
             return
 
         # check ID appearance frequency
@@ -207,13 +209,13 @@ class MessageFrequency(Rule):
         for count, pak in zip(id_counts, canlist):
             can_id = pak['id']
             if can_id not in self.frequencies:
-                yield False
+                yield True
                 continue
             low, high = self.frequencies[can_id]
             if low <= count <= high:
-                yield True
-            else:
                 yield False
+            else:
+                yield True
 
     def prepare(self, canlist=None):
         """Create frequency range dictionary
@@ -288,21 +290,21 @@ class MessageSequence(Rule):
             if len(seq) <= self.length:
                 # Fill initial sequence
                 if pak['id'] in self.whitelist:
-                    yield True
+                    yield False
                 else:
                     seq.pop()  # remove bad value
-                    yield False
+                    yield True
                 continue
             else:
                 prev = seq.popleft()
 
             if tuple(seq) in self.sequences:
-                yield True
+                yield False
             else:
                 # get rid of bad value from sequence
                 seq.appendleft(prev)
                 seq.pop()
-                yield False
+                yield True
 
     def prepare(self, canlist=None):
         """Create set of allowed sequences

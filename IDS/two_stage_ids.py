@@ -61,7 +61,7 @@ class TwoStageIDS:  # pylint: disable=too-many-instance-attributes
         self.dnn.change_param(key, value)
 
     def retrain_rules(self, canlist):
-        self.rules.prepare(canlist)
+        self.rules.prepare(canlist, self.params['rules_profile'])
         self.rules_trained = True
 
     def retrain_dnn(self, input_function, num_steps):
@@ -98,9 +98,9 @@ class TwoStageIDS:  # pylint: disable=too-many-instance-attributes
         self.in_simulation = False
 
     def judge_single_frame(self, frame):
-        passed = self.rules.test(frame)
-        if not passed[0]: # passed is a pair (passed rule, rule_name)
-            return passed
+        is_malicious = self.rules.test(frame)
+        if is_malicious[0]: # is_malicious is a pair (is_malicious, rule_name)
+            return is_malicious
         else:  # Passed RuleBasedIDS, test against DNNBasedIDS.
             processed_frame = {'id': id}
             processed_frame['occurrences_in_last_sec'] = next(

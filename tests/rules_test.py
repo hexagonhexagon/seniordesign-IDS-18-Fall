@@ -28,11 +28,11 @@ def canlist_bad_whitelist(canlist_good, canlist_bad):
     goodlist = set(x['id'] for x in canlist_good)
     new_badlist = []
     new_answers = []
-    for pak, good in zip(*canlist_bad):
-        if (pak['id'] in goodlist and good) \
-                or (pak['id'] not in goodlist and not good):
+    for pak, bad in zip(*canlist_bad):
+        if (pak['id'] in goodlist and not bad) \
+                or (pak['id'] not in goodlist and bad):
             new_badlist.append(pak)
-            new_answers.append(good)
+            new_answers.append(bad)
     return new_badlist, new_answers
 
 
@@ -43,12 +43,13 @@ def check_rule(rul, can_ans):
     badlist, answers = can_ans
     false_counts = collections.Counter()  # defaults any key to 0
     results = rul.test(badlist)
+    # result and answer represent "is_malicious" for a given CAN packet
     for result, answer in zip(results, answers):
         if result != answer:
-            if answer:  # good packet; failed rule
-                false_counts['positive'] += 1
-            else:  # bad packet; passed rule
+            if answer:  # bad packet; passed rule
                 false_counts['negative'] += 1
+            else:  # good packet; failed rule
+                false_counts['positive'] += 1
 
     print('false-positives: {} / {}'.format(false_counts['positive'],
                                             len(badlist)))

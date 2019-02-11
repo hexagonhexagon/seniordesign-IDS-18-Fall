@@ -71,7 +71,8 @@ class RulesIDS:
         Returns:
             Tuple (bool, str)
             Returns on the first rule to fail, with str as the name of the rule
-            that failed the packet. Else, str is None
+            that failed the packet. Else, str is None. bool represents
+            "is_malicious".
 
         Raises:
             TypeError: if can_frame isn't like a dict
@@ -82,9 +83,9 @@ class RulesIDS:
         for name, rule in self.roster.items():
             # Each rule is a generator yielding booleans for a list sent in.
             result = next(rule.test([can_frame]))
-            if not result:
-                return False, name
-        return True, None
+            if result:
+                return True, name
+        return False, None
 
     def test_series(self, canlist):
         """Examine list of CAN packets according to rules in the roster
@@ -95,7 +96,7 @@ class RulesIDS:
             A python generator yieldinga tuples (bool, name).
             Each tuple corresponds to a packet in the input list.
             str is the name of the rule to first fail a given packet, or None
-            if passed.
+            if passed. bool represents "is_malicious".
 
         Raises:
             TypeError: if canlist isn't like a list
@@ -113,9 +114,9 @@ class RulesIDS:
             yielded = False
             for name, rule in results.items():
                 # next() returns next generator item
-                if not next(rule):
+                if next(rule):
                     yielded = True
-                    yield False, name
+                    yield True, name
                     break
             if not yielded:
-                yield True, None
+                yield False, None
