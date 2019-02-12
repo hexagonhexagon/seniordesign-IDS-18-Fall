@@ -57,7 +57,7 @@ class RulesIDS:
         # Each item in roster should be a class definition deriving from
         # rule_abc.Rule
         new_roster = {}
-        for name, item in self.roster.items():
+        for name, item in IDS.rules.ROSTER.items():
             rule_instance = item(self.profile_id)
             rule_instance.prepare(canlist)
             new_roster[name] = rule_instance
