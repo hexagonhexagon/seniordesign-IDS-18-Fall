@@ -386,7 +386,7 @@ class ID_Entropy:  # pylint: disable=too-few-public-methods,invalid-name
                 with np.errstate(divide='ignore'):
                     self.observed_system_entropy -= p * np.log(p)
             e_system = self.observed_system_entropy - old_system_entropy
-        yield e_relative, e_system
+            yield e_relative, e_system
 
 
 def generate_feature_lists(canlist, idprobs):
