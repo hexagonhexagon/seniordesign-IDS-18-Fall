@@ -6,6 +6,10 @@ parse_traffic -- Take in the path to a .traffic file, parse the file, and
 return a list of CAN messages.
 parse_csv -- Take in the path to a CAN frame .csv file, parse the file, and
 return a list of CAN messages.
+write_canlist -- Take a list of CAN frames along with a path to write a file to,
+and write the list of CAN frames to a file.
+load_canlist -- Take the path to a CAN frame list file and return the CAN list
+from the file.
 validate_can_data -- Take in a list of CAN messages, determine if the list
 of messages is valid or not, and print all errors that are found to the
 screen.
@@ -32,6 +36,7 @@ import json
 import os.path
 import re
 import struct
+from copy import deepcopy
 
 import numpy as np
 
@@ -144,6 +149,54 @@ def parse_csv(filepath):
             messages.append({'id': id, 'timestamp': ts, 'data': data})
 
     return messages
+
+
+def write_canlist(canlist, outfilepath):
+    """Take a list of CAN frames along with a path to write a file to, and
+    and write the list of CAN frames to a file.
+
+    Arguments:
+    canlist -- A list of CAN messages produced from parse_can or
+    parse_traffic.
+    outfilepath -- A string containing the path to the file
+    you want to write. The file will be created by this function.
+
+    This will write the list of CAN frames to the file specified
+    in outfilepath in a JSON format.
+    """
+    # A deep copy is performed to prevent the function from modifying canlist
+    # outside of the call.
+    writable_canlist = deepcopy(canlist)
+    # JSON can't serialize the bytes objects in the 'data' field of CAN frames,
+    # so we convert them to lists.
+    for msg in writable_canlist:
+        msg['data'] = list(msg['data'])
+    with open(outfilepath, 'w+') as file:
+        json.dump(writable_canlist, file, indent=2)
+
+
+def load_canlist(filepath):
+    """Take the path to a CAN frame list file and return the CAN list
+    from the file.
+
+    Arguments:
+    filepath -- The path to the ID probability file. A
+    FileNotFoundError will be thrown if the path given here is not valid.
+
+    This will return a CAN frame list where each list item follows the format {'id': 1, 'timestamp': 1, 'data': b'\x00\x11'}.
+    """
+    if not os.path.exists(filepath):
+        raise FileNotFoundError(filepath + ' does not exist!')
+    elif os.path.isdir(filepath):
+        raise FileNotFoundError(filepath + ' is not a file!')
+    with open(filepath) as file:
+        canlist = json.load(file)
+    # The 'data' field for frames in the JSON file is a list, so we need to
+    # convert it back to a bytes object.
+    for msg in canlist:
+        msg['data'] = bytes(msg['data'])
+    return canlist
+
 
 
 def validate_can_data(canlist):
