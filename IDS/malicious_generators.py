@@ -39,8 +39,8 @@ def flood(time_window):
     """
     new_id = 0
     n_to_make = 21
-    timestamp_step = (time_window[0]['timestamp']
-                    - time_window[1]['timestamp']) / n_to_make
+    timestamp_step = (time_window[1]['timestamp']
+                    - time_window[0]['timestamp']) / n_to_make
     data = bytes([0, 0, 0, 0, 0, 0, 0, 0])
     for ii in range(n_to_make):
         timestamp = int(time_window[0]['timestamp'] + timestamp_step * ii)

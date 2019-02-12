@@ -374,7 +374,7 @@ class ID_Entropy:  # pylint: disable=too-few-public-methods,invalid-name
             p = self.observed_idcounts[frame['id']] / count
             q = idprobs.get(frame['id'], 0)
             if q == 0:
-                e_relative = np.Infinity
+                e_relative = 100
             else:
                 e_relative = p * np.log(p / q)
 
