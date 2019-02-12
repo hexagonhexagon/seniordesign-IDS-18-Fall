@@ -271,32 +271,24 @@ class MessageSequence(Rule):
         super().__init__(profile_id)
         self.length = length
         self.sequences = set()
-        self.whitelist = set()
 
     def test(self, canlist):
         """Check packet sequences
         Marks true for first packets within sequence length.
         Uses a queue to sample sequences; the queue is 'rolled back' one, if a
         bad packet is appended to the queue.
-        Using a whitelist to help prevent initial sequence corruption. Initial
-        sequence can get corrupted if bad values are present during filling.
+        Initial sequence can get corrupted if bad values are present during
+        filling. Using a sample from valid sequence list to prevent initial
+        sequence corruption.
 
         Note: if sequence sampling gets corrupted, rule will reject all packets
         """
-        seq = collections.deque()  # left is old
+        # using a sample from valid sequences to prime the initial sequence.
+        seq = collections.deque(next(iter(self.sequences)))  # left is old
         prev = None
         for pak in canlist:
             seq.append(pak['id'])
-            if len(seq) <= self.length:
-                # Fill initial sequence
-                if pak['id'] in self.whitelist:
-                    yield False
-                else:
-                    seq.pop()  # remove bad value
-                    yield True
-                continue
-            else:
-                prev = seq.popleft()
+            prev = seq.popleft()
 
             if tuple(seq) in self.sequences:
                 yield False
@@ -311,9 +303,6 @@ class MessageSequence(Rule):
         The set will be represented as a python set containing tuples.
         """
         if canlist:
-            # using whitelist to help prevent initial sequence corruption in
-            # test().
-            self.whitelist = set(x['id'] for x in canlist)
             for ii, _ in enumerate(canlist):
                 if ii < self.length:
                     continue
@@ -324,7 +313,6 @@ class MessageSequence(Rule):
             savedata = {
                 # can't save a set with JSON
                 'sequences': list(self.sequences),
-                'whitelist': list(self.whitelist),
                 'length': self.length
             }
             super()._save(savedata)
@@ -332,7 +320,6 @@ class MessageSequence(Rule):
             super()._load()
             # set lookups are much faster than lists: O(1) vs O(n)
             self.sequences = set(tuple(x) for x in self.sequences)
-            self.whitelist = set(self.whitelist)
 
 
 ROSTER = {
