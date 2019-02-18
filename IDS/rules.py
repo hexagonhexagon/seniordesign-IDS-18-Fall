@@ -118,7 +118,7 @@ class TimeInterval(Rule):
                 yield True
             elif delay == -1:
                 yield False
-            elif np.digitize(delay, self.bins[can_id]) \
+            elif int(np.digitize(delay, self.bins[can_id])) \
                     in self.valid_bins[can_id]:
                 yield False
             else:
