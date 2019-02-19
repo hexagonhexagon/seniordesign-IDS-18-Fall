@@ -39,7 +39,7 @@ Window
         id: background
         anchors.fill: parent
         fillMode: Image.Stretch
-        source: "IDS_GUI_Assets/Background.png"
+        source: "assets/Background.png"
 
         Image
         {
@@ -49,7 +49,7 @@ Window
             width: 277
             height: 198
             fillMode: Image.PreserveAspectFit
-            source: "IDS_GUI_Assets/fuelGauge.png"
+            source: "assets/fuelGauge.png"
 
             Image
             {
@@ -59,7 +59,7 @@ Window
                 width: 44
                 height: 33
                 fillMode: Image.PreserveAspectFit
-                source: "IDS_GUI_Assets/supportSmall.png"
+                source: "assets/supportSmall.png"
             }
         }
 
@@ -71,7 +71,7 @@ Window
             width: 250
             height: 160
             fillMode: Image.PreserveAspectFit
-            source: "IDS_GUI_Assets/tempGauge.png"
+            source: "assets/tempGauge.png"
 
             Image {
                 id: tempSupport
@@ -80,7 +80,7 @@ Window
                 width: 44
                 height: 33
                 fillMode: Image.PreserveAspectFit
-                source: "IDS_GUI_Assets/supportSmall.png"
+                source: "assets/supportSmall.png"
             }
         }
     }
@@ -93,7 +93,7 @@ Window
         width: 457
         height: 353
         fillMode: Image.Stretch
-        source: "IDS_GUI_Assets/BackgroundLights.png"
+        source: "assets/BackgroundLights.png"
 
         Image
         {
@@ -105,7 +105,7 @@ Window
             visible: oilLightOn
             z: 1
             fillMode: Image.PreserveAspectFit
-            source: "IDS_GUI_Assets/OilLight.png"
+            source: "assets/OilLight.png"
         }
 
         Image
@@ -118,7 +118,7 @@ Window
             visible: batteryLightOn
             z: 1
             fillMode: Image.PreserveAspectFit
-            source: "IDS_GUI_Assets/BatteryLight.png"
+            source: "assets/BatteryLight.png"
         }
 
         Image
@@ -131,7 +131,7 @@ Window
             visible: fluidLightOn
             z: 1
             fillMode: Image.PreserveAspectFit
-            source: "IDS_GUI_Assets/FluidLight.png"
+            source: "assets/FluidLight.png"
         }
 
         Image
@@ -144,7 +144,7 @@ Window
             visible: lowBeamLightOn
             z: 1
             fillMode: Image.PreserveAspectFit
-            source: "IDS_GUI_Assets/LowbeamLight.png"
+            source: "assets/LowbeamLight.png"
         }
 
         Image
@@ -157,7 +157,7 @@ Window
             visible: seatBeltLightOn
             z: 1
             fillMode: Image.PreserveAspectFit
-            source: "IDS_GUI_Assets/SeatbeltLight.png"
+            source: "assets/SeatbeltLight.png"
         }
 
         Image
@@ -170,7 +170,7 @@ Window
             visible: engineLightOn
             z: 1
             fillMode: Image.PreserveAspectFit
-            source: "IDS_GUI_Assets/EngineLight.png"
+            source: "assets/EngineLight.png"
         }
 
         Image
@@ -183,7 +183,7 @@ Window
             visible: airbagLightOn
             z: 1
             fillMode: Image.PreserveAspectFit
-            source: "IDS_GUI_Assets/AirbagLight.png"
+            source: "assets/AirbagLight.png"
         }
 
         Image
@@ -196,7 +196,7 @@ Window
             visible: highBeamLightOn
             z: 1
             fillMode: Image.PreserveAspectFit
-            source: "IDS_GUI_Assets/HighbeamLight.png"
+            source: "assets/HighbeamLight.png"
         }
 
         Image
@@ -209,7 +209,7 @@ Window
             visible: tempLightOn
             z: 1
             fillMode: Image.PreserveAspectFit
-            source: "IDS_GUI_Assets/TempLight.png"
+            source: "assets/TempLight.png"
         }
 
         Image
@@ -222,7 +222,7 @@ Window
             visible: absLightOn
             z: 1
             fillMode: Image.PreserveAspectFit
-            source: "IDS_GUI_Assets/ABSLight.png"
+            source: "assets/ABSLight.png"
         }
 
         Image
@@ -235,7 +235,7 @@ Window
             visible: brakeLightOn
             z: 1
             fillMode: Image.PreserveAspectFit
-            source: "IDS_GUI_Assets/ParkingBrakeLight.png"
+            source: "assets/ParkingBrakeLight.png"
         }
 
         Image
@@ -248,7 +248,7 @@ Window
             visible: tractionLightOn
             z: 1
             fillMode: Image.PreserveAspectFit
-            source: "IDS_GUI_Assets/TractionLight.png"
+            source: "assets/TractionLight.png"
         }
 
         Image
@@ -259,7 +259,7 @@ Window
             width: 49
             height: 41
             fillMode: Image.PreserveAspectFit
-            source: "IDS_GUI_Assets/OilOff.png"
+            source: "assets/OilOff.png"
         }
 
         Image
@@ -270,7 +270,7 @@ Window
             width: 50
             height: 41
             fillMode: Image.PreserveAspectFit
-            source: "IDS_GUI_Assets/BatteryOff.png"
+            source: "assets/BatteryOff.png"
         }
 
         Image
@@ -281,7 +281,7 @@ Window
             width: 55
             height: 41
             fillMode: Image.PreserveAspectFit
-            source: "IDS_GUI_Assets/FluidOff.png"
+            source: "assets/FluidOff.png"
         }
 
         Image
@@ -292,7 +292,7 @@ Window
             width: 48
             height: 49
             fillMode: Image.PreserveAspectFit
-            source: "IDS_GUI_Assets/HighbeamOff.png"
+            source: "assets/HighbeamOff.png"
         }
 
         Image
@@ -303,7 +303,7 @@ Window
             width: 52
             height: 45
             fillMode: Image.PreserveAspectFit
-            source: "IDS_GUI_Assets/SeatbeltOff.png"
+            source: "assets/SeatbeltOff.png"
         }
 
         Image
@@ -314,7 +314,7 @@ Window
             width: 55
             height: 49
             fillMode: Image.PreserveAspectFit
-            source: "IDS_GUI_Assets/EngineOff.png"
+            source: "assets/EngineOff.png"
         }
 
         Image
@@ -325,7 +325,7 @@ Window
             width: 55
             height: 41
             fillMode: Image.PreserveAspectFit
-            source: "IDS_GUI_Assets/AirbagOff.png"
+            source: "assets/AirbagOff.png"
         }
 
         Image
@@ -336,7 +336,7 @@ Window
             width: 52
             height: 41
             fillMode: Image.PreserveAspectFit
-            source: "IDS_GUI_Assets/LowbeamOff.png"
+            source: "assets/LowbeamOff.png"
         }
 
         Image
@@ -347,7 +347,7 @@ Window
             width: 55
             height: 49
             fillMode: Image.PreserveAspectFit
-            source: "IDS_GUI_Assets/TempOff.png"
+            source: "assets/TempOff.png"
         }
 
         Image
@@ -358,7 +358,7 @@ Window
             width: 55
             height: 49
             fillMode: Image.PreserveAspectFit
-            source: "IDS_GUI_Assets/ABSOff.png"
+            source: "assets/ABSOff.png"
         }
 
         Image
@@ -369,7 +369,7 @@ Window
             width: 55
             height: 49
             fillMode: Image.PreserveAspectFit
-            source: "IDS_GUI_Assets/ParkingBrakeOff.png"
+            source: "assets/ParkingBrakeOff.png"
         }
 
         Image
@@ -380,7 +380,7 @@ Window
             width: 55
             height: 49
             fillMode: Image.PreserveAspectFit
-            source: "IDS_GUI_Assets/TractionOff.png"
+            source: "assets/TractionOff.png"
         }
     }
 
@@ -394,7 +394,7 @@ Window
         antialiasing: true
         rotation: 0
         fillMode: Image.PreserveAspectFit
-        source: "IDS_GUI_Assets/Speedometer.png"
+        source: "assets/Speedometer.png"
 
 
         Image
@@ -408,7 +408,7 @@ Window
             antialiasing: true
             transformOrigin: Item.Bottom
             fillMode: Image.Stretch
-            source: "IDS_GUI_Assets/NeedleLarge.png"
+            source: "assets/NeedleLarge.png"
             smooth: true
         }
 
@@ -421,7 +421,7 @@ Window
             height: 37
             antialiasing: true
             fillMode: Image.PreserveAspectFit
-            source: "IDS_GUI_Assets/SupportLarge.png"
+            source: "assets/SupportLarge.png"
         }
     }
 
@@ -471,7 +471,7 @@ Window
             transformOrigin: Item.Bottom
             antialiasing: true
             smooth: true
-            source: "IDS_GUI_Assets/NeedleLarge.png"
+            source: "assets/NeedleLarge.png"
         }
 
         Image
@@ -483,10 +483,10 @@ Window
             height: 37
             fillMode: Image.PreserveAspectFit
             antialiasing: true
-            source: "IDS_GUI_Assets/SupportLarge.png"
+            source: "assets/SupportLarge.png"
         }
 
-        source: "IDS_GUI_Assets/Tachometer.png"
+        source: "assets/Tachometer.png"
         rotation: 0
     }
 
@@ -679,7 +679,7 @@ Window
         width: 609
         height: 298
         fillMode: Image.PreserveAspectFit
-        source: "IDS_GUI_Assets/turnBackground.png"
+        source: "assets/turnBackground.png"
 
         Image
         {
@@ -689,7 +689,7 @@ Window
             width: 52
             height: 56
             fillMode: Image.PreserveAspectFit
-            source: "IDS_GUI_Assets/turnLeftOff.png"
+            source: "assets/turnLeftOff.png"
         }
 
         Image
@@ -700,7 +700,7 @@ Window
             width: 53
             height: 60
             fillMode: Image.PreserveAspectFit
-            source: "IDS_GUI_Assets/turnRightOff.png"
+            source: "assets/turnRightOff.png"
         }
 
         Image
@@ -713,7 +713,7 @@ Window
             height: 63
             visible: leftTurnLightOn
             fillMode: Image.PreserveAspectFit
-            source: "IDS_GUI_Assets/turnLeftLight.png"
+            source: "assets/turnLeftLight.png"
         }
 
         Image
@@ -725,7 +725,7 @@ Window
             height: 63
             visible: false
             fillMode: Image.PreserveAspectFit
-            source: "IDS_GUI_Assets/turnRightLight.png"
+            source: "assets/turnRightLight.png"
         }
 
         Timer
