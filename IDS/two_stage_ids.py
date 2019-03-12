@@ -123,7 +123,7 @@ class TwoStageIDS:  # pylint: disable=too-many-instance-attributes
 
         Raises:
         RuntimeError -- A simulation has been started with the function
-        start_simulation.
+        start_simulation, or the Rules Based IDS or DNN Based IDS have not been trained.
 
         Returns a generator yielding one of three types of tuples:
         (True, str): The frame is malicious, and the string is the name of the
@@ -135,6 +135,10 @@ class TwoStageIDS:  # pylint: disable=too-many-instance-attributes
         """
         if self.in_simulation:
             raise RuntimeError('The TwoStageIDS must not be in a simulation in order to judge a dataset.')
+        if not self.dnn_trained:
+            raise RuntimeError('The DNN must be trained before a simulation can be started!')
+        if not self.rules_trained:
+            raise RuntimeError('The Rules Based IDS must be prepared before a simulation can be started!')
         rules_results = self.rules.test_series(canlist)
         dnn_results = self.dnn.predict(input_function)
         for rule_result, dnn_result in zip(rules_results, dnn_results):
