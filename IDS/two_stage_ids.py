@@ -203,6 +203,8 @@ class TwoStageIDS:  # pylint: disable=too-many-instance-attributes
         (False, float): The frame is not malicious, and the float value is the
         confidence of the DNN in its prediction.
         """
+        if not self.in_simulation:
+            raise RuntimeError('The TwoStageIDS is not currently in a simulation.')
         is_malicious = self.rules.test(frame)
         if is_malicious[0]: # is_malicious is a pair (is_malicious, rule_name)
             return is_malicious
