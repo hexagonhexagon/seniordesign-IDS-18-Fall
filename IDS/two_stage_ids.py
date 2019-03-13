@@ -35,14 +35,18 @@ class TwoStageIDS:  # pylint: disable=too-many-instance-attributes
         """
         if self.params['dnn_dir_path']:
             # If the DNN model trying to be loaded has
-            # been trained, then a .params file will exist.
+            # been created, then a .params file will exist.
             if os.path.exists(self.params['dnn_dir_path'] + '.params'):
                 print('Loading existing DNN model')
                 self.dnn.load_model(self.params['dnn_dir_path'])
-                self.dnn_trained = True
             else:
                 print('Creating new DNN model')
                 self.dnn.new_model(self.params['dnn_dir_path'])
+            # If the DNN model trying to be loaded has
+            # been trained, then the checkpoint folder will exist.
+            if os.path.exists(self.params['dnn_dir_path']):
+                self.dnn_trained = True
+            else:
                 self.dnn_trained = False
         if self.params['rules_profile']:
             self.rules.profile_id = self.params['rules_profile']
