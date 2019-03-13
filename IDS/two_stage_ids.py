@@ -114,6 +114,17 @@ class TwoStageIDS:  # pylint: disable=too-many-instance-attributes
         self.dnn.train(input_function, num_steps)
         self.dnn_trained = True
 
+    def _judge_dataset(self, canlist, input_function):
+        """Helper function for judge_dataset that creates the actual generator returned. Should never be used normally.
+        """
+        rules_results = self.rules.test_series(canlist)
+        dnn_results = self.dnn.predict(input_function)
+        for rule_result, dnn_result in zip(rules_results, dnn_results):
+            if not rule_result[0]:
+                yield rule_result
+            else:
+                yield dnn_result
+
     def judge_dataset(self, canlist, input_function):
         """Take a list of CAN frames as well as an input function, and run the frames through the Two Stage IDS and get the classifications of each frame. The Two Stage IDS must not be in a simulation in order for this function to work.
 
@@ -139,17 +150,13 @@ class TwoStageIDS:  # pylint: disable=too-many-instance-attributes
         """
         if self.in_simulation:
             raise RuntimeError('The TwoStageIDS must not be in a simulation in order to judge a dataset.')
-        if not self.dnn_trained:
+        elif not self.dnn_trained:
             raise RuntimeError('The DNN must be trained before judging a dataset.')
-        if not self.rules_trained:
+        elif not self.rules_trained:
             raise RuntimeError('The Rules Based IDS must be prepared before judging a dataset.')
-        rules_results = self.rules.test_series(canlist)
-        dnn_results = self.dnn.predict(input_function)
-        for rule_result, dnn_result in zip(rules_results, dnn_results):
-            if not rule_result[0]:
-                yield rule_result
-            else:
-                yield dnn_result
+        else:
+            return self._judge_dataset(canlist, input_function)
+
 
     def start_simulation(self):
         """Start a simulation of the Two Stage IDS, which allows the ability to feed the Two Stage IDS single CAN frames at a time in order to be classified, instead of having to preprocess the frames. Both the Rules Based IDS and DNN Based IDS must be trained before this can be started.
