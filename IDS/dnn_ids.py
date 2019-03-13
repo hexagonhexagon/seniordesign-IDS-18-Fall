@@ -185,7 +185,7 @@ class DNNBasedIDS:
         prediction = list(predictions)[0]
         pred_class = prediction['class_ids'][0]
         is_malicious = bool(pred_class)
-        confidence = prediction['probabilities'][pred_class]
+        confidence = float(prediction['probabilities'][pred_class])
         return is_malicious, confidence
 
     def predict(self, input_function):
@@ -201,5 +201,6 @@ class DNNBasedIDS:
         describing the probability the frame is malicious.
         """
         predictions = self._dnn.predict(input_function)
-        return map(lambda x: (bool(x['class_ids'][0]), x['probabilities'][x['class_ids'][0]]),
+        return map(lambda x: (bool(x['class_ids'][0]),
+                              float(x['probabilities'][x['class_ids'][0]])),
                    predictions)
