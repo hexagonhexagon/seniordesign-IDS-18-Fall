@@ -140,9 +140,9 @@ class TwoStageIDS:  # pylint: disable=too-many-instance-attributes
         if self.in_simulation:
             raise RuntimeError('The TwoStageIDS must not be in a simulation in order to judge a dataset.')
         if not self.dnn_trained:
-            raise RuntimeError('The DNN must be trained before a simulation can be started!')
+            raise RuntimeError('The DNN must be trained before judging a dataset.')
         if not self.rules_trained:
-            raise RuntimeError('The Rules Based IDS must be prepared before a simulation can be started!')
+            raise RuntimeError('The Rules Based IDS must be prepared before judging a dataset.')
         rules_results = self.rules.test_series(canlist)
         dnn_results = self.dnn.predict(input_function)
         for rule_result, dnn_result in zip(rules_results, dnn_results):
