@@ -57,12 +57,13 @@ def test_parse_csv():
     with pytest.raises(ValueError):
         dp.parse_csv(str(SAMPLE_PATH.parent / 'test_preprocessor.py'))
 
-def test_canlist():
+
+def test_canlist(tmp_path):
     frames = dp.parse_csv(
         str(SAMPLE_PATH /
             'csv/2006 Ford Fusion/Test Data/2006 Ford Fusion Test.csv'))
-    dp.write_canlist(frames, SAMPLE_PATH / 'test_preprocessor/canlist_validate.json')
-    frames_check = dp.load_canlist(SAMPLE_PATH / 'test_preprocessor/canlist_validate.json')
+    dp.write_canlist(frames, tmp_path / 'canlist_validate.json')
+    frames_check = dp.load_canlist(tmp_path / 'canlist_validate.json')
     assert frames == frames_check
     assert dp.validate_can_data(frames)
 
