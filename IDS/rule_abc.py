@@ -87,6 +87,11 @@ class Rule(ABC):
         if not self.is_prepared:
             raise ValueError("YOU ARE NOT PREPARED!!")
 
+    # _reset:
+    #   Rules should implement a private reset method.
+    #   This should reset all working data containers to their defaults (empty)
+    #   This should by prepare() whenever it is presented with new data.
+
     def prepare(self, canlist=None):
         """Prepare rule heuristics
         This method should be implemented as needed.

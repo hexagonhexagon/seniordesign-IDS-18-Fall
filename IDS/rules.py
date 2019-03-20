@@ -23,6 +23,14 @@ from IDS.rule_abc import Rule
 class ID_Whitelist(Rule):
     """Compares frame ID to whitelist"""
 
+    def __init__(self, profile_id):
+        super().__init__(profile_id)
+        self.whitelist = set()
+
+    def _reset(self):
+        """Reset Rule's working data"""
+        self.whitelist = set()
+
     def test(self, canlist):
         """Check against whitelist
         see Rule.test
@@ -36,15 +44,16 @@ class ID_Whitelist(Rule):
         See Rule.prepare
         """
         if canlist:
+            self._reset()
             # make new set of valid ID's
-            self.whitelist = set(x['id'] for x in canlist)  # pylint: disable=attribute-defined-outside-init
+            self.whitelist = set(x['id'] for x in canlist)
             savedata = {'whitelist': list(self.whitelist)}
             super()._save(savedata)
         else:
             # load existing profile data
             super()._load()
             # JSON doesn't support sets
-            self.whitelist = set(self.whitelist)  # pylint: disable=attribute-defined-outside-init
+            self.whitelist = set(self.whitelist)
 
         self._is_prepared = True
 
@@ -79,7 +88,12 @@ class TimeInterval(Rule):
         self.__coverage = 1.0
         # init empty working data
         self.bins = {}
-        self.valid_bins = collections.defaultdict(list)
+        self.valid_bins = collections.defaultdict(set)
+
+    def _reset():
+        """Reset rule's working data"""
+        self.bins = {}
+        self.valid_bins = collections.defaultdict(set)
 
     @property
     def coverage(self):
@@ -140,6 +154,7 @@ class TimeInterval(Rule):
         see Rule.prepare
         """
         if canlist:
+            self._reset()
             # Sort time intervals by packet ID
             id_delays = collections.defaultdict(list)
             delays = self._delays(canlist)
@@ -159,10 +174,9 @@ class TimeInterval(Rule):
                 for ind in hist_inds:
                     if valid_bins_coverage >= self.coverage:
                         break
-                    self.valid_bins[can_id].append(ind)
+                    self.valid_bins[can_id].add(int(ind))
                     valid_bins_coverage += hist[ind]
                 # JSON can't handle numpy datatypes
-                self.valid_bins[can_id] = set(int(x) for x in hist_inds)
 
             savedata = {
                 'bins': self.bins,
@@ -202,6 +216,10 @@ class MessageFrequency(Rule):
         self.time_frame = 1
         self.frequencies = collections.defaultdict(list)
 
+    def _reset(self):
+        """Resets rule working data."""
+        self.frequencies = collections.defaultdict(list)
+
     def test(self, canlist):
         """Check that packet occurrence is within acceptable frequencies.
         see Rule.test
@@ -236,6 +254,7 @@ class MessageFrequency(Rule):
         see Rule.prepare
         """
         if canlist:
+            self._reset()
             id_counts = IDS.preprocessor.ID_Past(self.time_frame).feed(canlist)
             for count, pak in zip(id_counts, canlist):
                 can_id = pak['id']
@@ -283,6 +302,10 @@ class MessageSequence(Rule):
         self.length = length
         self.sequences = set()
 
+    def _reset(self):
+        """Resets rule working data"""
+        self.sequences = set()
+
     def test(self, canlist):
         """Check packet sequences
         Marks true for first packets within sequence length.
@@ -316,6 +339,7 @@ class MessageSequence(Rule):
         The set will be represented as a python set containing tuples.
         """
         if canlist:
+            self._reset()
             for ii, _ in enumerate(canlist):
                 if ii < self.length:
                     continue
