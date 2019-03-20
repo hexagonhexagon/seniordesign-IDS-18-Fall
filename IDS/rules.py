@@ -27,6 +27,7 @@ class ID_Whitelist(Rule):
         """Check against whitelist
         see Rule.test
         """
+        super().test(canlist)
         for pak in canlist:
             yield pak['id'] not in self.whitelist
 
@@ -44,6 +45,8 @@ class ID_Whitelist(Rule):
             super()._load()
             # JSON doesn't support sets
             self.whitelist = set(self.whitelist)  # pylint: disable=attribute-defined-outside-init
+                    
+        self.__is_prepared = True
 
 
 class TimeInterval(Rule):
@@ -111,6 +114,8 @@ class TimeInterval(Rule):
         """Check that delays between packet ID's are acceptable
         see Rule.test
         """
+        super().test(canlist)
+
         delays = self._delays(canlist)
         for delay, pak in zip(delays, canlist):
             can_id = pak['id']
@@ -174,6 +179,8 @@ class TimeInterval(Rule):
                 int(x): set(y)
                 for x, y in self.valid_bins.items()
             }
+                    
+        self.__is_prepared = True
 
 
 class MessageFrequency(Rule):
@@ -199,6 +206,8 @@ class MessageFrequency(Rule):
         """Check that packet occurrence is within acceptable frequencies.
         see Rule.test
         """
+        super().test(canlist)
+
         # return True if sample is too small
         if len(canlist) < self.time_frame * 1e4:
             yield from (False for x in canlist)
@@ -252,6 +261,8 @@ class MessageFrequency(Rule):
                 int(x): tuple(y)
                 for x, y in self.frequencies.items()
             }
+                    
+        self.__is_prepared = True
 
 
 class MessageSequence(Rule):
@@ -283,6 +294,8 @@ class MessageSequence(Rule):
 
         Note: if sequence sampling gets corrupted, rule will reject all packets
         """
+        super().test(canlist)
+
         # using a sample from valid sequences to prime the initial sequence.
         seq = collections.deque(next(iter(self.sequences)))  # left is old
         prev = None
@@ -320,6 +333,8 @@ class MessageSequence(Rule):
             super()._load()
             # set lookups are much faster than lists: O(1) vs O(n)
             self.sequences = set(tuple(x) for x in self.sequences)
+        
+        self.__is_prepared = True
 
 
 ROSTER = {

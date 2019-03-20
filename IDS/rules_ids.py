@@ -22,8 +22,23 @@ class RulesIDS:
     def __init__(self, profile_id=None):
         """Init IDS
         """
-        self.profile_id = profile_id
+        self.profile_id = __profile_id
         self.roster = IDS.rules.ROSTER
+        self.__is_prepared = False
+
+    @property
+    def is_prepared(self):
+        return self.__is_prepared
+    # is_prepared does not have a setter
+
+    @property
+    def profile_id(self):
+        return self.__profile_id
+    
+    @profile_id.setter
+    def profile_id(self, val):
+        self.__is_prepared = False
+        self.__profile_id = val
 
     def prepare(self, canlist=None, set_profile_id=None):
         """Prepare rule heuristics with working data
@@ -61,9 +76,11 @@ class RulesIDS:
             # instantiate contained class if not already
             if not isinstance(rule, IDS.rule_abc.Rule):
                 rule = rule(self.profile_id)
+            rule.profile_id = self.profile_id
             rule.prepare(canlist)
             new_roster[name] = rule
         self.roster = new_roster
+        self.__is_prepared = True
 
     def test(self, can_frame):
         """Examine single CAN packet according to rules in the roster
@@ -78,7 +95,10 @@ class RulesIDS:
 
         Raises:
             TypeError: if can_frame isn't like a dict
+            ValueError: if rules have not been prepared.
         """
+        if not self.is_prepared:
+            raise ValueError("Rules are not prepared.")
         if not isinstance(can_frame, collections.abc.Mapping):
             raise TypeError('can_frame must be like a dictionary')
 
@@ -102,7 +122,10 @@ class RulesIDS:
 
         Raises:
             TypeError: if canlist isn't like a list
+            ValueError: if rules have not been prepared.
         """
+        if not self.is_prepared:
+            raise ValueError("Rules are not prepared.")
         if not isinstance(canlist, collections.abc.Sequence):
             raise TypeError('canlist must be like a list')
 

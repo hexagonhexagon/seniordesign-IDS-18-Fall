@@ -34,8 +34,23 @@ class Rule(ABC):
         """
         if not profile_id.isidentifier():
             raise ValueError("profile_id needs to be valid python identifier")
-        self.profile_id = profile_id
+        self.__profile_id = profile_id
+        self.__is_prepared = False
         super().__init__()
+
+    @property
+    def is_prepared(self):
+        return self.__is_prepared
+    # is_prepared does not have a setter
+
+    @property
+    def profile_id(self):
+        return self.__profile_id
+    
+    @profile_id.setter
+    def profile_id(self, val):
+        self.__is_prepared = False
+        self.__profile_id = val
 
     @property
     def save_path(self):
@@ -53,6 +68,8 @@ class Rule(ABC):
         and “Test Series” functions of the Rules IDS class.
         If any working data is needed, it should be defined by implementing the
         "prepare" method.
+        Deriving classes should call super at the beginning of test. Or raise a
+        similar error as implemented here, if the rule has not beed prepared.
 
         Returns: python generator: bool, ...
             The classification is a list of boolean values. The function should
@@ -60,11 +77,15 @@ class Rule(ABC):
             This list should be returned as a python generator object. bool
             should represent "is_malicious" for a given CAN frame.
 
+        Raises:
+            ValueError: when rule has not been prepared.
+
         Examples:
             >>> MyRule.test([pak1, pak2, pak3])
             [True, False, True]
         """
-        pass
+        if not self.is_prepared:
+            raise ValueError("YOU ARE NOT PREPARED!!")
 
     def prepare(self, canlist=None):
         """Prepare rule heuristics
@@ -84,6 +105,7 @@ class Rule(ABC):
         The JSON should be a dictionary, with each key corresponding to the
         class attribute name of the data being saved. For example:
         {'whitelist': self.whitelist}.
+        Deriving classes should set __is_prepared to True, after preparation.
 
         Args:
             canlist: default = None
