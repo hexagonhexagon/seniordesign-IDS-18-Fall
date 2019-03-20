@@ -5,15 +5,7 @@ import os.path
 
 import pytest
 
-@pytest.fixture
-def prepared_ids(canlist_good):
-    ids = TwoStageIDS()
-    ids.change_ids_parameters('dnn_dir_path', './sample_data/two_stage_ids_test/test_dnn')
-    ids.change_ids_parameters('rules_profile', 'test_rules')
-    ids.change_ids_parameters('idprobs_path', './sample_data/two_stage_ids_test/idprobs.json')
-    ids.init_ids()
-    ids.retrain_rules(canlist_good)
-    return ids
+test_dir = os.path.dirname(__file__)
 
 @pytest.fixture
 def feature_lists_labels():
@@ -22,6 +14,21 @@ def feature_lists_labels():
 @pytest.fixture
 def bad_canlist():
     return dp.load_canlist('./sample_data/two_stage_ids_test/badlist.json')
+
+@pytest.fixture
+def prepared_ids(canlist_good, feature_lists_labels):
+    features, labels = feature_lists_labels
+    ids = TwoStageIDS()
+    ids.change_ids_parameters('dnn_dir_path', test_dir + '/sample_data/two_stage_ids_test/test_dnn')
+    ids.change_ids_parameters('rules_profile', 'test_rules')
+    ids.change_ids_parameters('idprobs_path', test_dir + '/sample_data/two_stage_ids_test/idprobs.json')
+    ids.init_ids()
+    if not ids.rules_trained:
+        ids.retrain_rules(canlist_good)
+    if not ids.dnn_trained:
+        ids.train_dnn(dnn_input_function(features, labels, shuffle=True), 2000)
+    return ids
+
 
 def test_change_parameters(prepared_ids: TwoStageIDS):
     # Check that invalid keys raise a ValueError for change_ids_parameters.
@@ -68,16 +75,19 @@ def test_init_ids(prepared_ids: TwoStageIDS):
     assert ids.dnn_trained
     assert ids.dnn._dnn
 
-    ids.change_ids_parameters('dnn_dir_path', '../savedata/dnn-models/test_dnn_2')
+    ids.change_ids_parameters('dnn_dir_path', test_dir + '/sample_data/two_stage_ids_test/test_dnn_2')
     ids.change_ids_parameters('rules_profile', 'test_rules_2')
     # First round: test creation of new model
     # Second round: test loading of old model
-    for _ in range(2):
-        ids.init_ids()
-        assert not ids.rules_trained
-        assert not ids.dnn_trained
-    # Remove any files that were created during the testing.
-    os.remove('../savedata/dnn-models/test_dnn_2.params')
+    try:
+        for _ in range(2):
+            ids.init_ids()
+            assert not ids.rules_trained
+            assert not ids.dnn_trained
+    finally:
+        # Remove any files that were created during the testing.
+        # Will run even if exception is raised.
+        os.remove(test_dir + '/sample_data/two_stage_ids_test/test_dnn_2.params')
 
     # Check that having an invalid idprobs_path causes an error.
     ids.change_ids_parameters('idprobs_path', 'does_not_exist')
