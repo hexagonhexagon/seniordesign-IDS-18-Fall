@@ -35,21 +35,21 @@ class Rule(ABC):
         if not profile_id.isidentifier():
             raise ValueError("profile_id needs to be valid python identifier")
         self.__profile_id = profile_id
-        self.__is_prepared = False
+        self._is_prepared = False
         super().__init__()
 
     @property
     def is_prepared(self):
-        return self.__is_prepared
+        return self._is_prepared
     # is_prepared does not have a setter
 
     @property
     def profile_id(self):
         return self.__profile_id
-    
+
     @profile_id.setter
     def profile_id(self, val):
-        self.__is_prepared = False
+        self._is_prepared = False
         self.__profile_id = val
 
     @property
@@ -130,7 +130,7 @@ class Rule(ABC):
             This allows for execution of arbitrary code
             This method is marked as private, because it is intented to only be
             used by child classes.
-        
+
         Raises:
             FileNotFoundError
         """

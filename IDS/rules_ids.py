@@ -22,7 +22,7 @@ class RulesIDS:
     def __init__(self, profile_id=None):
         """Init IDS
         """
-        self.profile_id = __profile_id
+        self.profile_id = profile_id
         self.roster = IDS.rules.ROSTER
         self.__is_prepared = False
 
@@ -34,7 +34,7 @@ class RulesIDS:
     @property
     def profile_id(self):
         return self.__profile_id
-    
+
     @profile_id.setter
     def profile_id(self, val):
         self.__is_prepared = False

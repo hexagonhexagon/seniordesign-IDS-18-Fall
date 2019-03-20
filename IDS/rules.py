@@ -45,8 +45,8 @@ class ID_Whitelist(Rule):
             super()._load()
             # JSON doesn't support sets
             self.whitelist = set(self.whitelist)  # pylint: disable=attribute-defined-outside-init
-                    
-        self.__is_prepared = True
+
+        self._is_prepared = True
 
 
 class TimeInterval(Rule):
@@ -179,8 +179,8 @@ class TimeInterval(Rule):
                 int(x): set(y)
                 for x, y in self.valid_bins.items()
             }
-                    
-        self.__is_prepared = True
+
+        self._is_prepared = True
 
 
 class MessageFrequency(Rule):
@@ -261,8 +261,8 @@ class MessageFrequency(Rule):
                 int(x): tuple(y)
                 for x, y in self.frequencies.items()
             }
-                    
-        self.__is_prepared = True
+
+        self._is_prepared = True
 
 
 class MessageSequence(Rule):
@@ -333,8 +333,8 @@ class MessageSequence(Rule):
             super()._load()
             # set lookups are much faster than lists: O(1) vs O(n)
             self.sequences = set(tuple(x) for x in self.sequences)
-        
-        self.__is_prepared = True
+
+        self._is_prepared = True
 
 
 ROSTER = {
