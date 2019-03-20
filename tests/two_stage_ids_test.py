@@ -9,17 +9,17 @@ test_dir = os.path.dirname(__file__)
 
 @pytest.fixture
 def feature_lists_labels():
-    return dp.load_feature_lists('./sample_data/two_stage_ids_test/features.json')
+    return dp.load_feature_lists(test_dir + '/sample_data/two_stage_ids_test/features.json')
 
 @pytest.fixture
 def bad_canlist():
-    return dp.load_canlist('./sample_data/two_stage_ids_test/badlist.json')
+    return dp.load_canlist(test_dir + '/sample_data/two_stage_ids_test/badlist.json')
 
 @pytest.fixture
 def prepared_ids(canlist_good, feature_lists_labels):
     features, labels = feature_lists_labels
     ids = TwoStageIDS()
-    ids.change_ids_parameters('dnn_dir_path', test_dir + '/sample_data/two_stage_ids_test/test_dnn')
+    ids.change_ids_parameters('dnn_dir_path', test_dir + '/../savedata/test_dnn')
     ids.change_ids_parameters('rules_profile', 'test_rules')
     ids.change_ids_parameters('idprobs_path', test_dir + '/sample_data/two_stage_ids_test/idprobs.json')
     ids.init_ids()
@@ -75,7 +75,7 @@ def test_init_ids(prepared_ids: TwoStageIDS):
     assert ids.dnn_trained
     assert ids.dnn._dnn
 
-    ids.change_ids_parameters('dnn_dir_path', test_dir + '/sample_data/two_stage_ids_test/test_dnn_2')
+    ids.change_ids_parameters('dnn_dir_path', test_dir + '/../savedata/test_dnn_2')
     ids.change_ids_parameters('rules_profile', 'test_rules_2')
     # First round: test creation of new model
     # Second round: test loading of old model
@@ -87,7 +87,7 @@ def test_init_ids(prepared_ids: TwoStageIDS):
     finally:
         # Remove any files that were created during the testing.
         # Will run even if exception is raised.
-        os.remove(test_dir + '/sample_data/two_stage_ids_test/test_dnn_2.params')
+        os.remove(test_dir + '/../savedata/test_dnn_2.params')
 
     # Check that having an invalid idprobs_path causes an error.
     ids.change_ids_parameters('idprobs_path', 'does_not_exist')
