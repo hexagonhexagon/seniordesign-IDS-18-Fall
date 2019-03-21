@@ -90,7 +90,7 @@ class TimeInterval(Rule):
         self.bins = {}
         self.valid_bins = collections.defaultdict(set)
 
-    def _reset():
+    def _reset(self):
         """Reset rule's working data"""
         self.bins = {}
         self.valid_bins = collections.defaultdict(set)
@@ -169,13 +169,13 @@ class TimeInterval(Rule):
 
                 # Add indicies of the histogram, from largest to smallest,
                 # until a suitable level of data coverage is reached.
-                hist_inds = hist.argsort()
+                hist_inds = hist.argsort()  # sorts in order (small to big)
                 valid_bins_coverage = 0.0
-                for ind in hist_inds:
+                for ind in reversed(hist_inds):
                     if valid_bins_coverage >= self.coverage:
                         break
                     self.valid_bins[can_id].add(int(ind))
-                    valid_bins_coverage += hist[ind]
+                    valid_bins_coverage += hist[ind] / sum(hist)
                 # JSON can't handle numpy datatypes
 
             savedata = {
