@@ -1,3 +1,0 @@
-numpy
-setuptools
-tensorflow==1.12.0
