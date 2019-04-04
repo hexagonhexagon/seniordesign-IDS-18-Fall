@@ -1,6 +1,6 @@
-from IDS.two_stage_ids import TwoStageIDS
-from IDS.dnn_ids import dnn_input_function
-import IDS.preprocessor as dp
+from ids.two_stage_ids import TwoStageIDS
+from ids.dnn_ids import dnn_input_function
+import ids.preprocessor as dp
 import os.path
 
 import pytest

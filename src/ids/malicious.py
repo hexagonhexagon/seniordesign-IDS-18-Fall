@@ -15,7 +15,7 @@ Attributes:
 import random
 from math import isclose  # used to compare floats
 
-import IDS.malicious_generators
+import ids.malicious_generators
 
 NONE_ROSTER = {'none': {'attack': None, 'probability': 0.5}}
 
@@ -43,7 +43,7 @@ class MaliciousGenerator:
             AssertionError:: roster probabilities not set correctly; need == 1
         """
         # MAYBE: import multiple modules with malicious_generators
-        self.roster = IDS.malicious_generators.ROSTER
+        self.roster = ids.malicious_generators.ROSTER
         self.roster.update(NONE_ROSTER)  # add to roster
         self._normalize_roster()
 

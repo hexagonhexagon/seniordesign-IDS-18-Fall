@@ -8,7 +8,7 @@ Note:
 import pytest
 
 import tests.rule_abc_test
-from IDS.rules_ids import RulesIDS
+from ids.rules_ids import RulesIDS
 
 TEST_ROSTER = {
     'dummy': tests.rule_abc_test.DummyCl,

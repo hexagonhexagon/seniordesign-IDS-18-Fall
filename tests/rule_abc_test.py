@@ -13,7 +13,7 @@ Note:
 import pathlib
 import pytest
 
-from IDS.rule_abc import Rule
+from ids.rule_abc import Rule
 
 SAMPLE = [{
     'id': 530,

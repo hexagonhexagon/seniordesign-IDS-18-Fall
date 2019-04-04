@@ -12,7 +12,7 @@ import collections
 
 import pytest
 
-import IDS.rules
+import ids.rules
 
 # False positive/negative rates to be considered passing.
 # values are probabilities [0, 1], and compared inclusively ( <= )
@@ -63,7 +63,7 @@ def test_whitelist(canlist_good, canlist_bad_whitelist, tmp_path):
     """Testing ID_Whitelist rule"""
 
     def empty_rule():
-        rul = IDS.rules.ID_Whitelist('test')
+        rul = ids.rules.ID_Whitelist('test')
         rul.SAVE_PATH = tmp_path
         return rul
 
@@ -81,7 +81,7 @@ def test_timeinterval(canlist_good, canlist_bad, tmp_path):
     """Testing TimeInterval rule"""
 
     def empty_rule():
-        rul = IDS.rules.TimeInterval('test')
+        rul = ids.rules.TimeInterval('test')
         rul.SAVE_PATH = tmp_path
         return rul
 
@@ -104,7 +104,7 @@ def test_frequency(canlist_good, canlist_bad, tmp_path):
     """Testing MessageFrequency rule"""
 
     def empty_rule():
-        rul = IDS.rules.MessageFrequency('test')
+        rul = ids.rules.MessageFrequency('test')
         rul.SAVE_PATH = tmp_path
         return rul
 
@@ -127,7 +127,7 @@ def test_sequence(canlist_good, canlist_bad, tmp_path):
     """Testing MessageSequence rule"""
 
     def empty_rule():
-        rul = IDS.rules.MessageSequence('test')
+        rul = ids.rules.MessageSequence('test')
         rul.SAVE_PATH = tmp_path
         return rul
 

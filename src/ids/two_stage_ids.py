@@ -1,6 +1,6 @@
-from IDS.dnn_ids import DNNBasedIDS
-from IDS.rules_ids import RulesIDS
-import IDS.preprocessor as dp
+from ids.dnn_ids import DNNBasedIDS
+from ids.rules_ids import RulesIDS
+import ids.preprocessor as dp
 from numpy import log
 import os.path
 

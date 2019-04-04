@@ -16,8 +16,8 @@ from statistics import mean, stdev
 
 import numpy as np
 
-import IDS.preprocessor
-from IDS.rule_abc import Rule
+import ids.preprocessor
+from ids.rule_abc import Rule
 
 
 class ID_Whitelist(Rule):
@@ -232,7 +232,7 @@ class MessageFrequency(Rule):
             return
 
         # check ID appearance frequency
-        id_counts = IDS.preprocessor.ID_Past(self.time_frame).feed(canlist)
+        id_counts = ids.preprocessor.ID_Past(self.time_frame).feed(canlist)
         for count, pak in zip(id_counts, canlist):
             can_id = pak['id']
             if can_id not in self.frequencies:
@@ -255,7 +255,7 @@ class MessageFrequency(Rule):
         """
         if canlist:
             self._reset()
-            id_counts = IDS.preprocessor.ID_Past(self.time_frame).feed(canlist)
+            id_counts = ids.preprocessor.ID_Past(self.time_frame).feed(canlist)
             for count, pak in zip(id_counts, canlist):
                 can_id = pak['id']
                 self.frequencies[can_id].append(count)

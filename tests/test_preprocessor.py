@@ -7,8 +7,8 @@ from ast import literal_eval
 
 import pytest
 
-import IDS.preprocessor as dp
-from IDS.malicious import MaliciousGenerator
+import ids.preprocessor as dp
+from ids.malicious import MaliciousGenerator
 
 SAMPLE_PATH = pathlib.Path(__file__).parent / 'sample_data'
 

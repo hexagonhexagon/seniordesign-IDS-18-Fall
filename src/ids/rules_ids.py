@@ -11,8 +11,8 @@ Notes:
     arbitrary code.
 """
 
-import IDS.rules
-import IDS.rule_abc
+import ids.rules
+import ids.rule_abc
 import collections.abc
 
 
@@ -23,7 +23,7 @@ class RulesIDS:
         """Init IDS
         """
         self.profile_id = profile_id
-        self.roster = IDS.rules.ROSTER
+        self.roster = ids.rules.ROSTER
         self.__is_prepared = False
 
     @property
@@ -74,7 +74,7 @@ class RulesIDS:
         new_roster = {}
         for name, rule in self.roster.items():
             # instantiate contained class if not already
-            if not isinstance(rule, IDS.rule_abc.Rule):
+            if not isinstance(rule, ids.rule_abc.Rule):
                 rule = rule(self.profile_id)
             rule.profile_id = self.profile_id
             rule.prepare(canlist)
