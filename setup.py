@@ -16,11 +16,13 @@ setup(
     long_description=long_description,
     author='UM-Dearborn CIS Team 10 W19',
 
-    python_requires='>=3.6, <3.7',
+    # python_requires='>=3.6, <3.7',
+    python_requires='>=3.6',
     install_requires=['numpy', 'tensorflow'],
     extras_require={
         'test': ['pytest']
     },
 
-    packages=find_packages(exclude=['tests', 'old*', 'old', 'NNIDS*', 'NNIDS'])
+    packages=find_packages('src'),
+    package_dir={'': 'src'}
 )

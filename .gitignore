@@ -10,3 +10,8 @@ __pycache__
 # files produced by IDS
 savedata/
 results/
+
+# python virtual env stuff
+.venv*
+venv*
+*.egg-info
