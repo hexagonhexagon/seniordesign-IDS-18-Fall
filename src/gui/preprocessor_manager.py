@@ -1,4 +1,4 @@
-import IDS.preprocessor as dp
+import ids.preprocessor as dp
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, QVariant, QUrl
 
 class DataPreprocessorManager(QObject):

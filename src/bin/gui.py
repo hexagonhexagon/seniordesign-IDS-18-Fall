@@ -2,7 +2,7 @@ import sys
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtQml import QQmlApplicationEngine
 
-from preprocessor_manager import DataPreprocessorManager
+from gui.preprocessor_manager import DataPreprocessorManager
 
 def main():
     global app
@@ -12,7 +12,7 @@ def main():
     engine = QQmlApplicationEngine()
     dpmanager = DataPreprocessorManager()
     engine.rootContext().setContextProperty("dpManager", dpmanager)
-    engine.load('main.qml')
+    engine.load('../gui/main.qml')
 
     sys.exit(app.exec_())
 
