@@ -1,4 +1,6 @@
 import sys
+import os.path
+
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtQml import QQmlApplicationEngine
 
@@ -12,7 +14,7 @@ def main():
     engine = QQmlApplicationEngine()
     dpmanager = DataPreprocessorManager()
     engine.rootContext().setContextProperty("dpManager", dpmanager)
-    engine.load('../gui/main.qml')
+    engine.load(os.path.dirname(os.path.abspath(__file__)) + '/gui/main.qml')
 
     sys.exit(app.exec_())
 
