@@ -8,8 +8,10 @@ from gui.preprocessor_manager import DataPreprocessorManager
 
 def main():
     global app
+    # The following command line argument sets the style of the QML app. There is no alternative.
+    # Available styles: https://doc.qt.io/qt-5/qtquickcontrols2-styles.html
+    sys.argv += ['--style', 'fusion']
     app = QApplication(sys.argv)
-    app.setStyle('Fusion')
 
     engine = QQmlApplicationEngine()
     dpmanager = DataPreprocessorManager()
