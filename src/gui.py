@@ -13,11 +13,14 @@ def main():
     sys.argv += ['--style', 'fusion']
     app = QApplication(sys.argv)
 
+    # Make the Data Preprocessor Manager accessible through QML.
     engine = QQmlApplicationEngine()
     dpmanager = DataPreprocessorManager()
     engine.rootContext().setContextProperty("dpManager", dpmanager)
+    # Load the QML file.
     engine.load(os.path.dirname(os.path.abspath(__file__)) + '/gui/main.qml')
 
+    # Run the QML file.
     sys.exit(app.exec_())
 
 if __name__ == "__main__":
