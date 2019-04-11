@@ -49,7 +49,7 @@ Row {
         // When the box is deselected or the user presses Enter, update the
         // slider value and emit the moved signal so any updates that that might
         // cause actually happen.
-        onAccepted: {
+        onEditingFinished: {
             slider.value = text
             slider.moved()
         }
