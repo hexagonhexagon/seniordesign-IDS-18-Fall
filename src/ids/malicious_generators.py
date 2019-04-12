@@ -5,12 +5,18 @@ class.
 Module Constants:
 - ROSTER: a dictionary containing references to each malicious generator
   contained in this module, and the default probabilities associated with each.
+  MaliciousGenerator will use this when importing this module.
 
 Notes:
     CAN Packet: a dict with 3 keys: timestamp, id, data
         timestamp is an int representing 0.1 milisecond intervals since start
         id is an 11-bit integer
         data is an 8-byte bytes object
+
+    Any malicous generator must be a function that accepts a "time_window",
+    and returns a CAN packet. This “time_window” is merely a tuple
+    of two CAN packets representing the space in which a malicious packet
+    will be inserted.
 """
 
 # TODO: need a way to communicate with IDS to get info about the CAN bus.
@@ -39,8 +45,8 @@ def flood(time_window):
     """
     new_id = 0
     n_to_make = 21
-    timestamp_step = (time_window[1]['timestamp']
-                    - time_window[0]['timestamp']) / n_to_make
+    timestamp_step = (time_window[1]['timestamp'] -
+                      time_window[0]['timestamp']) / n_to_make
     data = bytes([0, 0, 0, 0, 0, 0, 0, 0])
     for ii in range(n_to_make):
         timestamp = int(time_window[0]['timestamp'] + timestamp_step * ii)
@@ -72,6 +78,7 @@ def spoof(time_window):
     yield packet
 
 
+# Register Malicious Generators here
 ROSTER = {
     'random': {
         'attack': random_packet,
