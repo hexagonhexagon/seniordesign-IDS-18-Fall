@@ -166,16 +166,14 @@ class TwoStageIDSManager(QObject):
         self._ids.train_dnn(dnn_input_function(features, labels, shuffle=True), num_steps)
         self.get_parameters.emit()
 
-    @pyqtSlot()
+    # These are distinctly not a slot, because it will be called by the Simulation
+    # Manager, which will take this class in its constructor.
     def start_simulation(self):
         self._ids.start_simulation()
 
-    # This is distinctly not a slot, because it will be called by the Simulation
-    # Manager, which will take this class in its constructor.
     def judge_single_frame(self, can_frame):
         result = self._ids.judge_single_frame(can_frame)
         self.judgement_result.emit(result)
 
-    @pyqtSlot()
     def stop_simulation(self):
         self._ids.stop_simulation()
