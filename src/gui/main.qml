@@ -11,6 +11,32 @@ ApplicationWindow {
     width: 640
     height: 640
 
+    property double speedometerRotationAngle: -136;
+    property double tachometerRotationAngle: -103;
+
+    // Bools to keep track of whether an indicator light is on or off
+    property bool oilLightOn: false;
+    property bool batteryLightOn: false;
+    property bool fluidLightOn: false;
+    property bool highBeamLightOn: false;
+    property bool seatBeltLightOn: false;
+    property bool engineLightOn: false;
+    property bool airbagLightOn: false;
+    property bool lowBeamLightOn: false;
+    property bool tempLightOn: false;
+    property bool absLightOn: false;
+    property bool brakeLightOn: false;
+    property bool tractionLightOn: false;
+
+    // Bools and timer for turn signals and hazards -- turn signals blink once per second
+    property bool rightTurnLightOn: false;  // Indicates if light is currently lit
+    property bool leftTurnLightOn: false;
+    property bool rightTurnLightActivated: false; // Indicates if light is currently activated (blinking)
+    property bool leftTurnLightActivated: false;
+    property bool hazardsActivated: false;
+    property double startTime: 0;   // Time that blinker/hazards were last lit at
+
+
     ListModel {
         id: activationFnModel
         ListElement { name: "ReLU" }
@@ -152,7 +178,7 @@ ApplicationWindow {
                             // comes up as well as the filter (name of filter, then actual
                             // filter in parentheses). Definition in MultiFileSelect.qml.
                             MultiFileSelect {
-                                id: idprobsFileSelect
+                                id: idprobsFileSelectProcess
                                 title: qsTr("Select files for ID probabilities file")
                                 nameFilters: "CAN Frame Files (*.json *.traffic *.csv)"
                             }
@@ -202,7 +228,7 @@ ApplicationWindow {
                                 }
 
                                 ComboBox {
-                                    id: datasetIdprobs
+                                    id: datasetIdprobsProcess
                                     model: dpManager.availableIdprobs
                                 }
                             }
@@ -224,7 +250,7 @@ ApplicationWindow {
                                 // 0.0-1.0, and a text box that displays the current value and
                                 // can be changed to change the value of the slider.
                                 MaliciousGeneratorSlider {
-                                    id: noAttackSlider
+                                    id: noAttackSliderProcess
                                     label: qsTr("No Attack")
                                     value: 0.5
                                     // If the no attack slider is moved, proportionally
@@ -232,31 +258,31 @@ ApplicationWindow {
                                     // probabilities sum to 1.
                                     onMoved: {
                                         // Get (1 - previous slider value).
-                                        var attackValueSum =  randomSlider.value +
-                                        floodSlider.value + replaySlider.value +
-                                        spoofSlider.value
+                                        var attackValueSum =  randomSliderProcess.value +
+                                                floodSliderProcess.value + replaySliderProcess.value +
+                                                spoofSliderProcess.value
                                         if (attackValueSum == 0.0) {
                                             // If sum was 0, scale up other slider values equally.
                                             var newValue = (1 - value) / 4
-                                            randomSlider.value = newValue
-                                            floodSlider.value = newValue
-                                            replaySlider.value = newValue
-                                            spoofSlider.value = newValue
+                                            randomSliderProcess.value = newValue
+                                            floodSliderProcess.value = newValue
+                                            replaySliderProcess.value = newValue
+                                            spoofSliderProcess.value = newValue
                                         }
                                         else {
                                             // Otherwise, scale up other slider values by
                                             // multiplying by (1 - new value) / (1 - old
                                             // value), which ensures everything sums to 1.
                                             var multiplier = (1 - value) / attackValueSum
-                                            randomSlider.value *= multiplier
-                                            floodSlider.value *= multiplier
-                                            replaySlider.value *= multiplier
-                                            spoofSlider.value *= multiplier
+                                            randomSliderProcess.value *= multiplier
+                                            floodSliderProcess.value *= multiplier
+                                            replaySliderProcess.value *= multiplier
+                                            spoofSliderProcess.value *= multiplier
                                         }
                                     }
                                 }
                                 MaliciousGeneratorSlider {
-                                    id: randomSlider
+                                    id: randomSliderProcess
                                     label: qsTr("Random Attack")
                                     value: 0.125
                                     // If a non-no attack slider is moved, adjust the
@@ -266,64 +292,64 @@ ApplicationWindow {
                                     // very similar for the 3 sliders after this one.
                                     onMoved: {
                                         // Find the sum of all the other attacks.
-                                        var otherValueSum =  floodSlider.value + replaySlider.value + spoofSlider.value
+                                        var otherValueSum =  floodSliderProcess.value + replaySliderProcess.value + spoofSliderProcess.value
                                         if (value + otherValueSum <= 1.0)  {
                                             // Is the new sum of the attack probabilities
                                             // less than 1? If so, we adjust the No Attack
                                             // slider accordingly.
-                                            noAttackSlider.value = 1 - value - otherValueSum
+                                            noAttackSliderProcess.value = 1 - value - otherValueSum
                                         }
                                         else {
                                             // Otherwise, No Attack is at 0 and we set this
                                             // slider value to the highest it can be without
                                             // getting the probabilities to sum greater than
                                             // 1.
-                                            noAttackSlider.value = 0.0
+                                            noAttackSliderProcess.value = 0.0
                                             value = 1 - otherValueSum
                                         }
                                     }
                                 }
                                 MaliciousGeneratorSlider {
-                                    id: floodSlider
+                                    id: floodSliderProcess
                                     label: qsTr("Flood Attack")
                                     value: 0.125
                                     onMoved: {
-                                        var otherValueSum =  randomSlider.value + replaySlider.value + spoofSlider.value
+                                        var otherValueSum =  randomSliderProcess.value + replaySliderProcess.value + spoofSliderProcess.value
                                         if (value + otherValueSum <= 1.0)  {
-                                            noAttackSlider.value = 1 - value - otherValueSum
+                                            noAttackSliderProcess.value = 1 - value - otherValueSum
                                         }
                                         else {
-                                            noAttackSlider.value = 0.0
+                                            noAttackSliderProcess.value = 0.0
                                             value = 1 - otherValueSum
                                         }
                                     }
                                 }
                                 MaliciousGeneratorSlider {
-                                    id: replaySlider
+                                    id: replaySliderProcess
                                     label: qsTr("Replay Attack")
                                     value: 0.125
                                     onMoved: {
-                                        var otherValueSum =  randomSlider.value + floodSlider.value + spoofSlider.value
+                                        var otherValueSum =  randomSliderProcess.value + floodSliderProcess.value + spoofSliderProcess.value
                                         if (value + otherValueSum <= 1.0)  {
-                                            noAttackSlider.value = 1 - value - otherValueSum
+                                            noAttackSliderProcess.value = 1 - value - otherValueSum
                                         }
                                         else {
-                                            noAttackSlider.value = 0.0
+                                            noAttackSliderProcess.value = 0.0
                                             value = 1 - otherValueSum
                                         }
                                     }
                                 }
                                 MaliciousGeneratorSlider {
-                                    id: spoofSlider
+                                    id: spoofSliderProcess
                                     label: qsTr("Spoofing Attack")
                                     value: 0.125
                                     onMoved: {
-                                        var otherValueSum =  randomSlider.value + floodSlider.value + replaySlider.value
+                                        var otherValueSum =  randomSliderProcess.value + floodSliderProcess.value + replaySliderProcess.value
                                         if (value + otherValueSum <= 1.0)  {
-                                            noAttackSlider.value = 1 - value - otherValueSum
+                                            noAttackSliderProcess.value = 1 - value - otherValueSum
                                         }
                                         else {
-                                            noAttackSlider.value = 0.0
+                                            noAttackSliderProcess.value = 0.0
                                             value = 1 - otherValueSum
                                         }
                                     }
@@ -339,11 +365,11 @@ ApplicationWindow {
                                     // create_dataset function to be the probabilities we
                                     // just specified as a JS object.
                                     var malgenSettings = {
-                                        "none": noAttackSlider.value,
-                                        "random": randomSlider.value,
-                                        "flood": floodSlider.value,
-                                        "replay": replaySlider.value,
-                                        "spoof": spoofSlider.value
+                                        "none": noAttackSliderProcess.value,
+                                        "random": randomSliderProcess.value,
+                                        "flood": floodSliderProcess.value,
+                                        "replay": replaySliderProcess.value,
+                                        "spoof": spoofSliderProcess.value
                                     }
                                     // Call the function. We get the file selected via
                                     // SingleFileSelect.fileUrl, and we pass in the
@@ -518,13 +544,13 @@ ApplicationWindow {
                                         if (currentOptimizerProps.hasOwnProperty(prop)) {
                                             var value = currentOptimizerProps[prop]
                                             optimizerPropertiesModel.append(
-                                                {
-                                                    "name": prop,
-                                                    "type": typeof(value),
-                                                    "defaultValue": value,
-                                                    "value": value
-                                                }
-                                            )
+                                                        {
+                                                            "name": prop,
+                                                            "type": typeof(value),
+                                                            "defaultValue": value,
+                                                            "value": value
+                                                        }
+                                                        )
                                         }
                                     }
                                 }
@@ -660,10 +686,840 @@ ApplicationWindow {
 
             // Test Tab
             Item {
-                anchors.fill: parent
+                Row{
+                    spacing: 5
+                    Column{
+                        //Test Setup - used to load Idprobs file and CAN Frame File and start test
+                        GroupBox{
+                            title: qsTr("Test Setup")
+                            Column{
+                                spacing: 5
+                                //Select Idprobs file
+                                Row {
+                                    spacing: 5
+                                    Label {
+                                        text: qsTr("ID Probs to Use")
+                                    }
+
+                                    ComboBox {
+                                        id: datasetIdprobsTest
+                                        model: dpManager.availableIdprobs
+                                    }
+                                }
+
+                                //Select CAN Frame File
+                                SingleFileSelect {
+                                    id: canFrameFile
+                                    title: qsTr("Select CAN Frame File")
+                                    nameFilters: "CAN Frame Files (*.json *.traffic *.csv)"
+                                }
+                            }
+                        }
+
+                        //Report - used to output results of test and save results
+                        GroupBox{
+                            title: qsTr("Report")
+                            Column{
+                                spacing: 5
+                                //Accuracy
+                                Row{
+                                    spacing: 5
+                                    Text{
+                                        text: qsTr("Accuracy:")
+                                    }
+                                    Text{
+                                        id: accuracyResult
+                                        text: qsTr("0")
+                                    }
+                                }
+                                //Correct
+                                Row{
+                                    spacing: 5
+                                    Text{
+                                        text: qsTr("Correct:")
+                                    }
+                                    Text{
+                                        id: correctResult
+                                        text: qsTr("0%")
+                                    }
+                                }
+                                //Malicious Caught
+                                Row{
+                                    spacing: 5
+                                    Text{
+                                        text: qsTr("Malicious Caught:")
+                                    }
+                                    Text{
+                                        id: maliciousCaughtResult
+                                        text: qsTr("0%")
+                                    }
+                                }
+                                //False Positive
+                                Row{
+                                    spacing: 5
+                                    Text{
+                                        text: qsTr("False Positive:")
+                                    }
+                                    Text{
+                                        id: falsePositiveResult
+                                        text: qsTr("0%")
+                                    }
+                                }
+                                //Random Attack
+                                Row{
+                                    spacing: 5
+                                    Text{
+                                        text: qsTr("Random Sent:")
+                                    }
+                                    Text{
+                                        id: randomSentResult
+                                        text: qsTr("0")
+                                    }
+                                }
+                                Row{
+                                    spacing: 5
+                                    Text{
+                                        text: qsTr("Random Caught:")
+                                    }
+                                    Text{
+                                        id: randomCaughtResult
+                                        text: qsTr("0")
+                                    }
+                                }
+                                //Flood
+                                Row{
+                                    spacing: 5
+                                    Text{
+                                        text: qsTr("Flood Sent:")
+                                    }
+                                    Text{
+                                        id: floodSentResult
+                                        text: qsTr("0")
+                                    }
+                                }
+                                Row{
+                                    spacing: 5
+                                    Text{
+                                        text: qsTr("Flood Caught:")
+                                    }
+                                    Text{
+                                        id: floodCaughtResult
+                                        text: qsTr("0")
+                                    }
+                                }
+                                //Replay
+                                Row{
+                                    spacing: 5
+                                    Text{
+                                        text: qsTr("Replay Sent:")
+                                    }
+                                    Text{
+                                        id: replaySentResult
+                                        text: qsTr("0")
+                                    }
+                                }
+                                Row{
+                                    spacing: 5
+                                    Text{
+                                        text: qsTr("Replay Caught:")
+                                    }
+                                    Text{
+                                        id: replayCaughtResult
+                                        text: qsTr("0")
+                                    }
+                                }
+                                //Spoofing
+                                Row{
+                                    spacing: 5
+                                    Text{
+                                        text: qsTr("Spoofing Sent:")
+                                    }
+                                    Text{
+                                        id: spoofingSentResult
+                                        text: qsTr("0")
+                                    }
+                                }
+                                Row{
+                                    spacing: 5
+                                    Text{
+                                        text: qsTr("Spoofing Caught:")
+                                    }
+                                    Text{
+                                        id: spoofingCaughtResult
+                                        text: qsTr("0")
+                                    }
+                                }
+
+                                //Save CAN Log Checkbox - only include CAN Log in csv saved
+                                //if checkbox is checked
+                                CheckBox{
+                                    id: saveCANLog
+                                    text: qsTr("Save CAN Log with Results")
+                                }
+                                //Save Results button - prompts a file dialog to pick a
+                                //path and filename to save the results to and saves them.
+                                SingleFileSelect {
+                                    id: saveResults
+                                    title: qsTr("Save Results")
+                                    nameFilters: "CAN Frame Files (*.json *.traffic *.csv)"
+                                }
+                            }
+                        }
+                    }
+                    Column{
+                        //Visualizer
+                        GroupBox{
+                            title: qsTr("Visualizer")
+                            width: 860
+                            height: 475
+                            Image
+                            {
+                                id: background
+                                anchors.fill: parent
+                                fillMode: Image.Stretch
+                                source: "assets/Background.png"
+
+                                Image
+                                {
+                                    id: fuelGauge
+                                    x: 447
+                                    y: 67
+                                    width: 277
+                                    height: 198
+                                    fillMode: Image.PreserveAspectFit
+                                    source: "assets/fuelGauge.png"
+
+                                    Image
+                                    {
+                                        id: fuelSupport
+                                        x: 123
+                                        y: 83
+                                        width: 44
+                                        height: 33
+                                        fillMode: Image.PreserveAspectFit
+                                        source: "assets/supportSmall.png"
+                                    }
+                                }
+
+                                Image
+                                {
+                                    id: tempGauge
+                                    x: 133
+                                    y: 86
+                                    width: 250
+                                    height: 160
+                                    fillMode: Image.PreserveAspectFit
+                                    source: "assets/tempGauge.png"
+
+                                    Image {
+                                        id: tempSupport
+                                        x: 97
+                                        y: 64
+                                        width: 44
+                                        height: 33
+                                        fillMode: Image.PreserveAspectFit
+                                        source: "assets/supportSmall.png"
+                                    }
+                                }
+                            }
+
+                            Image
+                            {
+                                id: lightBackground
+                                x: 193
+                                y: 154
+                                width: 457
+                                height: 353
+                                fillMode: Image.Stretch
+                                source: "assets/BackgroundLights.png"
+
+                                Image
+                                {
+                                    id: oilLight
+                                    x: 106
+                                    y: 96
+                                    width: 55
+                                    height: 41
+                                    visible: oilLightOn
+                                    z: 1
+                                    fillMode: Image.PreserveAspectFit
+                                    source: "assets/OilLight.png"
+                                }
+
+                                Image
+                                {
+                                    id: batteryLight
+                                    x: 174
+                                    y: 96
+                                    width: 55
+                                    height: 41
+                                    visible: batteryLightOn
+                                    z: 1
+                                    fillMode: Image.PreserveAspectFit
+                                    source: "assets/BatteryLight.png"
+                                }
+
+                                Image
+                                {
+                                    id: fluidLight
+                                    x: 235
+                                    y: 96
+                                    width: 55
+                                    height: 41
+                                    visible: fluidLightOn
+                                    z: 1
+                                    fillMode: Image.PreserveAspectFit
+                                    source: "assets/FluidLight.png"
+                                }
+
+                                Image
+                                {
+                                    id: lowbeamLight
+                                    x: 296
+                                    y: 151
+                                    width: 55
+                                    height: 41
+                                    visible: lowBeamLightOn
+                                    z: 1
+                                    fillMode: Image.PreserveAspectFit
+                                    source: "assets/LowbeamLight.png"
+                                }
+
+                                Image
+                                {
+                                    id: seatbeltLight
+                                    x: 106
+                                    y: 143
+                                    width: 55
+                                    height: 49
+                                    visible: seatBeltLightOn
+                                    z: 1
+                                    fillMode: Image.PreserveAspectFit
+                                    source: "assets/SeatbeltLight.png"
+                                }
+
+                                Image
+                                {
+                                    id: engineLight
+                                    x: 174
+                                    y: 143
+                                    width: 55
+                                    height: 49
+                                    visible: engineLightOn
+                                    z: 1
+                                    fillMode: Image.PreserveAspectFit
+                                    source: "assets/EngineLight.png"
+                                }
+
+                                Image
+                                {
+                                    id: airbagLight
+                                    x: 235
+                                    y: 143
+                                    width: 55
+                                    height: 49
+                                    visible: airbagLightOn
+                                    z: 1
+                                    fillMode: Image.PreserveAspectFit
+                                    source: "assets/AirbagLight.png"
+                                }
+
+                                Image
+                                {
+                                    id: highbeamLight
+                                    x: 296
+                                    y: 88
+                                    width: 55
+                                    height: 49
+                                    visible: highBeamLightOn
+                                    z: 1
+                                    fillMode: Image.PreserveAspectFit
+                                    source: "assets/HighbeamLight.png"
+                                }
+
+                                Image
+                                {
+                                    id: tempLight
+                                    x: 106
+                                    y: 208
+                                    width: 55
+                                    height: 49
+                                    visible: tempLightOn
+                                    z: 1
+                                    fillMode: Image.PreserveAspectFit
+                                    source: "assets/TempLight.png"
+                                }
+
+                                Image
+                                {
+                                    id: absLight
+                                    x: 174
+                                    y: 208
+                                    width: 55
+                                    height: 49
+                                    visible: absLightOn
+                                    z: 1
+                                    fillMode: Image.PreserveAspectFit
+                                    source: "assets/ABSLight.png"
+                                }
+
+                                Image
+                                {
+                                    id: parkingBrakeLight
+                                    x: 235
+                                    y: 208
+                                    width: 55
+                                    height: 49
+                                    visible: brakeLightOn
+                                    z: 1
+                                    fillMode: Image.PreserveAspectFit
+                                    source: "assets/ParkingBrakeLight.png"
+                                }
+
+                                Image
+                                {
+                                    id: tractionLight
+                                    x: 296
+                                    y: 208
+                                    width: 55
+                                    height: 49
+                                    visible: tractionLightOn
+                                    z: 1
+                                    fillMode: Image.PreserveAspectFit
+                                    source: "assets/TractionLight.png"
+                                }
+
+                                Image
+                                {
+                                    id: oilOff
+                                    x: 109
+                                    y: 96
+                                    width: 49
+                                    height: 41
+                                    fillMode: Image.PreserveAspectFit
+                                    source: "assets/OilOff.png"
+                                }
+
+                                Image
+                                {
+                                    id: batteryOff
+                                    x: 177
+                                    y: 96
+                                    width: 50
+                                    height: 41
+                                    fillMode: Image.PreserveAspectFit
+                                    source: "assets/BatteryOff.png"
+                                }
+
+                                Image
+                                {
+                                    id: fluidOff
+                                    x: 235
+                                    y: 96
+                                    width: 55
+                                    height: 41
+                                    fillMode: Image.PreserveAspectFit
+                                    source: "assets/FluidOff.png"
+                                }
+
+                                Image
+                                {
+                                    id: highbeamOff
+                                    x: 300
+                                    y: 88
+                                    width: 48
+                                    height: 49
+                                    fillMode: Image.PreserveAspectFit
+                                    source: "assets/HighbeamOff.png"
+                                }
+
+                                Image
+                                {
+                                    id: seatbeltOff
+                                    x: 108
+                                    y: 145
+                                    width: 52
+                                    height: 45
+                                    fillMode: Image.PreserveAspectFit
+                                    source: "assets/SeatbeltOff.png"
+                                }
+
+                                Image
+                                {
+                                    id: engineOff
+                                    x: 174
+                                    y: 143
+                                    width: 55
+                                    height: 49
+                                    fillMode: Image.PreserveAspectFit
+                                    source: "assets/EngineOff.png"
+                                }
+
+                                Image
+                                {
+                                    id: airbagOff
+                                    x: 235
+                                    y: 147
+                                    width: 55
+                                    height: 41
+                                    fillMode: Image.PreserveAspectFit
+                                    source: "assets/AirbagOff.png"
+                                }
+
+                                Image
+                                {
+                                    id: lowbeamOff
+                                    x: 298
+                                    y: 151
+                                    width: 52
+                                    height: 41
+                                    fillMode: Image.PreserveAspectFit
+                                    source: "assets/LowbeamOff.png"
+                                }
+
+                                Image
+                                {
+                                    id: tempOff
+                                    x: 106
+                                    y: 208
+                                    width: 55
+                                    height: 49
+                                    fillMode: Image.PreserveAspectFit
+                                    source: "assets/TempOff.png"
+                                }
+
+                                Image
+                                {
+                                    id: absOff
+                                    x: 174
+                                    y: 208
+                                    width: 55
+                                    height: 49
+                                    fillMode: Image.PreserveAspectFit
+                                    source: "assets/ABSOff.png"
+                                }
+
+                                Image
+                                {
+                                    id: parkingBrakeOff
+                                    x: 235
+                                    y: 208
+                                    width: 55
+                                    height: 49
+                                    fillMode: Image.PreserveAspectFit
+                                    source: "assets/ParkingBrakeOff.png"
+                                }
+
+                                Image
+                                {
+                                    id: tractionOff
+                                    x: 296
+                                    y: 208
+                                    width: 55
+                                    height: 49
+                                    fillMode: Image.PreserveAspectFit
+                                    source: "assets/TractionOff.png"
+                                }
+                            }
+
+                            Image
+                            {
+                                id: speedometer
+                                x: -54
+                                y: 95
+                                width: 391
+                                height: 347
+                                antialiasing: true
+                                rotation: 0
+                                fillMode: Image.PreserveAspectFit
+                                source: "assets/Speedometer.png"
+
+
+                                Image
+                                {
+                                    id: speedNeedle
+                                    x: 191
+                                    y: 61
+                                    width: 11
+                                    height: 113
+                                    rotation: speedometerRotationAngle
+                                    antialiasing: true
+                                    transformOrigin: Item.Bottom
+                                    fillMode: Image.Stretch
+                                    source: "assets/NeedleLarge.png"
+                                    smooth: true
+                                }
+
+                                Image
+                                {
+                                    id: speedSupport
+                                    x: 175
+                                    y: 155
+                                    width: 42
+                                    height: 37
+                                    antialiasing: true
+                                    fillMode: Image.PreserveAspectFit
+                                    source: "assets/SupportLarge.png"
+                                }
+                            }
+
+
+                            Image
+                            {
+                                id: tachometer
+                                x: 507
+                                y: 95
+                                width: 391
+                                height: 347
+                                fillMode: Image.PreserveAspectFit
+                                antialiasing: true
+                                Image
+                                {
+                                    id: tachNeedle
+                                    x: 191
+                                    y: 61
+                                    width: 11
+                                    height: 113
+                                    rotation: tachometerRotationAngle
+                                    fillMode: Image.Stretch
+                                    transformOrigin: Item.Bottom
+                                    antialiasing: true
+                                    smooth: true
+                                    source: "assets/NeedleLarge.png"
+                                }
+
+                                Image
+                                {
+                                    id: tachSupport
+                                    x: 175
+                                    y: 155
+                                    width: 42
+                                    height: 37
+                                    fillMode: Image.PreserveAspectFit
+                                    antialiasing: true
+                                    source: "assets/SupportLarge.png"
+                                }
+
+                                source: "assets/Tachometer.png"
+                                rotation: 0
+                            }
+
+
+                            Image
+                            {
+                                id: turnBackground
+                                x: 117
+                                y: 11
+                                width: 609
+                                height: 298
+                                fillMode: Image.PreserveAspectFit
+                                source: "assets/turnBackground.png"
+
+                                Image
+                                {
+                                    id: turnLeftOff
+                                    x: 240
+                                    y: 121
+                                    width: 52
+                                    height: 56
+                                    fillMode: Image.PreserveAspectFit
+                                    source: "assets/turnLeftOff.png"
+                                }
+
+                                Image
+                                {
+                                    id: turnRightOff
+                                    x: 321
+                                    y: 119
+                                    width: 53
+                                    height: 60
+                                    fillMode: Image.PreserveAspectFit
+                                    source: "assets/turnRightOff.png"
+                                }
+
+                                Image
+                                {
+                                    id: turnLeftOn
+                                    objectName: "leftTurnSignal"
+                                    x: 236
+                                    y: 118
+                                    width: 59
+                                    height: 63
+                                    visible: leftTurnLightOn
+                                    fillMode: Image.PreserveAspectFit
+                                    source: "assets/turnLeftLight.png"
+                                }
+
+                                Image
+                                {
+                                    id: turnRightOn
+                                    x: 318
+                                    y: 116
+                                    width: 59
+                                    height: 63
+                                    visible: false
+                                    fillMode: Image.PreserveAspectFit
+                                    source: "assets/turnRightLight.png"
+                                }
+
+                                Timer
+                                {
+                                    interval: 1000;
+                                    running: rightTurnLightActivated || leftTurnLightActivated || hazardsActivated;
+                                    repeat: true
+                                    onTriggered:
+                                    {
+                                        if(rightTurnLightActivated)
+                                        {
+                                            rightTurnLightOn ? rightTurnLightOn = false : rightTurnLightOn = true;
+                                            turnRightOn.visible = rightTurnLightOn
+                                        }
+
+                                        if(leftTurnLightActivated)
+                                        {
+                                            leftTurnLightOn ? leftTurnLightOn = false : leftTurnLightOn = true;
+                                            turnLeftOn.visible = leftTurnLightOn
+                                        }
+
+                                        if(hazardsActivated)
+                                        {
+                                            leftTurnLightOn ? leftTurnLightOn = false : leftTurnLightOn = true;
+                                            rightTurnLightOn ? rightTurnLightOn = false : rightTurnLightOn = true;
+                                            turnLeftOn.visible = leftTurnLightOn
+                                            turnRightOn.visible = rightTurnLightOn
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        //Output
+                        GroupBox{
+                            title: qsTr("Output")
+                        }
+                    }
+
+                    //Attack Controls
+                    Column{
+                        GroupBox{
+                            title: qsTr("Attack Controls")
+                            Column{
+                                anchors.fill: parent
+                                MaliciousGeneratorSlider {
+                                    id: noAttackSliderTest
+                                    label: qsTr("No Attack")
+                                    value: 0.5
+                                    // If the no attack slider is moved, proportionally
+                                    // scale up or down all other attacks to ensure the
+                                    // probabilities sum to 1.
+                                    onMoved: {
+                                        // Get (1 - previous slider value).
+                                        var attackValueSum =  randomSliderTest.value +
+                                                floodSliderTest.value + replaySliderTest.value +
+                                                spoofSliderTest.value
+                                        if (attackValueSum == 0.0) {
+                                            // If sum was 0, scale up other slider values equally.
+                                            var newValue = (1 - value) / 4
+                                            randomSliderTest.value = newValue
+                                            floodSliderTest.value = newValue
+                                            replaySliderTest.value = newValue
+                                            spoofSliderTest.value = newValue
+                                        }
+                                        else {
+                                            // Otherwise, scale up other slider values by
+                                            // multiplying by (1 - new value) / (1 - old
+                                            // value), which ensures everything sums to 1.
+                                            var multiplier = (1 - value) / attackValueSum
+                                            randomSliderTest.value *= multiplier
+                                            floodSliderTest.value *= multiplier
+                                            replaySliderTest.value *= multiplier
+                                            spoofSliderTest.value *= multiplier
+                                        }
+                                    }
+                                }
+                                MaliciousGeneratorSlider {
+                                    id: randomSliderTest
+                                    label: qsTr("Random Attack")
+                                    value: 0.125
+                                    // If a non-no attack slider is moved, adjust the
+                                    // No Attack slider up or down relative to the new value of
+                                    // this slider. If No Attack is brought to 0, this slider
+                                    // cannot be moved any further to the right. The code is
+                                    // very similar for the 3 sliders after this one.
+                                    onMoved: {
+                                        // Find the sum of all the other attacks.
+                                        var otherValueSum =  floodSliderTest.value + replaySliderTest.value + spoofSliderTest.value
+                                        if (value + otherValueSum <= 1.0)  {
+                                            // Is the new sum of the attack probabilities
+                                            // less than 1? If so, we adjust the No Attack
+                                            // slider accordingly.
+                                            noAttackSliderTest.value = 1 - value - otherValueSum
+                                        }
+                                        else {
+                                            // Otherwise, No Attack is at 0 and we set this
+                                            // slider value to the highest it can be without
+                                            // getting the probabilities to sum greater than
+                                            // 1.
+                                            noAttackSliderTest.value = 0.0
+                                            value = 1 - otherValueSum
+                                        }
+                                    }
+                                }
+                                MaliciousGeneratorSlider {
+                                    id: floodSliderTest
+                                    label: qsTr("Flood Attack")
+                                    value: 0.125
+                                    onMoved: {
+                                        var otherValueSum =  randomSlider.value + replaySlider.value + spoofSlider.value
+                                        if (value + otherValueSum <= 1.0)  {
+                                            noAttackSliderTest.value = 1 - value - otherValueSum
+                                        }
+                                        else {
+                                            noAttackSliderTest.value = 0.0
+                                            value = 1 - otherValueSum
+                                        }
+                                    }
+                                }
+                                MaliciousGeneratorSlider {
+                                    id: replaySliderTest
+                                    label: qsTr("Replay Attack")
+                                    value: 0.125
+                                    onMoved: {
+                                        var otherValueSum =  randomSliderTest.value + floodSliderTest.value + spoofSliderTest.value
+                                        if (value + otherValueSum <= 1.0)  {
+                                            noAttackSliderTest.value = 1 - value - otherValueSum
+                                        }
+                                        else {
+                                            noAttackSliderTest.value = 0.0
+                                            value = 1 - otherValueSum
+                                        }
+                                    }
+                                }
+                                MaliciousGeneratorSlider {
+                                    id: spoofSliderTest
+                                    label: qsTr("Spoofing Attack")
+                                    value: 0.125
+                                    onMoved: {
+                                        var otherValueSum =  randomSliderTest.value + floodSliderTest.value + replaySliderTest.value
+                                        if (value + otherValueSum <= 1.0)  {
+                                            noAttackSliderTest.value = 1 - value - otherValueSum
+                                        }
+                                        else {
+                                            noAttackSliderTest.value = 0.0
+                                            value = 1 - otherValueSum
+                                        }
+                                    }
+                                }
+                            }
+                        }
+
+                        //Time Controls
+                        GroupBox{
+                            title: qsTr("Time Control")
+                        }
+                    }
+                }
             }
         }
     }
 }
-
-
