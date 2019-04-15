@@ -358,25 +358,117 @@ ApplicationWindow {
 
             // Train Tab
             Item {
-                Column {
+                Row {
+                    spacing: 5
+                    Column {
+                        spacing: 5
+                        GroupBox {
+                            title: qsTr("Model")
+                            Column {
+                                spacing: 5
+                                Button {
+                                    text: qsTr("New Model")
+                                    onClicked: newModelDialog.open()
+                                }
+                                Button {
+                                    text: qsTr("Load Model")
+                                    onClicked: loadModelDialog.open()
+                                }
+                                Button {
+                                    text: qsTr("Delete Model")
+                                    onClicked: deleteModelDialog.open()
+                                }
+                            }
+                        }
+
+                        GroupBox {
+                            title: qsTr("Train Rules Based IDS")
+                            Column {
+                                spacing: 5
+                                Row {
+                                    spacing: 5
+                                    Label {
+                                        text: qsTr("Dataset to Use")
+                                    }
+
+                                    ComboBox {
+                                        id: rulesTrainingDataset
+                                        model: dpManager.availableDatasets
+                                    }
+                                }
+
+                                Button {
+                                    text: qsTr("Train")
+                                    onClicked: {
+                                        idsManager.train_rules(rulesTrainingDataset.currentText)
+                                    }
+                                }
+                            }
+                        }
+
+                        GroupBox {
+                            title: qsTr("Train DNN Based IDS")
+                            Column {
+                                spacing: 5
+                                Row {
+                                    spacing: 5
+                                    Label {
+                                        text: qsTr("Dataset to Use")
+                                    }
+
+                                    ComboBox {
+                                        id: dnnTrainingDataset
+                                        model: dpManager.availableDatasets
+                                    }
+                                }
+
+                                LabeledTextField {
+                                    id: dnnTrainingNumSteps
+                                    label: qsTr("Number of Steps")
+                                    field.validator: IntValidator {
+                                        bottom: 1
+                                    }
+                                }
+
+                                Button {
+                                    text: qsTr("Train")
+                                    onClicked: {
+                                        idsManager.train_dnn(rulesTrainingDataset.currentText, dnnTrainingNumSteps.text)
+                                    }
+                                }
+                            }
+                        }
+                    }
+
                     GroupBox {
-                        title: qsTr("Model")
+                        id: modelPropertiesDisplay
+                        title: qsTr("Model Details")
                         Column {
                             spacing: 5
-                            Button {
-                                text: qsTr("New Model")
-                                onClicked: newModelDialog.open()
+                            Label {
+                                text: "Model Name: " + idsManager.parameters["Model Name"]
                             }
-                            Button {
-                                text: qsTr("Load Model")
+                            Label {
+                                text: "Rules Trained: " + idsManager.parameters["Rules Trained"]
                             }
-                            Button {
-                                text: qsTr("Delete Model")
+                            Label {
+                                text: "DNN Trained: " + idsManager.parameters["DNN Trained"]
+                            }
+                            Label {
+                                text: "Hidden Units: " + idsManager.parameters["Hidden Units"]
+                            }
+                            Label {
+                                text: "Activation Function: " + idsManager.parameters["Activation Function"]
+                            }
+                            Label {
+                                text: "Optimizer: " + idsManager.parameters["Optimizer"]
+                            }
+                            Label {
+                                text: "Loss Reduction: " + idsManager.parameters["Loss Reduction"]
                             }
                         }
                     }
                 }
-
                 Dialog {
                     id: newModelDialog
                     title: qsTr("Create New Model")
@@ -426,7 +518,12 @@ ApplicationWindow {
                                         if (currentOptimizerProps.hasOwnProperty(prop)) {
                                             var value = currentOptimizerProps[prop]
                                             optimizerPropertiesModel.append(
-                                                {"name": prop, "type": typeof(value), "defaultValue": value, "value": value}
+                                                {
+                                                    "name": prop,
+                                                    "type": typeof(value),
+                                                    "defaultValue": value,
+                                                    "value": value
+                                                }
                                             )
                                         }
                                     }
@@ -498,10 +595,65 @@ ApplicationWindow {
                         }
                     }
                     onAccepted: {
+                        var properties = {
+                            "Hidden Units": newModelHiddenUnits.text,
+                            "Activation Function": newModelActivationFn.currentText,
+                            "Optimizer": newModelOptimizer.currentText,
+                            "Loss Reduction": newModelLossReduction.currentText
+                        }
+                        idsManager.new_model(newModelName.text, properties)
+
                         for (var i = 0; i < optimizerPropertiesModel.count; i++) {
                             var prop = optimizerPropertiesModel.get(i)
+                            console.log(typeof(prop))
                             console.log(prop.name, prop.value)
                         }
+                    }
+                }
+
+                Dialog {
+                    id: loadModelDialog
+                    title: qsTr("Load Model")
+                    standardButtons: StandardButton.Cancel | StandardButton.Ok
+
+                    Row {
+                        spacing: 5
+                        Label {
+                            text: qsTr("Model to Load")
+                            height: loadModelModel.height
+                            verticalAlignment: Text.AlignVCenter
+                        }
+                        ComboBox {
+                            id: loadModelModel
+                            model: idsManager.availableModels
+                        }
+                    }
+
+                    onAccepted: {
+                        idsManager.load_model(loadModelModel.currentText)
+                    }
+                }
+
+                Dialog {
+                    id: deleteModelDialog
+                    title: qsTr("Delete Model")
+                    standardButtons: StandardButton.Cancel | StandardButton.Ok
+
+                    Row {
+                        spacing: 5
+                        Label {
+                            text: qsTr("Model to Delete")
+                            height: loadModelModel.height
+                            verticalAlignment: Text.AlignVCenter
+                        }
+                        ComboBox {
+                            id: deleteModelModel
+                            model: idsManager.availableModels
+                        }
+                    }
+
+                    onAccepted: {
+                        idsManager.delete_model(loadModelModel.currentText)
                     }
                 }
             }

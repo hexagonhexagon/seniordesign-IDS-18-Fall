@@ -5,6 +5,7 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtQml import QQmlApplicationEngine
 
 from gui.preprocessor_manager import DataPreprocessorManager
+from gui.two_stage_ids_manager import TwoStageIDSManager
 
 def main():
     global app
@@ -16,7 +17,9 @@ def main():
     # Make the Data Preprocessor Manager accessible through QML.
     engine = QQmlApplicationEngine()
     dpmanager = DataPreprocessorManager()
-    engine.rootContext().setContextProperty("dpManager", dpmanager)
+    engine.rootContext().setContextProperty('dpManager', dpmanager)
+    idsmanager = TwoStageIDSManager()
+    engine.rootContext().setContextProperty('idsManager', idsmanager)
     # Load the QML file.
     engine.load(os.path.dirname(os.path.abspath(__file__)) + '/gui/main.qml')
 
