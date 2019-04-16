@@ -197,7 +197,7 @@ ApplicationWindow {
                             Button {
                                 id: makeIdprobsButton
                                 text: qsTr("Make ID Probs File")
-                                onClicked: dpManager.create_idprobs_file(idprobsFileSelect.fileUrls, idprobsName.text)
+                                onClicked: dpManager.create_idprobs_file(idprobsFileSelectProcess.fileUrls, idprobsName.text)
                             }
                         }
                     }
@@ -374,7 +374,7 @@ ApplicationWindow {
                                     // Call the function. We get the file selected via
                                     // SingleFileSelect.fileUrl, and we pass in the
                                     // adjustments we just specified.
-                                    dpManager.create_dataset(datasetFileSelect.fileUrl, datasetIdprobs.currentText, malgenSettings, datasetName.text)
+                                    dpManager.create_dataset(datasetFileSelect.fileUrl, datasetIdprobsProcess.currentText, malgenSettings, datasetName.text)
                                 }
                             }
                         }
