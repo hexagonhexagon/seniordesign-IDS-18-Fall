@@ -152,6 +152,6 @@ def test_inject_malicious_packets():
     mg = MaliciousGenerator()
     frames, labels = dp.inject_malicious_packets(frames, mg)
     assert len(frames) == len(labels)
-    assert 1 in labels
+    assert not all(x is None for x in labels)
     assert len(frames) > prev_len
     assert dp.validate_can_data(frames)

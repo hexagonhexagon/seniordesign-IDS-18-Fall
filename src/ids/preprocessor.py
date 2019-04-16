@@ -337,7 +337,8 @@ def inject_malicious_packets(canlist, malgen):
     inject.
 
     Returns a tuple (newcanlist, labels), where newcanlist is the list of
-    messages, and labels is a list of the labels for each message.
+    messages, and labels is a list of the labels for each message. Labels are
+    'attack_name' if malicious, else None.
     """
     newcanlist = []
     # The labels for the frames. 0 means the packet is not malicious, and 1
@@ -346,13 +347,13 @@ def inject_malicious_packets(canlist, malgen):
     labels = []
     for i in range(len(canlist) - 1):
         newcanlist.append(canlist[i])
-        labels.append(0)
+        labels.append(None)
         malicious_frames = malgen.get((canlist[i], canlist[i + 1]))
-        for frame in malicious_frames:
+        for frame, name in malicious_frames:
             newcanlist.append(frame)
-            labels.append(1)
+            labels.append(name)
     newcanlist.append(canlist[-1])
-    labels.append(0)
+    labels.append(None)
     return newcanlist, labels
 
 

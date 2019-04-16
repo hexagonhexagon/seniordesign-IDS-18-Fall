@@ -119,10 +119,11 @@ class MaliciousGenerator:
             packet per batch, for most.
 
         Returns:
-            python generator object yielding 0 to N CAN packets.
+            python generator object yielding 0 to N tuples.
+            Each tuple is (CAN packet, attack name).
             A CAN packet is a dict with keys 'timestamp', 'id', and 'data'
 
-        Usage: 
+        Usage:
             mal.get() is as python generator, a kind of iterable object.
             A single value can be returned using the next() funciton.
             next() will raise a StopIteration error when the generator exits,
@@ -144,14 +145,14 @@ class MaliciousGenerator:
                 'id': 1433,
                 'data': [145, 49, 247, 135, 200, 57, 54, 214]}]
         """
-        choices = [self.roster[x]['attack'] for x in self.roster]
+        choices = list(self.roster.keys())
         chances = [self.roster[x]['probability'] for x in self.roster]
         chosen = random.choices(choices, weights=chances)[0]
-        if chosen is None:
+        if self.roster[chosen]['attack'] is None:
             return
         for _ in range(repeat):
-            for packet in chosen(time_window):
-                yield packet
+            for packet in self.roster[chosen]['attack'](time_window):
+                yield packet, chosen
 
     def get_attack(self, time_window, attack_name, repeat=1):
         """
