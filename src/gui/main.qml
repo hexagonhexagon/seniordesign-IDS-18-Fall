@@ -36,6 +36,23 @@ ApplicationWindow {
     property bool hazardsActivated: false;
     property double startTime: 0;   // Time that blinker/hazards were last lit at
 
+    signal judgeResult(variant result)
+    Component.onCompleted: {
+        simManager.result.connect(judgeResult)
+    }
+
+    Connections {
+        target: root
+        onJudgeResult: {
+            reportManager.update_statistics(result)
+        }
+    }
+
+    Connections {
+        target: reportManager
+        onStatisticsChanged: reportModel.updateReport()
+    }
+
 
     ListModel {
         id: activationFnModel
@@ -712,6 +729,47 @@ ApplicationWindow {
                                     title: qsTr("Select CAN Frame File")
                                     nameFilters: "CAN Frame Files (*.json *.traffic *.csv)"
                                 }
+
+                                Button {
+                                    id: startButton
+                                    text: qsTr("Start Test (temporary)")
+                                    onClicked: {
+                                        var malgenSettings = {
+                                            "none": noAttackSliderProcess.value,
+                                            "random": randomSliderProcess.value,
+                                            "flood": floodSliderProcess.value,
+                                            "replay": replaySliderProcess.value,
+                                            "spoof": spoofSliderProcess.value
+                                        }
+                                        simManager.adjust_malgen(malgenSettings)
+                                        simManager.start_simulation(canFrameFile.fileUrl, datasetIdprobsTest.currentText)
+                                        enabled = false
+                                        nextButton.enabled = true
+                                        stopButton.enabled = true
+                                    }
+                                }
+
+                                Button {
+                                    id: nextButton
+                                    text: qsTr("Judge Next Frame (temporary)")
+                                    enabled: false
+                                    onClicked: {
+                                        simManager.judge_next_frame()
+                                    }
+                                }
+
+                                Button {
+                                    id: stopButton
+                                    text: qsTr("Stop simulation (temporary)")
+                                    enabled: false
+                                    onClicked: {
+                                        simManager.stop_simulation()
+                                        enabled = false
+                                        nextButton.enabled = false
+                                        startButton.enabled = true
+                                        reportManager.reset_statistics()
+                                    }
+                                }
                             }
                         }
 
@@ -721,8 +779,17 @@ ApplicationWindow {
 
                             Column {
                                 spacing: 5
+
                                 ListModel {
                                     id: reportModel
+
+                                    function updateReport() {
+                                        reportModel.clear()
+                                        var stats = reportManager.statistics
+                                        for (var i = 0; i < stats.length; i++) {
+                                            reportModel.append(stats[i])
+                                        }
+                                    }
                                 }
 
                                 ListView {
@@ -731,18 +798,8 @@ ApplicationWindow {
                                     implicitHeight: contentHeight
                                     model: reportModel
                                     delegate: reportDelegate
-                                    Component.onCompleted: {
-                                        reportManager.update_statistics({
-                                            "Frame": 0,
-                                            "Label": "random",
-                                            "Judgement": true,
-                                            "Reason": 0
-                                        })
-                                        var stats = reportManager.statistics
-                                        for (var i = 0; i < stats.length; i++) {
-                                            reportModel.append(stats[i])
-                                        }
-                                    }
+
+                                    Component.onCompleted: reportModel.updateReport()
                                 }
 
                                 Component {
