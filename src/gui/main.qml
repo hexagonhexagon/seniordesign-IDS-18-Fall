@@ -8,8 +8,8 @@ ApplicationWindow {
     id: root
     visible: true
     title: qsTr("Two Stage IDS Tester")
-    width: 640
-    height: 640
+    width: 1550
+    height: 850
 
     property double speedometerRotationAngle: -136;
     property double tachometerRotationAngle: -103;
@@ -817,10 +817,15 @@ ApplicationWindow {
                                 }
                                 //Save Results button - prompts a file dialog to pick a
                                 //path and filename to save the results to and saves them.
-                                SingleFileSelect {
-                                    id: saveResults
+                                SingleSaveFileSelect {
+                                    id: saveResultsFile
                                     title: qsTr("Save Results")
                                     nameFilters: "CAN Frame Files (*.json *.traffic *.csv)"
+                                }
+                                //Save Button
+                                Button {
+                                    id: saveResultsButton
+                                    text: qsTr("Save Results")
                                 }
                             }
                         }
@@ -837,10 +842,10 @@ ApplicationWindow {
                                 anchors.fill: parent
                                 fillMode: Image.Stretch
                                 source: "assets/Background.png"
-
                                 Image
                                 {
                                     id: fuelGauge
+
                                     x: 447
                                     y: 67
                                     width: 277
@@ -1352,14 +1357,125 @@ ApplicationWindow {
                             }
                         }
 
-                        //Output
+                        //Messages
                         GroupBox{
-                            title: qsTr("Output")
+                            width: 860
+                            height: 300
+                            title: qsTr("Messages")
+                            TabBar {
+                                id: tabBarTestOutput
+                                height: contentHeight
+                                TabButton {
+                                    width: implicitWidth + 10
+                                    background.implicitHeight: 30
+                                    text: qsTr("Output")
+                                }
+                                TabButton {
+                                    width: implicitWidth + 10
+                                    background.implicitHeight: 30
+                                    text: qsTr("Filter")
+                                }
+                            }
+
+                            StackLayout {
+                                anchors.top: tabBarTestOutput.bottom
+                                anchors.topMargin: 30
+                                anchors.fill: parent
+                                currentIndex: tabBarTestOutput.currentIndex
+
+                                //Output Tab
+                                Item {
+                                    anchors.fill: parent
+                                    Row{
+                                        anchors.fill: parent
+                                        spacing: 5
+
+                                        Flickable {
+                                            id: flickable
+                                            anchors.fill: parent
+                                            ScrollBar.vertical: ScrollBar {
+                                                parent: flickable.parent
+                                                anchors.top: flickable.top
+                                                anchors.left: flickable.right
+                                                anchors.bottom: flickable.bottom
+                                            }
+                                            TextArea.flickable: TextArea{
+                                                anchors.fill: parent
+                                                enabled: false
+                                                text: "text\n...\n...\n...\n...\n...\n...\n...\n...\n...\n...\n...\nArea"
+                                            }
+                                        }
+                                    }
+                                }
+
+                                //Filter Tab
+                                Item {
+                                    Row{
+                                        spacing: 5
+                                        //Result Type
+                                        Column{
+                                            spacing: 5
+
+                                            //False Negative
+                                            CheckBox {
+                                                id: falseNegativeFilter
+                                                text: "False Negative"
+                                            }
+                                            //False Positive
+                                            CheckBox {
+                                                id: falsePositiveFilter
+                                                text: "False Positive"
+                                            }
+                                            //True Positive
+                                            CheckBox {
+                                                id: truePositiveFilter
+                                                text: "True Positive"
+                                            }
+                                            //True Negative
+                                            CheckBox {
+                                                id: trueNegativeFilter
+                                                text: "True Negative"
+                                            }
+                                        }
+
+                                        //Message Type
+                                        Column{
+                                            spacing: 5
+
+                                            //benign
+                                            CheckBox {
+                                                id: benignFilter
+                                                text: "Benign"
+                                            }
+                                            //random
+                                            CheckBox {
+                                                id: randomFilter
+                                                text: "Random"
+                                            }
+                                            //flood
+                                            CheckBox {
+                                                id: floodFilter
+                                                text: "Flood"
+                                            }
+                                            //replay
+                                            CheckBox {
+                                                id: replayFilter
+                                                text: "Replay"
+                                            }
+                                            //spoofing
+                                            CheckBox {
+                                                id: spoofingFilter
+                                                text: "Spoofing"
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
 
-                    //Attack Controls
                     Column{
+                        //Attack Controls
                         GroupBox{
                             title: qsTr("Attack Controls")
                             Column{
@@ -1475,6 +1591,58 @@ ApplicationWindow {
                         //Time Controls
                         GroupBox{
                             title: qsTr("Time Control")
+
+                            Row{
+                                anchors.fill: parent
+
+                                //Backward Button
+                                Button{
+                                    height: 70
+                                    width: 70
+
+                                    Image{
+                                        id: backward
+                                        anchors.fill: parent
+                                        source: "assets/backward.png"
+                                    }
+                                }
+
+                                //Pause Button
+                                Button{
+                                    height: 70
+                                    width: 70
+
+                                    Image{
+                                        id: pause
+                                        anchors.fill: parent
+                                        source: "assets/pause.png"
+                                    }
+                                }
+
+                                //Play Button
+                                Button{
+                                    height: 70
+                                    width: 70
+
+                                    Image{
+                                        id: play
+                                        anchors.fill: parent
+                                        source: "assets/play.png"
+                                    }
+                                }
+
+                                //Forward Button
+                                Button{
+                                    height: 70
+                                    width: 70
+
+                                    Image{
+                                        id: forward
+                                        anchors.fill: parent
+                                        source: "assets/forward.png"
+                                    }
+                                }
+                            }
                         }
                     }
                 }
