@@ -27,6 +27,7 @@ class SimulationManager(QObject):
     def adjust_malgen(self, adjustments):
         self._malgen.adjust(adjustments)
 
+    @pyqtSlot()
     def judge_next_frame(self):
         if self._current_canlist:
             if len(self._current_canlist) > 1:
@@ -61,7 +62,7 @@ class SimulationManager(QObject):
             raise ValueError(f'Unknown type of CAN frame file provided: {file_path}.')
         self._current_canlist, self._current_labels = dp.inject_malicious_packets(canlist, self._malgen)
 
-        self._ids_manager._ids.change_ids_parameters(idprobs_dir + '/' + idprobs_name + '.json')
+        self._ids_manager._ids.change_ids_parameters('idprobs_path', idprobs_dir + '/' + idprobs_name + '.json')
         self._ids_manager.start_simulation()
 
     @pyqtSlot(str)

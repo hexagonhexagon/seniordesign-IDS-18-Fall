@@ -36,6 +36,23 @@ ApplicationWindow {
     property bool hazardsActivated: false;
     property double startTime: 0;   // Time that blinker/hazards were last lit at
 
+    signal judgeResult(variant result)
+    Component.onCompleted: {
+        simManager.result.connect(judgeResult)
+    }
+
+    Connections {
+        target: root
+        onJudgeResult: {
+            reportManager.update_statistics(result)
+        }
+    }
+
+    Connections {
+        target: reportManager
+        onStatisticsChanged: reportModel.updateReport()
+    }
+
 
     ListModel {
         id: activationFnModel
@@ -543,14 +560,12 @@ ApplicationWindow {
                                     for (var prop in currentOptimizerProps) {
                                         if (currentOptimizerProps.hasOwnProperty(prop)) {
                                             var value = currentOptimizerProps[prop]
-                                            optimizerPropertiesModel.append(
-                                                        {
-                                                            "name": prop,
-                                                            "type": typeof(value),
-                                                            "defaultValue": value,
-                                                            "value": value
-                                                        }
-                                                        )
+                                            optimizerPropertiesModel.append({
+                                                "name": prop,
+                                                "type": typeof(value),
+                                                "defaultValue": value,
+                                                "value": value
+                                            })
                                         }
                                     }
                                 }
@@ -686,13 +701,14 @@ ApplicationWindow {
 
             // Test Tab
             Item {
-                Row{
+                Row {
                     spacing: 5
-                    Column{
+                    Column {
+                        spacing: 5
                         //Test Setup - used to load Idprobs file and CAN Frame File and start test
-                        GroupBox{
+                        GroupBox {
                             title: qsTr("Test Setup")
-                            Column{
+                            Column {
                                 spacing: 5
                                 //Select Idprobs file
                                 Row {
@@ -713,146 +729,89 @@ ApplicationWindow {
                                     title: qsTr("Select CAN Frame File")
                                     nameFilters: "CAN Frame Files (*.json *.traffic *.csv)"
                                 }
+
+                                Button {
+                                    id: startButton
+                                    text: qsTr("Start Test (temporary)")
+                                    onClicked: {
+                                        var malgenSettings = {
+                                            "none": noAttackSliderProcess.value,
+                                            "random": randomSliderProcess.value,
+                                            "flood": floodSliderProcess.value,
+                                            "replay": replaySliderProcess.value,
+                                            "spoof": spoofSliderProcess.value
+                                        }
+                                        simManager.adjust_malgen(malgenSettings)
+                                        simManager.start_simulation(canFrameFile.fileUrl, datasetIdprobsTest.currentText)
+                                        enabled = false
+                                        nextButton.enabled = true
+                                        stopButton.enabled = true
+                                    }
+                                }
+
+                                Button {
+                                    id: nextButton
+                                    text: qsTr("Judge Next Frame (temporary)")
+                                    enabled: false
+                                    onClicked: {
+                                        simManager.judge_next_frame()
+                                    }
+                                }
+
+                                Button {
+                                    id: stopButton
+                                    text: qsTr("Stop simulation (temporary)")
+                                    enabled: false
+                                    onClicked: {
+                                        simManager.stop_simulation()
+                                        enabled = false
+                                        nextButton.enabled = false
+                                        startButton.enabled = true
+                                        reportManager.reset_statistics()
+                                    }
+                                }
                             }
                         }
 
                         //Report - used to output results of test and save results
-                        GroupBox{
+                        GroupBox {
                             title: qsTr("Report")
-                            Column{
+
+                            Column {
                                 spacing: 5
-                                //Accuracy
-                                Row{
-                                    spacing: 5
-                                    Text{
-                                        text: qsTr("Accuracy:")
-                                    }
-                                    Text{
-                                        id: accuracyResult
-                                        text: qsTr("0")
-                                    }
-                                }
-                                //Correct
-                                Row{
-                                    spacing: 5
-                                    Text{
-                                        text: qsTr("Correct:")
-                                    }
-                                    Text{
-                                        id: correctResult
-                                        text: qsTr("0%")
+
+                                ListModel {
+                                    id: reportModel
+
+                                    function updateReport() {
+                                        reportModel.clear()
+                                        var stats = reportManager.statistics
+                                        for (var i = 0; i < stats.length; i++) {
+                                            reportModel.append(stats[i])
+                                        }
                                     }
                                 }
-                                //Malicious Caught
-                                Row{
+
+                                ListView {
                                     spacing: 5
-                                    Text{
-                                        text: qsTr("Malicious Caught:")
-                                    }
-                                    Text{
-                                        id: maliciousCaughtResult
-                                        text: qsTr("0%")
-                                    }
+                                    implicitWidth: contentWidth
+                                    implicitHeight: contentHeight
+                                    model: reportModel
+                                    delegate: reportDelegate
+
+                                    Component.onCompleted: reportModel.updateReport()
                                 }
-                                //False Positive
-                                Row{
-                                    spacing: 5
-                                    Text{
-                                        text: qsTr("False Positive:")
-                                    }
-                                    Text{
-                                        id: falsePositiveResult
-                                        text: qsTr("0%")
-                                    }
-                                }
-                                //Random Attack
-                                Row{
-                                    spacing: 5
-                                    Text{
-                                        text: qsTr("Random Sent:")
-                                    }
-                                    Text{
-                                        id: randomSentResult
-                                        text: qsTr("0")
-                                    }
-                                }
-                                Row{
-                                    spacing: 5
-                                    Text{
-                                        text: qsTr("Random Caught:")
-                                    }
-                                    Text{
-                                        id: randomCaughtResult
-                                        text: qsTr("0")
-                                    }
-                                }
-                                //Flood
-                                Row{
-                                    spacing: 5
-                                    Text{
-                                        text: qsTr("Flood Sent:")
-                                    }
-                                    Text{
-                                        id: floodSentResult
-                                        text: qsTr("0")
-                                    }
-                                }
-                                Row{
-                                    spacing: 5
-                                    Text{
-                                        text: qsTr("Flood Caught:")
-                                    }
-                                    Text{
-                                        id: floodCaughtResult
-                                        text: qsTr("0")
-                                    }
-                                }
-                                //Replay
-                                Row{
-                                    spacing: 5
-                                    Text{
-                                        text: qsTr("Replay Sent:")
-                                    }
-                                    Text{
-                                        id: replaySentResult
-                                        text: qsTr("0")
-                                    }
-                                }
-                                Row{
-                                    spacing: 5
-                                    Text{
-                                        text: qsTr("Replay Caught:")
-                                    }
-                                    Text{
-                                        id: replayCaughtResult
-                                        text: qsTr("0")
-                                    }
-                                }
-                                //Spoofing
-                                Row{
-                                    spacing: 5
-                                    Text{
-                                        text: qsTr("Spoofing Sent:")
-                                    }
-                                    Text{
-                                        id: spoofingSentResult
-                                        text: qsTr("0")
-                                    }
-                                }
-                                Row{
-                                    spacing: 5
-                                    Text{
-                                        text: qsTr("Spoofing Caught:")
-                                    }
-                                    Text{
-                                        id: spoofingCaughtResult
-                                        text: qsTr("0")
+
+                                Component {
+                                    id: reportDelegate
+                                    Text {
+                                        text: stat + ": " + (value*100).toFixed(2).toString() + '%'
                                     }
                                 }
 
                                 //Save CAN Log Checkbox - only include CAN Log in csv saved
                                 //if checkbox is checked
-                                CheckBox{
+                                CheckBox {
                                     id: saveCANLog
                                     text: qsTr("Save CAN Log with Results")
                                 }
@@ -866,9 +825,9 @@ ApplicationWindow {
                             }
                         }
                     }
-                    Column{
+                    Column {
                         //Visualizer
-                        GroupBox{
+                        GroupBox {
                             title: qsTr("Visualizer")
                             width: 860
                             height: 475

@@ -173,7 +173,7 @@ class TwoStageIDSManager(QObject):
 
     def judge_single_frame(self, can_frame):
         result = self._ids.judge_single_frame(can_frame)
-        self.judgement_result.emit(result)
+        return result
 
     def stop_simulation(self):
         self._ids.stop_simulation()
