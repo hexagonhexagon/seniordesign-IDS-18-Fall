@@ -10,7 +10,7 @@ def safe_div(num1, num2):
         return num1 / num2
 
 class ReportManager(QObject):
-    def __init__(self, ids_manager: TwoStageIDSManager):
+    def __init__(self):
         # Required line for anything that inherits from QObject.
         QObject.__init__(self)
 
@@ -23,19 +23,19 @@ class ReportManager(QObject):
             'false_positive': 0,
             'false_negative': 0,
             'random': {
-                'total': 0
+                'total': 0,
                 'true_positive': 0
             },
             'replay': {
-                'total': 0
+                'total': 0,
                 'true_positive': 0
             },
             'flood': {
-                'total': 0
+                'total': 0,
                 'true_positive': 0
             },
             'spoof': {
-                'total': 0
+                'total': 0,
                 'true_positive': 0
             }
         }
@@ -45,20 +45,50 @@ class ReportManager(QObject):
     @pyqtProperty(QVariant, notify=get_statistics)
     def statistics(self):
         stats = self._statistics
-        precision = safe_div(stats['true_positive'], stats['true_positive'] + stats['false_positive']))
+        precision = safe_div(stats['true_positive'], stats['true_positive'] + stats['false_positive'])
         recall = safe_div(stats['true_positive'], stats['total_malicious'])
-        return {
-            'Accuracy': safe_div(stats['true_positive'] + stats['true_negative'], stats['total'])
-            'Benign Passed': safe_div(stats['true_negative'], stats['total_benign'])
-            'Malicious Caught': safe_div(stats['true_positive'], stats['total_malicious'])
-            'False Positives': safe_div(stats['false_positive'], stats['total_benign'])
-            'False Negatives': safe_div(stats['false_negative'], stats['total_malicious'])
-            'Random Attack Caught': safe_div(stats['random']['true_negative'], stats['random']['total'])
-            'Replay Attack Caught': safe_div(stats['replay']['true_negative'], stats['replay']['total'])
-            'DoS Attack Caught': safe_div(stats['flood']['true_negative'], stats['flood']['total'])
-            'Spoofing Attack Caught': safe_div(stats['spoof']['true_negative'], stats['spoof']['total'])
-            'F1 Score': safe_div(2 * precision * recall, precision + recall)
-        }
+        return [
+            {
+                'stat': 'Accuracy',
+                'value': safe_div(stats['true_positive'] + stats['true_negative'], stats['total'])
+            },
+            {
+                'stat': 'Benign Passed',
+                'value': safe_div(stats['true_negative'], stats['total_benign'])
+            },
+            {
+                'stat': 'Malicious Caught',
+                'value': safe_div(stats['true_positive'], stats['total_malicious'])
+            },
+            {
+                'stat': 'False Positives',
+                'value': safe_div(stats['false_positive'], stats['total_benign'])
+            },
+            {
+                'stat': 'False Negatives',
+                'value': safe_div(stats['false_negative'], stats['total_malicious'])
+            },
+            {
+                'stat': 'Random Attack Caught',
+                'value': safe_div(stats['random']['true_positive'], stats['random']['total'])
+            },
+            {
+                'stat': 'Replay Attack Caught',
+                'value': safe_div(stats['replay']['true_positive'], stats['replay']['total'])
+            },
+            {
+                'stat': 'DoS Attack Caught',
+                'value': safe_div(stats['flood']['true_positive'], stats['flood']['total'])
+            },
+            {
+                'stat': 'Spoofing Attack Caught',
+                'value': safe_div(stats['spoof']['true_positive'], stats['spoof']['total'])
+            },
+            {
+                'stat': 'F1 Score',
+                'value': safe_div(2 * precision * recall, precision + recall)
+            }
+        ]
 
     @pyqtSlot()
     def reset_statistics(self):
@@ -68,10 +98,12 @@ class ReportManager(QObject):
                     self._statistics[key][sub_key] = 0
             else:
                 self._statistics[key] = 0
-        get_statistics.emit()
+        self.get_statistics.emit()
 
-    @pyqtSlot(QVariant)
+    @pyqtSlot(QJSValue)
     def update_statistics(self, judgement_result):
+        judgement_result = judgement_result.toVariant()
+
         self._statistics['total'] += 1
 
         label = judgement_result['Label']
@@ -93,4 +125,4 @@ class ReportManager(QObject):
         elif is_malicious and not judge_malicious:
             self._statistics['false_negative'] += 1
 
-        get_statistics.emit()
+        self.get_statistics.emit()

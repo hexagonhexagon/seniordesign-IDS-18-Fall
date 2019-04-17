@@ -6,6 +6,7 @@ from PyQt5.QtQml import QQmlApplicationEngine
 
 from gui.preprocessor_manager import DataPreprocessorManager
 from gui.two_stage_ids_manager import TwoStageIDSManager
+from gui.report_manager import ReportManager
 
 def main():
     global app
@@ -20,6 +21,8 @@ def main():
     engine.rootContext().setContextProperty('dpManager', dpmanager)
     idsmanager = TwoStageIDSManager()
     engine.rootContext().setContextProperty('idsManager', idsmanager)
+    reportmanager = ReportManager()
+    engine.rootContext().setContextProperty('reportManager', reportmanager)
     # Load the QML file.
     engine.load(os.path.dirname(os.path.abspath(__file__)) + '/gui/main.qml')
 
