@@ -62,6 +62,7 @@ class BaseOutputLogModel(QAbstractListModel):
     def roleNames(self):
         return self._roles
 
+# Based off of https://github.com/baoboa/pyqt5/blob/master/examples/itemviews/basicsortfiltermodel.py
 class OutputLogModel(QSortFilterProxyModel):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -85,10 +86,31 @@ class OutputLogModel(QSortFilterProxyModel):
     @pyqtSlot(QJSValue)
     def append(self, judgement):
         self.sourceModel().append(judgement.toVariant())
+        self.get_count.emit()
 
     @pyqtSlot()
     def clear(self):
         self.sourceModel().clear()
+        self.get_count.emit()
+
+    @pyqtSlot(int, result=QVariant)
+    def get(self, source_row):
+        index = self.sourceModel().index(source_row, 0, QModelIndex())
+        try:
+            return {
+                'Frame': self.sourceModel().data(index, BaseOutputLogModel.FrameRole),
+                'Label': self.sourceModel().data(index, BaseOutputLogModel.LabelRole),
+                'Judgement': self.sourceModel().data(index, BaseOutputLogModel.JudgementRole),
+                'Reason': self.sourceModel().data(index, BaseOutputLogModel.ReasonRole)
+            }
+        except IndexError:
+            return QVariant()
+
+    get_count = pyqtSignal()
+
+    @pyqtProperty(int, notify=get_count)
+    def count(self):
+        return self.sourceModel().rowCount()
 
     def filterAcceptsRow(self, source_row, source_parent):
         index = self.sourceModel().index(source_row, 0, source_parent)

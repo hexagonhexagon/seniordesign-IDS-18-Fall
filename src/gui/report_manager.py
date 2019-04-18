@@ -1,6 +1,8 @@
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, pyqtProperty, QVariant, QUrl
 from PyQt5.QtQml import QJSValue
 
+import platform
+
 # We will occasionally divide 0/0, in which case we want to return 0.
 def safe_div(num1, num2):
     if num1 == 0 and num2 == 0:
@@ -126,3 +128,22 @@ class ReportManager(QObject):
             self._statistics['false_negative'] += 1
 
         self.get_statistics.emit()
+
+    @pyqtSlot(QVariant, QVariant)
+    def save_report(self, file_url, output_log):
+        output_log = output_log.toVariant()
+        if platform.system() == 'Windows':
+            file_path = file_url.toString()[8:]
+        else:
+            file_path = file_url.toString()[7:]
+
+        with open(file_path, 'w') as report_file:
+            report_file.write('Statistics:\n')
+            for entry in self.statistics:
+                stat, value = entry['stat'], entry['value']
+                report_file.write(f'{stat}: {value:.2%}\n')
+
+            if output_log:
+                report_file.write('\nJudgement Results:\n')
+                for line in output_log:
+                    report_file.write(f'{line}\n')

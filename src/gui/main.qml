@@ -735,6 +735,8 @@ ApplicationWindow {
                                     id: startButton
                                     text: qsTr("Start Test (temporary)")
                                     onClicked: {
+                                        reportManager.reset_statistics()
+                                        outputLogModel.clear()
                                         var malgenSettings = {
                                             "none": noAttackSliderTest.value,
                                             "random": randomSliderTest.value,
@@ -768,8 +770,7 @@ ApplicationWindow {
                                         enabled = false
                                         nextButton.enabled = false
                                         startButton.enabled = true
-                                        reportManager.reset_statistics()
-                                        outputLogModel.clear()
+                                        saveReportDialog.open()
                                     }
                                 }
                             }
@@ -795,13 +796,16 @@ ApplicationWindow {
                                 }
 
                                 ListView {
+                                    id: reportView
                                     spacing: 5
-                                    implicitWidth: contentWidth
+                                    width: 285
                                     implicitHeight: contentHeight
                                     model: reportModel
                                     delegate: reportDelegate
 
-                                    Component.onCompleted: reportModel.updateReport()
+                                    Component.onCompleted: {
+                                        reportModel.updateReport()
+                                    }
                                 }
 
                                 Component {
@@ -811,23 +815,54 @@ ApplicationWindow {
                                     }
                                 }
 
-                                //Save CAN Log Checkbox - only include CAN Log in csv saved
-                                //if checkbox is checked
-                                CheckBox {
-                                    id: saveCANLog
-                                    text: qsTr("Save CAN Log with Results")
+                                Dialog {
+                                    id: saveReportDialog
+                                    title: qsTr("Save Report?")
+                                    standardButtons: StandardButton.No | StandardButton.Yes
+                                    Column {
+                                        spacing: 5
+
+                                        Text {
+                                            text: qsTr("Would you like to save a report containing the statistics of this run to a file?")
+                                        }
+
+                                        CheckBox {
+                                            id: saveCANLog
+                                            text: qsTr("Save CAN Log with Results")
+                                        }
+                                    }
+
+                                    onYes: {
+                                        saveReportFileDialog.open()
+                                    }
                                 }
-                                //Save Results button - prompts a file dialog to pick a
-                                //path and filename to save the results to and saves them.
-                                SingleSaveFileSelect {
-                                    id: saveResultsFile
-                                    title: qsTr("Save Results")
-                                    nameFilters: "CAN Frame Files (*.json *.traffic *.csv)"
-                                }
-                                //Save Button
-                                Button {
-                                    id: saveResultsButton
-                                    text: qsTr("Save Results")
+
+                                FileDialog {
+                                    id: saveReportFileDialog
+                                    title: qsTr("Save Report")
+                                    selectMultiple: false
+                                    selectExisting: false
+                                    // When the user clicks OK to select the files...
+                                    onAccepted: {
+                                        if (saveCANLog.checked) {
+                                            var outputLogText = []
+                                            for (var i = 0; i < outputLogModel.count; i++) {
+                                                var result = outputLogModel.get(i)
+                                                outputLogText.push(
+                                                    outputLogView.getText(
+                                                        result["Label"],
+                                                        result["Frame"],
+                                                        result["Judgement"],
+                                                        result["Reason"]
+                                                    )
+                                                )
+                                            }
+                                            reportManager.save_report(fileUrl, outputLogText)
+                                        }
+                                        else {
+                                            reportManager.save_report(fileUrl, null)
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -1397,6 +1432,17 @@ ApplicationWindow {
                                         height: parent.height
                                         model: outputLogModel
                                         delegate: outputLogDelegate
+
+                                        function getText(modelLabel, modelFrame, modelJudgement, modelReason) {
+                                            var text = ""
+                                            text += modelLabel.charAt(0).toUpperCase() + modelLabel.slice(1) + " Frame, "
+                                            text += "ID " + modelFrame["id"] + " "
+                                            text += "marked as " + (modelJudgement ? "malicious" : "benign")
+                                            text += (modelReason ? " by " + modelReason : "")
+                                            text += "."
+                                            return text
+                                        }
+
                                         ScrollBar.vertical: ScrollBar {
                                             parent: outputLogView.parent
                                             anchors.top: parent.top
@@ -1409,7 +1455,7 @@ ApplicationWindow {
                                         id: outputLogDelegate
 
                                         Text {
-                                            text: label.charAt(0).toUpperCase() + label.slice(1) + " Frame, ID " + frame["id"] + " marked as " + (judgement ? "malicious" : "benign") + (reason ? " by " + reason : "") + "."
+                                            text: outputLogView.getText(label, frame, judgement, reason)
                                         }
                                     }
                                 }
