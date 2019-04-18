@@ -6,6 +6,7 @@ from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, pyqtProperty, QVariant, 
 from PyQt5.QtQml import QJSValue
 
 import os
+import platform
 
 savedata_dir = os.path.dirname(os.path.abspath(__file__)) + '/../../savedata'
 idprobs_dir = savedata_dir + '/idprobs'
