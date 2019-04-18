@@ -51,7 +51,10 @@ class SimulationManager(QObject):
 
     @pyqtSlot(QVariant, str)
     def start_simulation(self, can_file_url, idprobs_name):
-        file_path = can_file_url.toString()[7:]
+        if platform.system() == 'Windows':
+            file_path = can_file_url.toString()[8:]
+        else:
+            file_path = can_file_url.toString()[7:]
         if file_path.endswith('.traffic'):
             canlist = dp.parse_traffic(file_path)
         elif file_path.endswith('.csv'):

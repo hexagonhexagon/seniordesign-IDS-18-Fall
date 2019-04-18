@@ -1545,7 +1545,7 @@ ApplicationWindow {
                                     label: qsTr("Flood Attack")
                                     value: 0.125
                                     onMoved: {
-                                        var otherValueSum =  randomSlider.value + replaySlider.value + spoofSlider.value
+                                        var otherValueSum =  randomSliderTest.value + replaySliderTest.value + spoofSliderTest.value
                                         if (value + otherValueSum <= 1.0)  {
                                             noAttackSliderTest.value = 1 - value - otherValueSum
                                         }

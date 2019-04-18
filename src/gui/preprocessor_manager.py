@@ -4,6 +4,7 @@ from ids.malicious import MaliciousGenerator
 from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, pyqtProperty, QVariant, QUrl
 from PyQt5.QtQml import QJSValue
 import os
+import platform
 
 # Set up directories the Data Preprocessor uses.
 savedata_dir = os.path.dirname(os.path.abspath(__file__)) + '/../../savedata'
@@ -57,7 +58,10 @@ class DataPreprocessorManager(QObject):
         for file_url in list_of_can_files:
             # toString() returns 'file://<actual file path>', so strip the
             # beginning and open the rest.
-            file_path = file_url.toString()[7:]
+            if platform.system() == 'Windows':
+                file_path = file_url.toString()[8:]
+            else:
+                file_path = file_url.toString()[7:]
             if file_path.endswith('.traffic'):
                 canlist += dp.parse_traffic(file_path)
             elif file_path.endswith('.csv'):
@@ -80,7 +84,10 @@ class DataPreprocessorManager(QObject):
     def create_dataset(self, can_file_url, idprobs_name, malgen_probs, dataset_name):
         # Convert the JS object to a dictionary.
         malgen_probs = malgen_probs.toVariant()
-        file_path = can_file_url.toString()[7:]
+        if platform.system() == 'Windows':
+            file_path = can_file_url.toString()[8:]
+        else:
+            file_path = can_file_url.toString()[7:]
         if file_path.endswith('.traffic'):
             canlist = dp.parse_traffic(file_path)
         elif file_path.endswith('.csv'):
