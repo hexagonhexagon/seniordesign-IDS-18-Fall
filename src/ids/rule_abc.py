@@ -25,7 +25,7 @@ class Rule(ABC):
     # use this file as path reference
     # MAYBE: make a file in project root to define global constants, such as
     # this.
-    SAVE_PATH = pathlib.Path(__file__).parent.parent / 'savedata/rule-profiles'
+    SAVE_PATH = pathlib.Path(__file__).parent.parent.parent / 'savedata/rule-profiles'
 
     def __init__(self, profile_id):
         """Init Rule
