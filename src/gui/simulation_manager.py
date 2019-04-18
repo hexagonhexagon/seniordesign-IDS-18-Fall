@@ -76,13 +76,17 @@ class SimulationManager(QObject):
 
     @pyqtSlot(str)
     def inject_malicious_packet(self, attack_name):
-        if len(self._current_canlist > 1):
-            malicious_frames, malicious_labels = self._malgen.get_attack(
+        if len(self._current_canlist) > 1:
+            malicious_frames = list(self._malgen.get_attack(
                 (self._current_canlist[0], self._current_canlist[1]),
                 attack_name
-            )
-            self._current_canlist = malicious_frames + self._current_canlist
-            self._current_labels = malicious_labels + self._current_labels
+            ))
+            malicious_labels = [attack_name for _ in range(len(malicious_frames))]
+            for i in range(len(malicious_frames) - 1, -1, -1):
+                self._current_canlist.insert(1, malicious_frames[i])
+                self._current_labels.insert(1, malicious_labels[i])
+            print(self._current_canlist[:10])
+            print(self._current_labels[:10])
 
     @pyqtSlot()
     def stop_simulation(self):

@@ -61,6 +61,10 @@ ApplicationWindow {
             stepButton.enabled = false
             playButton.enabled = false
             startButton.enabled = true
+            injectRandomButton.enabled = false
+            injectFloodButton.enabled = false
+            injectReplayButton.enabled = false
+            injectSpoofButton.enabled = false
             saveReportDialog.open()
         }
     }
@@ -772,6 +776,10 @@ ApplicationWindow {
                                         stepButton.enabled = true
                                         playButton.enabled = true
                                         stopButton.enabled = true
+                                        injectRandomButton.enabled = true
+                                        injectFloodButton.enabled = true
+                                        injectReplayButton.enabled = true
+                                        injectSpoofButton.enabled = true
                                     }
                                 }
                             }
@@ -1672,6 +1680,46 @@ ApplicationWindow {
                                             noAttackSliderTest.value = 0.0
                                             value = 1 - otherValueSum
                                         }
+                                    }
+                                }
+
+                                Button {
+                                    id: injectRandomButton
+                                    text: qsTr("Inject Random Attack")
+                                    enabled: false
+                                    onClicked: {
+                                        simManager.inject_malicious_packet('random')
+                                        simManager.step_simulation()
+                                    }
+                                }
+
+                                Button {
+                                    id: injectFloodButton
+                                    text: qsTr("Inject Flood Attack")
+                                    enabled: false
+                                    onClicked: {
+                                        simManager.inject_malicious_packet('flood')
+                                        simManager.step_simulation()
+                                    }
+                                }
+
+                                Button {
+                                    id: injectReplayButton
+                                    text: qsTr("Inject Replay Attack")
+                                    enabled: false
+                                    onClicked: {
+                                        simManager.inject_malicious_packet('replay')
+                                        simManager.step_simulation()
+                                    }
+                                }
+
+                                Button {
+                                    id: injectSpoofButton
+                                    text: qsTr("Inject Spoof Attack")
+                                    enabled: false
+                                    onClicked: {
+                                        simManager.inject_malicious_packet('spoof')
+                                        simManager.step_simulation()
                                     }
                                 }
                             }
