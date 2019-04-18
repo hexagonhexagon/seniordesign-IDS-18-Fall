@@ -1422,32 +1422,41 @@ ApplicationWindow {
 
                                 //Output Tab
                                 Item {
+                                    id: outputLogHolder
                                     anchors.fill: parent
-                                    anchors.margins: 5
+                                    Rectangle {
+                                        anchors.fill: parent
+                                        anchors.rightMargin: 10
+                                        border.width: 1
+                                        border.color: "#ababab"
+                                        color: "white"
+                                        ListView {
+                                            id: outputLogView
+                                            anchors.fill: parent
+                                            anchors.margins: 5
+                                            spacing: 5
+                                            model: outputLogModel
+                                            delegate: outputLogDelegate
 
-                                    ListView {
-                                        id: outputLogView
-                                        spacing: 5
-                                        width: parent.width
-                                        height: parent.height
-                                        model: outputLogModel
-                                        delegate: outputLogDelegate
+                                            function getText(modelLabel, modelFrame, modelJudgement, modelReason) {
+                                                var text = ""
+                                                text += modelLabel.charAt(0).toUpperCase() + modelLabel.slice(1) + " Frame, "
+                                                text += "ID " + modelFrame["id"] + " "
+                                                text += "marked as " + (modelJudgement ? "malicious" : "benign")
+                                                text += (modelReason ? " by " + modelReason : "")
+                                                text += "."
+                                                return text
+                                            }
 
-                                        function getText(modelLabel, modelFrame, modelJudgement, modelReason) {
-                                            var text = ""
-                                            text += modelLabel.charAt(0).toUpperCase() + modelLabel.slice(1) + " Frame, "
-                                            text += "ID " + modelFrame["id"] + " "
-                                            text += "marked as " + (modelJudgement ? "malicious" : "benign")
-                                            text += (modelReason ? " by " + modelReason : "")
-                                            text += "."
-                                            return text
-                                        }
-
-                                        ScrollBar.vertical: ScrollBar {
-                                            parent: outputLogView.parent
-                                            anchors.top: parent.top
-                                            anchors.left: parent.right
-                                            anchors.bottom: parent.bottom
+                                            ScrollBar.vertical: ScrollBar {
+                                                parent: outputLogView.parent
+                                                anchors.top: parent.top
+                                                anchors.left: parent.right
+                                                anchors.bottom: parent.bottom
+                                            }
+                                            clip: true
+                                            boundsBehavior: Flickable.StopAtBounds
+                                            Component.onCompleted: outputLogScrollTimer.start()
                                         }
                                     }
 
@@ -1456,6 +1465,15 @@ ApplicationWindow {
 
                                         Text {
                                             text: outputLogView.getText(label, frame, judgement, reason)
+                                        }
+                                    }
+
+                                    Timer {
+                                        id: outputLogScrollTimer
+                                        interval: 100
+                                        repeat: true
+                                        onTriggered: {
+                                            outputLogView.positionViewAtEnd()
                                         }
                                     }
                                 }
@@ -1673,6 +1691,7 @@ ApplicationWindow {
                                     enabled: false
                                     onClicked: {
                                         simManager.stop_simulation()
+                                        outputLogScrollTimer.stop()
                                     }
 
                                     Image{
@@ -1689,6 +1708,8 @@ ApplicationWindow {
                                     enabled: false
                                     onClicked: {
                                         simManager.pause_simulation()
+                                        outputLogScrollTimer.stop()
+                                        outputLogView.positionViewAtEnd()
                                     }
 
                                     Image{
@@ -1705,6 +1726,7 @@ ApplicationWindow {
                                     enabled: false
                                     onClicked: {
                                         simManager.step_simulation()
+                                        outputLogView.positionViewAtEnd()
                                     }
 
                                     Image{
@@ -1720,6 +1742,7 @@ ApplicationWindow {
                                     width: 70
                                     enabled: false
                                     onClicked: {
+                                        outputLogScrollTimer.start()
                                         simManager.play_simulation()
                                     }
 

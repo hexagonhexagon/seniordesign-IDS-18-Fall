@@ -22,7 +22,7 @@ class SimulationManager(QObject):
         self._current_canlist = []
         self._current_labels = []
         self.sim_thread = None
-        self._sim_paused = False
+        self._sim_paused = True
 
     result = pyqtSignal(QVariant)
     simDone = pyqtSignal()
@@ -86,7 +86,7 @@ class SimulationManager(QObject):
 
     @pyqtSlot()
     def stop_simulation(self):
-        self.sim_thread.quit()
+        self.sim_thread.exit()
         self.sim_thread = None
         self._sim_paused = True
         self._ids_manager.stop_simulation()
