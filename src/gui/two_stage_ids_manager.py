@@ -57,6 +57,77 @@ optimizer_convert = {
 
 optimizer_convert_reverse = {v: k for k, v in optimizer_convert.items()}
 
+def construct_optimizer(name, properties):
+    optimizer_class = optimizer_convert_reverse[name]
+    if name == 'Adadelta Optimizer':
+        return optimizer_class(
+            learning_rate=properties['Learning Rate'],
+            rho=properties['Rho'],
+            epsilon=properties['Epsilon']
+        )
+    elif name == 'Adagrad DA Optimizer':
+        return optimizer_class(
+            learning_rate=properties['Learning Rate'],
+            global_step=properties['Global Step'],
+            initial_gradient_squared_accumulator_value=properties['Initial Gradient Squared Accumulator Value'],
+            l1_regularization_strength=properties['L1 Regularization Strength'],
+            l2_regularization_strength=properties['L2 Regularization Strength']
+        )
+    elif name == 'Adagrad Optimizer':
+        return optimizer_class(
+            learning_rate=properties['Learning Rate'],
+            initial_accumulator_value=properties['Initial Accumulator Value']
+        )
+    elif name == 'Adam Optimizer':
+        return optimizer_class(
+            learning_rate=properties['Learning Rate'],
+            beta1=properties['Beta_1'],
+            beta2=properties['Beta_2'],
+            epsilon=properties['Epsilon']
+        )
+    elif name == 'FTRL Optimizer':
+        return optimizer_class(
+            learning_rate=properties['Learning Rate'],
+            learning_rate_power=properties['Learning Rate Power'],
+            initial_accumulator_value=properties['Initial Accumulator Value'],
+            l1_regularization_strength=properties['L1 Regularization Strength'],
+            l2_regularization_strength=properties['L2 Regularization Strength'],
+            l2_shrinkage_regularization_strength=properties['L2 Shrinkage Regularization Strength']
+        )
+    elif name == 'Gradient Descent Optimizer':
+        return optimizer_class(
+            learning_rate=properties['Learning Rate']
+        )
+    elif name == 'Momentum Optimizer':
+        return optimizer_class(
+            learning_rate=properties['Learning Rate'],
+            momentum=properties['Momentum'],
+            use_nesterov=False
+        )
+    elif name == 'Proximal Adagrad Optimizer':
+        return optimizer_class(
+            learning_rate=properties['Learning Rate'],
+            initial_accumulator_value=properties['Initial Accumulator Value'],
+            l1_regularization_strength=properties['L1 Regularization Strength'],
+            l2_regularization_strength=properties['L2 Regularization Strength']
+        )
+    elif name == 'Proximal Gradient Descent Optimizer':
+        return optimizer_class(
+            learning_rate=properties['Learning Rate'],
+            l1_regularization_strength=properties['L1 Regularization Strength'],
+            l2_regularization_strength=properties['L2 Regularization Strength']
+        )
+    elif name == 'RMS Prop Optimizer':
+        return optimizer_class(
+            learning_rate=properties['Learning Rate'],
+            decay=properties['Decay'],
+            momentum=properties['Momentum'],
+            centered=properties['Centered']
+        )
+    else:
+        raise ValueError()
+
+
 # Inherits from QObject, which is what allows it to be used in QML.
 class TwoStageIDSManager(QObject):
     def __init__(self):
@@ -115,7 +186,11 @@ class TwoStageIDSManager(QObject):
         self._ids.change_ids_parameters('dnn_dir_path', dnnmodels_dir + '/' + model_name)
         self._ids.change_ids_parameters('rules_profile', model_name)
         self._ids.change_dnn_parameters('hidden_units', literal_eval(parameters['Hidden Units']))
-        # self._ids.change_dnn_parameters('optimizer', ???)
+        print(parameters['Optimizer Properties'])
+        self._ids.change_dnn_parameters('optimizer', construct_optimizer(
+            parameters['Optimizer'],
+            parameters['Optimizer Properties']
+        ))
         self._ids.change_dnn_parameters('activation_fn', activation_fn_convert_reverse[parameters['Activation Function']])
         self._ids.change_dnn_parameters('loss_reduction', loss_reduction_convert_reverse[parameters['Loss Reduction']])
         self._ids.init_ids()

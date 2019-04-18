@@ -653,19 +653,20 @@ ApplicationWindow {
                         }
                     }
                     onAccepted: {
+                        var currentOptimizerProps = {}
+                        for (var i = 0; i < optimizerPropertiesModel.count; i++) {
+                            var prop = optimizerPropertiesModel.get(i)
+                            currentOptimizerProps[prop.name] = prop.value
+                        }
+
                         var properties = {
                             "Hidden Units": newModelHiddenUnits.text,
                             "Activation Function": newModelActivationFn.currentText,
                             "Optimizer": newModelOptimizer.currentText,
+                            "Optimizer Properties": currentOptimizerProps,
                             "Loss Reduction": newModelLossReduction.currentText
                         }
                         idsManager.new_model(newModelName.text, properties)
-
-                        for (var i = 0; i < optimizerPropertiesModel.count; i++) {
-                            var prop = optimizerPropertiesModel.get(i)
-                            console.log(typeof(prop))
-                            console.log(prop.name, prop.value)
-                        }
                     }
                 }
 
@@ -701,7 +702,7 @@ ApplicationWindow {
                         spacing: 5
                         Label {
                             text: qsTr("Model to Delete")
-                            height: loadModelModel.height
+                            height: deleteModelModel.height
                             verticalAlignment: Text.AlignVCenter
                         }
                         ComboBox {
@@ -711,7 +712,7 @@ ApplicationWindow {
                     }
 
                     onAccepted: {
-                        idsManager.delete_model(loadModelModel.currentText)
+                        idsManager.delete_model(deleteModelModel.currentText)
                     }
                 }
             }
