@@ -36,16 +36,32 @@ ApplicationWindow {
     property bool hazardsActivated: false;
     property double startTime: 0;   // Time that blinker/hazards were last lit at
 
+    // Bools for keeping track of simulation
+    property bool simulationPaused: true
+
     signal judgeResult(variant result)
     Component.onCompleted: {
         simManager.result.connect(judgeResult)
     }
+    signal simDone()
 
     Connections {
         target: root
         onJudgeResult: {
             reportManager.update_statistics(result)
             outputLogModel.append(result)
+        }
+    }
+
+    Connections {
+        target: simManager
+        onSimDone: {
+            stopButton.enabled = false
+            pauseButton.enabled = false
+            stepButton.enabled = false
+            playButton.enabled = false
+            startButton.enabled = true
+            saveReportDialog.open()
         }
     }
 
@@ -711,6 +727,10 @@ ApplicationWindow {
                             title: qsTr("Test Setup")
                             Column {
                                 spacing: 5
+                                Text {
+                                    text: "Model Name: " + idsManager.parameters["Model Name"]
+                                }
+
                                 //Select Idprobs file
                                 Row {
                                     spacing: 5
@@ -733,7 +753,7 @@ ApplicationWindow {
 
                                 Button {
                                     id: startButton
-                                    text: qsTr("Start Test (temporary)")
+                                    text: qsTr("Start Simulation")
                                     onClicked: {
                                         reportManager.reset_statistics()
                                         outputLogModel.clear()
@@ -747,30 +767,10 @@ ApplicationWindow {
                                         simManager.adjust_malgen(malgenSettings)
                                         simManager.start_simulation(canFrameFile.fileUrl, datasetIdprobsTest.currentText)
                                         enabled = false
-                                        nextButton.enabled = true
+                                        pauseButton.enabled = true
+                                        stepButton.enabled = true
+                                        playButton.enabled = true
                                         stopButton.enabled = true
-                                    }
-                                }
-
-                                Button {
-                                    id: nextButton
-                                    text: qsTr("Judge Next Frame (temporary)")
-                                    enabled: false
-                                    onClicked: {
-                                        simManager.judge_next_frame()
-                                    }
-                                }
-
-                                Button {
-                                    id: stopButton
-                                    text: qsTr("Stop simulation (temporary)")
-                                    enabled: false
-                                    onClicked: {
-                                        simManager.stop_simulation()
-                                        enabled = false
-                                        nextButton.enabled = false
-                                        startButton.enabled = true
-                                        saveReportDialog.open()
                                     }
                                 }
                             }
@@ -1665,51 +1665,67 @@ ApplicationWindow {
                             Row{
                                 anchors.fill: parent
 
-                                //Backward Button
+                                //Stop Button
                                 Button{
+                                    id: stopButton
                                     height: 70
                                     width: 70
+                                    enabled: false
+                                    onClicked: {
+                                        simManager.stop_simulation()
+                                    }
 
                                     Image{
-                                        id: backward
                                         anchors.fill: parent
-                                        source: "assets/backward.png"
+                                        source: "assets/stop.png"
                                     }
                                 }
 
                                 //Pause Button
                                 Button{
+                                    id: pauseButton
                                     height: 70
                                     width: 70
+                                    enabled: false
+                                    onClicked: {
+                                        simManager.pause_simulation()
+                                    }
 
                                     Image{
-                                        id: pause
                                         anchors.fill: parent
                                         source: "assets/pause.png"
                                     }
                                 }
 
-                                //Play Button
+                                //Step Button
                                 Button{
+                                    id: stepButton
                                     height: 70
                                     width: 70
+                                    enabled: false
+                                    onClicked: {
+                                        simManager.step_simulation()
+                                    }
 
                                     Image{
-                                        id: play
                                         anchors.fill: parent
-                                        source: "assets/play.png"
+                                        source: "assets/step.png"
                                     }
                                 }
 
-                                //Forward Button
+                                //Play Button
                                 Button{
+                                    id: playButton
                                     height: 70
                                     width: 70
+                                    enabled: false
+                                    onClicked: {
+                                        simManager.play_simulation()
+                                    }
 
                                     Image{
-                                        id: forward
                                         anchors.fill: parent
-                                        source: "assets/forward.png"
+                                        source: "assets/play.png"
                                     }
                                 }
                             }

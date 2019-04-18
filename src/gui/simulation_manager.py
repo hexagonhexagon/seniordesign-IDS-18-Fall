@@ -2,7 +2,7 @@ from gui.two_stage_ids_manager import TwoStageIDSManager
 from ids.malicious import MaliciousGenerator
 import ids.preprocessor as dp
 
-from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, pyqtProperty, QVariant, QUrl
+from PyQt5.QtCore import QObject, pyqtSignal, pyqtSlot, pyqtProperty, QVariant, QUrl, QThread
 from PyQt5.QtQml import QJSValue
 
 import os
@@ -10,6 +10,7 @@ import platform
 
 savedata_dir = os.path.dirname(os.path.abspath(__file__)) + '/../../savedata'
 idprobs_dir = savedata_dir + '/idprobs'
+
 
 class SimulationManager(QObject):
     def __init__(self, ids_manager: TwoStageIDSManager):
@@ -20,6 +21,8 @@ class SimulationManager(QObject):
         self._malgen = MaliciousGenerator()
         self._current_canlist = []
         self._current_labels = []
+        self.sim_thread = None
+        self._sim_paused = False
 
     result = pyqtSignal(QVariant)
     simDone = pyqtSignal()
@@ -68,6 +71,8 @@ class SimulationManager(QObject):
 
         self._ids_manager._ids.change_ids_parameters('idprobs_path', idprobs_dir + '/' + idprobs_name + '.json')
         self._ids_manager.start_simulation()
+        self.sim_thread = SimulationThread(self)
+        self.sim_thread.start()
 
     @pyqtSlot(str)
     def inject_malicious_packet(self, attack_name):
@@ -81,5 +86,31 @@ class SimulationManager(QObject):
 
     @pyqtSlot()
     def stop_simulation(self):
+        self.sim_thread.quit()
+        self.sim_thread = None
+        self._sim_paused = True
         self._ids_manager.stop_simulation()
         self.simDone.emit()
+
+    @pyqtSlot()
+    def pause_simulation(self):
+        self._sim_paused = True
+
+    @pyqtSlot()
+    def step_simulation(self):
+        self._sim_paused = True
+        self.judge_next_frame()
+
+    @pyqtSlot()
+    def play_simulation(self):
+        self._sim_paused = False
+
+class SimulationThread(QThread):
+    def __init__(self, sim_manager: SimulationManager):
+        QThread.__init__(self)
+        self.sim_manager = sim_manager
+
+    def run(self):
+        while self.sim_manager._ids_manager._ids.in_simulation:
+            if not self.sim_manager._sim_paused:
+                self.sim_manager.judge_next_frame()

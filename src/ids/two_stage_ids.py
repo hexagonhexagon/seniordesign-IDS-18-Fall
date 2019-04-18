@@ -216,7 +216,7 @@ class TwoStageIDS:  # pylint: disable=too-many-instance-attributes
         if is_malicious[0]: # is_malicious is a pair (is_malicious, rule_name)
             return is_malicious
         else:  # Passed RuleBasedIDS, test against DNNBasedIDS.
-            processed_frame = {'id': id}
+            processed_frame = {'id': frame['id']}
             processed_frame['occurrences_in_last_sec'] = next(
                 self.id_freq.feed([frame]))
 
