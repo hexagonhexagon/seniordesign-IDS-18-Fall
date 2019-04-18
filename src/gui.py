@@ -8,6 +8,7 @@ from gui.preprocessor_manager import DataPreprocessorManager
 from gui.two_stage_ids_manager import TwoStageIDSManager
 from gui.report_manager import ReportManager
 from gui.simulation_manager import SimulationManager
+from gui.output_log_model import BaseOutputLogModel, OutputLogModel
 
 def main():
     global app
@@ -18,14 +19,21 @@ def main():
 
     # Make the Data Preprocessor Manager accessible through QML.
     engine = QQmlApplicationEngine()
+    context = engine.rootContext()
     dpmanager = DataPreprocessorManager()
-    engine.rootContext().setContextProperty('dpManager', dpmanager)
+    context.setContextProperty('dpManager', dpmanager)
     idsmanager = TwoStageIDSManager()
-    engine.rootContext().setContextProperty('idsManager', idsmanager)
+    context.setContextProperty('idsManager', idsmanager)
     reportmanager = ReportManager()
-    engine.rootContext().setContextProperty('reportManager', reportmanager)
+    context.setContextProperty('reportManager', reportmanager)
     simulationmanager = SimulationManager(idsmanager)
-    engine.rootContext().setContextProperty('simManager', simulationmanager)
+    context.setContextProperty('simManager', simulationmanager)
+
+    baselogmodel = BaseOutputLogModel()
+    outputlogmodel = OutputLogModel()
+    outputlogmodel.setDynamicSortFilter(True)
+    outputlogmodel.setSourceModel(baselogmodel)
+    context.setContextProperty('outputLogModel', outputlogmodel)
     # Load the QML file.
     engine.load(os.path.dirname(os.path.abspath(__file__)) + '/gui/main.qml')
 

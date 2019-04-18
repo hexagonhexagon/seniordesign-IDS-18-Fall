@@ -45,6 +45,7 @@ ApplicationWindow {
         target: root
         onJudgeResult: {
             reportManager.update_statistics(result)
+            outputLogModel.append(result)
         }
     }
 
@@ -735,11 +736,11 @@ ApplicationWindow {
                                     text: qsTr("Start Test (temporary)")
                                     onClicked: {
                                         var malgenSettings = {
-                                            "none": noAttackSliderProcess.value,
-                                            "random": randomSliderProcess.value,
-                                            "flood": floodSliderProcess.value,
-                                            "replay": replaySliderProcess.value,
-                                            "spoof": spoofSliderProcess.value
+                                            "none": noAttackSliderTest.value,
+                                            "random": randomSliderTest.value,
+                                            "flood": floodSliderTest.value,
+                                            "replay": replaySliderTest.value,
+                                            "spoof": spoofSliderTest.value
                                         }
                                         simManager.adjust_malgen(malgenSettings)
                                         simManager.start_simulation(canFrameFile.fileUrl, datasetIdprobsTest.currentText)
@@ -768,6 +769,7 @@ ApplicationWindow {
                                         nextButton.enabled = false
                                         startButton.enabled = true
                                         reportManager.reset_statistics()
+                                        outputLogModel.clear()
                                     }
                                 }
                             }
@@ -1386,24 +1388,28 @@ ApplicationWindow {
                                 //Output Tab
                                 Item {
                                     anchors.fill: parent
-                                    Row{
-                                        anchors.fill: parent
-                                        spacing: 5
+                                    anchors.margins: 5
 
-                                        Flickable {
-                                            id: flickable
-                                            anchors.fill: parent
-                                            ScrollBar.vertical: ScrollBar {
-                                                parent: flickable.parent
-                                                anchors.top: flickable.top
-                                                anchors.left: flickable.right
-                                                anchors.bottom: flickable.bottom
-                                            }
-                                            TextArea.flickable: TextArea{
-                                                anchors.fill: parent
-                                                enabled: false
-                                                text: "text\n...\n...\n...\n...\n...\n...\n...\n...\n...\n...\n...\nArea"
-                                            }
+                                    ListView {
+                                        id: outputLogView
+                                        spacing: 5
+                                        width: parent.width
+                                        height: parent.height
+                                        model: outputLogModel
+                                        delegate: outputLogDelegate
+                                        ScrollBar.vertical: ScrollBar {
+                                            parent: outputLogView.parent
+                                            anchors.top: parent.top
+                                            anchors.left: parent.right
+                                            anchors.bottom: parent.bottom
+                                        }
+                                    }
+
+                                    Component {
+                                        id: outputLogDelegate
+
+                                        Text {
+                                            text: label.charAt(0).toUpperCase() + label.slice(1) + " Frame, ID " + frame["id"] + " marked as " + (judgement ? "malicious" : "benign") + (reason ? " by " + reason : "") + "."
                                         }
                                     }
                                 }
@@ -1420,21 +1426,29 @@ ApplicationWindow {
                                             CheckBox {
                                                 id: falseNegativeFilter
                                                 text: "False Negative"
+                                                checked: true
+                                                onCheckedChanged: outputLogModel.change_filter("false_negative", checked)
                                             }
                                             //False Positive
                                             CheckBox {
                                                 id: falsePositiveFilter
                                                 text: "False Positive"
+                                                checked: true
+                                                onCheckedChanged: outputLogModel.change_filter("false_positive", checked)
                                             }
                                             //True Positive
                                             CheckBox {
                                                 id: truePositiveFilter
                                                 text: "True Positive"
+                                                checked: true
+                                                onCheckedChanged: outputLogModel.change_filter("true_positive", checked)
                                             }
                                             //True Negative
                                             CheckBox {
                                                 id: trueNegativeFilter
                                                 text: "True Negative"
+                                                checked: true
+                                                onCheckedChanged: outputLogModel.change_filter("true_negative", checked)
                                             }
                                         }
 
@@ -1446,26 +1460,36 @@ ApplicationWindow {
                                             CheckBox {
                                                 id: benignFilter
                                                 text: "Benign"
+                                                checked: true
+                                                onCheckedChanged: outputLogModel.change_filter("benign", checked)
                                             }
                                             //random
                                             CheckBox {
                                                 id: randomFilter
                                                 text: "Random"
+                                                checked: true
+                                                onCheckedChanged: outputLogModel.change_filter("random", checked)
                                             }
                                             //flood
                                             CheckBox {
                                                 id: floodFilter
                                                 text: "Flood"
+                                                checked: true
+                                                onCheckedChanged: outputLogModel.change_filter("flood", checked)
                                             }
                                             //replay
                                             CheckBox {
                                                 id: replayFilter
                                                 text: "Replay"
+                                                checked: true
+                                                onCheckedChanged: outputLogModel.change_filter("replay", checked)
                                             }
                                             //spoofing
                                             CheckBox {
                                                 id: spoofingFilter
                                                 text: "Spoofing"
+                                                checked: true
+                                                onCheckedChanged: outputLogModel.change_filter("spoof", checked)
                                             }
                                         }
                                     }

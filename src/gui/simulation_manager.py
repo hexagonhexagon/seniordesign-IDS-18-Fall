@@ -26,7 +26,7 @@ class SimulationManager(QObject):
 
     @pyqtSlot(QJSValue)
     def adjust_malgen(self, adjustments):
-        self._malgen.adjust(adjustments)
+        self._malgen.adjust(adjustments.toVariant())
 
     @pyqtSlot()
     def judge_next_frame(self):
