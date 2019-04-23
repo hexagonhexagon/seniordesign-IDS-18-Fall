@@ -21,12 +21,14 @@ class DataPreprocessorManager(QObject):
         # extension).
         self._available_idprobs = []
         for filename in os.listdir(idprobs_dir):
-            self._available_idprobs.append(filename.replace('.json', ''))
+            if filename != '.gitignore':
+                self._available_idprobs.append(filename.replace('.json', ''))
 
         # Enumerate all available dataset names.
         self._available_datasets = []
         for dirname in os.listdir(datasets_dir):
-            self._available_datasets.append(dirname)
+            if dirname != '.gitignore':
+                self._available_datasets.append(dirname)
 
     # Set up availableIdprobs property. Must have @pyqtProperty decorator in
     # order to be visible to QML, where type must be specified. QVariant is a
