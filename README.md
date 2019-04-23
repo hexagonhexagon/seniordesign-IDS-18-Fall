@@ -5,11 +5,13 @@ determine if a packet sent on a CAN bus is malicious or not.
 
 ## Installation
 1. Clone this repository. If Git is installed, then run  
-   `git clone https://gitlab.eecs.umich.edu/linxiz/IDS-18-Fall.git`.
+   `git clone https://gitlab.eecs.umich.edu/linxiz/IDS-18-Fall.git`. Then enter the `IDS-18-Fall` directory just created by the command.
+1. Run the command `git checkout gui` in order to get the latest branch with the GUI functionality implemented.
 1. Install [Python](https://www.python.org/downloads/). You will also need pip
    installed with Python: this is done by default.
 1. Run the command `pip install .`. This will install all dependencies that
    this project requires in order for you to run it.
+1. Run the command `python src/gui.py`. This will start up the GUI.
 
 ### Development
 1. In the root of the project directory, make a virtual environment with `python -m venv .venv`.
