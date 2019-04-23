@@ -18,7 +18,7 @@ setup(
 
     # python_requires='>=3.6, <3.7',
     python_requires='>=3.6',
-    install_requires=['numpy', 'tensorflow'],
+    install_requires=['numpy', 'tensorflow', 'PyQt5'],
     extras_require={
         'test': ['pytest']
     },
