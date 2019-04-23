@@ -630,7 +630,7 @@ ApplicationWindow {
                                             visible: type == "number"
                                             onTextChanged: {
                                                 if (acceptableInput) {
-                                                    model.value = text
+                                                    model.value = parseFloat(text)
                                                 }
                                             }
                                         }
