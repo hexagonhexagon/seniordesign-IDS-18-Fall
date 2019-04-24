@@ -18,6 +18,8 @@ determine if a packet sent on a CAN bus is malicious or not.
 2. Activate the venv with:
    - Linux/Mac: `source .venv/bin/activate`
    - Windows: `.\.venv\Scripts\Activate.ps1`
+      -On some devices, the execution policy will prevent the script from running. Execute the following 
+	  command with admin privileges in powershell and select yes: Set-ExecutionPolicy RemoteSigned
 2. Install the application to venv in development mode with `pip install --editable '.[test]'`.
 3. To run tests, run the command `python -m pytest`. This will automatically
    perform all unit tests, and you can verify that all tests pass.  

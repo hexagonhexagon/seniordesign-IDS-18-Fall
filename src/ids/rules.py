@@ -365,5 +365,5 @@ ROSTER = {
     'ID_Whitelist': ID_Whitelist,
     'TimeInterval': TimeInterval,
     'MessageFrequency': MessageFrequency,
-    'MessageSequence': MessageSequence
+    #'MessageSequence': MessageSequence
 }
