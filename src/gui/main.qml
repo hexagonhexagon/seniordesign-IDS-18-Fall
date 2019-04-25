@@ -40,8 +40,12 @@ ApplicationWindow {
     property bool simulationPaused: true
 
     signal judgeResult(variant result)
+    signal handledException(string errorText)
+    signal unhandledException(variant error)
     Component.onCompleted: {
         simManager.result.connect(judgeResult)
+        excHandler.handledException.connect(handledException)
+        excHandler.unhandledException.connect(unhandledException)
     }
     signal simDone()
 
@@ -50,6 +54,14 @@ ApplicationWindow {
         onJudgeResult: {
             reportManager.update_statistics(result)
             outputLogModel.append(result)
+        }
+        onHandledException: {
+            handledExceptionDialog.text = "There was an error:\n" + errorText
+            handledExceptionDialog.open()
+        }
+        onUnhandledException: {
+            unhandledExceptionDialog.text = "There was an unexpected error:\n\n" + error["error"] + "\n" + error["traceback"] + "\nReport this issue on the issue tracker."
+            unhandledExceptionDialog.open()
         }
     }
 
@@ -1805,5 +1817,17 @@ ApplicationWindow {
                 }
             }
         }
+    }
+
+    MessageDialog {
+        id: handledExceptionDialog
+        title: qsTr("Error")
+        icon: StandardIcon.Warning
+    }
+
+    MessageDialog {
+        id: unhandledExceptionDialog
+        title: qsTr("Unexpected Error")
+        icon: StandardIcon.Critical
     }
 }

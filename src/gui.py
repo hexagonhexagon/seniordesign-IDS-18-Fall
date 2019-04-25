@@ -9,6 +9,9 @@ from gui.two_stage_ids_manager import TwoStageIDSManager
 from gui.report_manager import ReportManager
 from gui.simulation_manager import SimulationManager
 from gui.output_log_model import BaseOutputLogModel, OutputLogModel
+from gui.exception_handler import excHandler
+
+sys.excepthook = excHandler.excepthook
 
 def main():
     global app
@@ -34,6 +37,8 @@ def main():
     outputlogmodel.setDynamicSortFilter(True)
     outputlogmodel.setSourceModel(baselogmodel)
     context.setContextProperty('outputLogModel', outputlogmodel)
+
+    context.setContextProperty('excHandler', excHandler)
     # Load the QML file.
     engine.load(os.path.dirname(os.path.abspath(__file__)) + '/gui/main.qml')
 
