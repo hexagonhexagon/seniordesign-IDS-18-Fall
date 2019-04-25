@@ -56,7 +56,7 @@ ApplicationWindow {
             outputLogModel.append(result)
         }
         onHandledException: {
-            handledExceptionDialog.text = "There was an error:\n" + errorText
+            handledExceptionDialog.text = "There was an error:\n\n" + errorText
             handledExceptionDialog.open()
         }
         onUnhandledException: {
@@ -246,6 +246,7 @@ ApplicationWindow {
                             Button {
                                 id: makeIdprobsButton
                                 text: qsTr("Make ID Probs File")
+                                enabled: idprobsFileSelectProcess.fileUrls && idprobsName.text
                                 onClicked: dpManager.create_idprobs_file(idprobsFileSelectProcess.fileUrls, idprobsName.text)
                             }
                         }
@@ -409,6 +410,7 @@ ApplicationWindow {
                             Button {
                                 id: makeDatasetButton
                                 text: qsTr("Make Dataset")
+                                enabled: datasetFileSelect.fileUrl && datasetIdprobsProcess.currentText && datasetName.text
                                 onClicked: {
                                     // We set up the adjustment dictionary to pass in to the
                                     // create_dataset function to be the probabilities we
@@ -474,6 +476,7 @@ ApplicationWindow {
 
                                 Button {
                                     text: qsTr("Train")
+                                    enabled: idsManager.parameters["Model Name"] !== "No Model" && rulesTrainingDataset.currentText
                                     onClicked: {
                                         idsManager.train_rules(rulesTrainingDataset.currentText)
                                     }
@@ -507,6 +510,7 @@ ApplicationWindow {
 
                                 Button {
                                     text: qsTr("Train")
+                                    enabled: (idsManager.parameters["Model Name"] !== "No Model") && dnnTrainingDataset.currentText && dnnTrainingNumSteps.field.acceptableInput
                                     onClicked: {
                                         idsManager.train_dnn(rulesTrainingDataset.currentText, dnnTrainingNumSteps.text)
                                     }
@@ -770,6 +774,7 @@ ApplicationWindow {
                                 Button {
                                     id: startButton
                                     text: qsTr("Start Simulation")
+                                    enabled: idsManager.parameters["Rules Trained"] && idsManager.parameters["DNN Trained"] && datasetIdprobsTest.currentText && canFrameFile.fileUrl
                                     onClicked: {
                                         reportManager.reset_statistics()
                                         outputLogModel.clear()
