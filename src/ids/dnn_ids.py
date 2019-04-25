@@ -12,7 +12,7 @@ feature_cols = [
     tf.feature_column.numeric_column('system_entropy_change')
 ]
 
-def dnn_input_function(features, labels, batch_size=128, shuffle=False, num_epochs=1):
+def dnn_input_function(features, labels, batch_size=128, shuffle=False, num_epochs=None):
     """An input function to the train and predict functions of the DNNBasedIDS.
 
     Arguments:
