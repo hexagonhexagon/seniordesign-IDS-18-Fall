@@ -36,7 +36,6 @@ loss_reduction_convert = {
     tf.losses.Reduction.MEAN: "Mean",
     tf.losses.Reduction.SUM: "Sum",
     tf.losses.Reduction.SUM_OVER_BATCH_SIZE: "Sum over Batch Size",
-    tf.losses.Reduction.SUM_OVER_NONZERO_WEIGHTS: "Sum over Nonzero Weights",
     tf.losses.Reduction.SUM_BY_NONZERO_WEIGHTS: "Sum by Nonzero Weights"
 }
 

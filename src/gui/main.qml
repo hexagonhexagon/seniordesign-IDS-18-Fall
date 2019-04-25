@@ -94,7 +94,6 @@ ApplicationWindow {
         ListElement { name: "Mean" }
         ListElement { name: "Sum" }
         ListElement { name: "Sum over Batch Size" }
-        ListElement { name: "Sum over Nonzero Weights" }
         ListElement { name: "Sum by Nonzero Weights" }
     }
 
