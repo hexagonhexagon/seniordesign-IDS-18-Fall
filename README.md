@@ -1,4 +1,6 @@
 # Machine Learning Based Intrusion Detection System for CAN Bus
+NOTE: This repository is a re-upload of a GitLab repository that is private to anyone but UM-Dearborn students directly involved in the project. This was made for a UM-Dearborn year-long Senior Design course, on which the original repository provided to us was refactored and expanded greatly in a group of 4. It is made available here in its original form at the end fo the project for others to take a look at.
+
 This repository contains the code for a Two Stage Intrusion Detection System,
 that uses both hard-coded rules along with a neural network in order to
 determine if a packet sent on a CAN bus is malicious or not.
