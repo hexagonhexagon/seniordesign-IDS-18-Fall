@@ -19,3 +19,6 @@ results/
 .venv*
 venv*
 *.egg-info
+
+# visual studio code
+.vscode
